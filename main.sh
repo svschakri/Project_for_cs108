@@ -8,7 +8,7 @@ if [[ $(cat line1.txt) == "" ]];then
 else 	
 	echo Password1 :
 	read Pass1
-	Hash1=hash(Pass1)
+	Hash1=$(echo $Pass1 | sha256sum | cut -d " " -f 1)
 	if [[ $Hash1 != $(cut -f 2 line1.txt ) ]];then
 	       echo "This Password doesn't match Try again"
 	       rm line1.txt
@@ -23,7 +23,7 @@ else
 	       	else		
 			echo Pass2 :
 			read Pass2
-			Hash2=hash(Pass2)
+			Hash2=$(echo $Pass2 | sha256sum | cut -d " " -f 1)
         		if [[ $Hash2 != $(cut -f 2 line2.txt ) ]];then
                			echo "This Password doesn't match Try again"
 				rm line2.txt
