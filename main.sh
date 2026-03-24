@@ -1,36 +1,55 @@
 #!/bin/bash
-echo Username1 : 
-read User1
-grep -E "^\${User1}$" users.tsv > line1.txt
-if [[ $(cat line1.txt) == "" ]];then
-	echo "This Username name doesn't exist do you wanna register"
-	rm line1.txt
-else 	
-	echo Password1 :
-	read Pass1
-	Hash1=$(echo $Pass1 | sha256sum | cut -d " " -f 1)
-	if [[ $Hash1 != $(cut -f 2 line1.txt ) ]];then
-	       echo "This Password doesn't match Try again"
-	       rm line1.txt
-        else	
-	 	rm line1.txt	
-		echo Username2 :
-		read User2
-		grep -E "^\${User2}$" users.tsv > line2.txt
-		if [[ $(cat line2.txt) == "" ]];then
-		       	echo "This Username name doesn't exist do you wanna register"
-			rm line2.txt 
-	       	else		
-			echo Pass2 :
-			read Pass2
-			Hash2=$(echo $Pass2 | sha256sum | cut -d " " -f 1)
-        		if [[ $Hash2 != $(cut -f 2 line2.txt ) ]];then
-               			echo "This Password doesn't match Try again"
-				rm line2.txt
-			else
-				rm line2.txt
-				python3 game.py $User1 $User2
-			fi
-		fi
+for i in 1 2; do
+	if (( i == 1 )); then
+		echo "================================ FIRST PLAYER  ================================"
+	else 
+		echo "================================ SECOND PLAYER ================================"
 	fi
-fi
+	while true; do	
+		echo -n "Username: " 
+		read User
+		# grep -E "^${User}" users.tsv > line1.txt
+		userLine=$(grep -E "^${User}" users.tsv)
+		if [[ -z "$userLine" ]]; then
+			echo -n "This username doesn't exist! Do you want to register? (y/n) "
+			read input
+				if [[ ${input} ==  "y" ]]; then
+					echo -n "Enter Username: "
+					read newUser
+					while true; do
+						echo -n "Enter Password: "
+						read newPass
+						echo -n "Confirm Password: "
+						read confirmedPass
+						if [[ "${newPass}" != "${confirmedPass}" ]]; then
+							echo "Passwords don't match. Try again."
+							continue
+						else 
+							hashedPass=$(echo -n "$newPass" | sha256sum | cut -d ' ' -f1)
+							echo -e "${newUser}\t${hashedPass}" >> users.tsv
+							echo "User registered successfully"
+							break
+						fi
+					done
+					continue
+				else
+					echo "Authentication failed."
+					exit
+				fi
+		else 	
+			while true; do
+				echo -n "Password: "
+				read Pass
+				hashPass=$(echo -n $Pass | sha256sum | cut -d " " -f1)
+				if [[ $hashPass != $(echo "$userLine" | cut -f2) ]]; then
+					echo "Password incorrect. Try again."
+					continue
+				else 
+					echo "Authentication Successful"
+					break
+				fi
+			done
+		fi
+		break
+	done
+done
