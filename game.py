@@ -112,7 +112,6 @@ def make_button(text_str, center_y, mouse):
     return button_rect
 
 def play_game(game_name):
-    pygame.quit()
 
     output = subprocess.run(["python3", GAME_PATH[game_name], user1, user2], capture_output=True, text=True)
     with open("history.csv", "a") as f:
@@ -121,9 +120,6 @@ def play_game(game_name):
         row = ",".join(result)
         f.write(f"{row}\n")
 
-    pygame.init()
-    global screen, title_font, header_font, button_font
-    screen, title_font, header_font, button_font = init_pygame()
     return int(command)
  
 def analysis_menu():
@@ -184,15 +180,16 @@ def start_menu():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-                sys.exit()
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if quit_rect.collidepoint(mouse):
                     running = False
-                    sys.exit()
+
                 for game_name, game_rect in game_rect_list:
                     if game_rect.collidepoint(mouse):
                         running = game_over_menu(game_name)
-                        
+        if not running:
+            break
         pygame.display.update()
 
 start_menu()
