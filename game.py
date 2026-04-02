@@ -5,11 +5,11 @@ import pathlib
 import sys
 import os 
 import time
+import subprocess
 
 # handle users
-USER1 = sys.argv[1] 
-USER2 = sys.argv[2]
-TURN = 0
+user1 = sys.argv[1] 
+user2 = sys.argv[2]
 
 # dimensions
 SCREEN_WIDTH = 1920
@@ -23,12 +23,13 @@ header_ht = SCREEN_HEIGHT // 6
 header_wt = 2 * (SCREEN_WIDTH // 3)
 HEADER_BORDER_RADIUS = 50
 
-BUTTON_LIST = ["Tic-Tac-Toe", "Othello", "Connect4"]
-button_number = len(BUTTON_LIST)
+GAME_LIST = ["Tic-Tac-Toe", "Othello", "Connect Four"]
+GAME_PATH = {"Tic-Tac-Toe": "games/tictactoe.py", "Othello": "games/othello.py", "Connect Four": "games/connect4.py"}
+button_number = len(GAME_LIST)
 button_wt = SCREEN_WIDTH // 3
 button_ht = SCREEN_HEIGHT // 12
 button_gap = SCREEN_HEIGHT // 24
-button_stack_ht = (button_number-1)*button_gap + (button_number)*button_ht
+button_stack_ht = (button_number)*button_gap + (button_number+1)*button_ht # include quit button
 
 header_box_gap = (SCREEN_HEIGHT - title_ht - title_header_gap - header_ht - button_stack_ht) // 3
 BOX_BORDER_RADIUS = 10
@@ -45,7 +46,11 @@ HEADER_BG = (239, 245, 66)
 HEADER_COLOR = BLACK
 
 BUTTON_BG = (245, 66, 233)
-BUTTON_COLOR = WHITE
+LIGHT_BUTTON_BG = (237, 147, 227)
+BUTTON_FONT_COLOR = WHITE
+
+QUIT_BG = (242, 90, 63)
+LIGHT_QUIT_BG = (242, 121, 99)
 
 class Player:
     def __init__(self, user_name, turn):
@@ -74,9 +79,9 @@ class Game:
 # menu design
 pygame.init()
 
-TITLE_FONT = pygame.font.SysFont("comicsansms", 100)
-HEADER_FONT = pygame.font.SysFont("timesnewroman", 60)
-BUTTON_FONT = pygame.font.SysFont("calibri", 40)
+title_font = pygame.font.SysFont(None, 100)
+header_font = pygame.font.SysFont("timesnewroman", 60)
+button_font = pygame.font.SysFont("calibri", 40)
 
 screen = pygame.display.set_mode(screen_size)
 
@@ -85,41 +90,68 @@ def make_box(text, center_y, wt, ht, box_color, box_border_radius = 0):
     bg_rect.center = (SCREEN_WIDTH // 2, center_y)
 
     pygame.draw.rect(screen, box_color, bg_rect, border_radius=box_border_radius)
-    button_rect = text.get_rect(center = (SCREEN_WIDTH/2, center_y))
-    screen.blit(text, button_rect)
+    text_rect = text.get_rect(center = bg_rect.center)
+    screen.blit(text, text_rect)
 
-def make_button(str, center_y):
-    text = BUTTON_FONT.render(str, True, BUTTON_COLOR)
-    make_box(text, center_y, button_wt, button_ht, BUTTON_BG, BOX_BORDER_RADIUS)
+def make_button(text_str, center_y, mouse):
+    text = button_font.render(text_str, True, BUTTON_FONT_COLOR)
+    button_rect = pygame.Rect(0, 0, button_wt, button_ht)
+    button_rect.center = (SCREEN_WIDTH // 2, center_y)
+
+    button_color = BUTTON_BG if text_str != "Quit" else QUIT_BG
+    if button_rect.collidepoint(mouse):
+        button_color = LIGHT_BUTTON_BG if text_str != "Quit" else LIGHT_QUIT_BG
+
+    pygame.draw.rect(screen, button_color, button_rect, border_radius=BOX_BORDER_RADIUS)
+    text_rect = text.get_rect(center = button_rect.center)
+    screen.blit(text, text_rect)
+    return button_rect
+
 
 def start_menu():
     pygame.display.set_caption("GAME HUB")
     running = True
     while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-                sys.exit()
+        mouse = pygame.mouse.get_pos()
 
         screen.fill(BGCOLOR)
 
         # title
-        title_text = TITLE_FONT.render("GAME HUB", True, TITLE_COLOR)
+        title_text = title_font.render("GAME HUB", True, TITLE_COLOR)
         title_center_y = title_ht // 2
         make_box(title_text, title_center_y, title_wt, title_ht, TITLE_BG)
 
         # header
-        header_text = HEADER_FONT.render(f"{USER1} V/S {USER2}", True, HEADER_COLOR)
+        header_text = header_font.render(f"{user1} V/S {user2}", True, HEADER_COLOR)
         header_center_y = title_ht + title_header_gap + header_ht // 2
         make_box(header_text, header_center_y, header_wt, header_ht, HEADER_BG, HEADER_BORDER_RADIUS)
 
         # game buttons
+        game_rect_list = []
+        buttons_top =  title_ht + title_header_gap + header_ht + header_box_gap
+
         for i in range(button_number):
-            game_name = BUTTON_LIST[i]
-            buttons_top =  title_ht + title_header_gap + header_ht + header_box_gap
-            center_i = buttons_top + i*(button_ht + button_gap) + button_ht // 2
-            make_button(game_name, center_i)
+            game_name = GAME_LIST[i]
+            center_i = buttons_top + i * (button_ht + button_gap) + button_ht // 2
+            game_rect_list.append((game_name, make_button(game_name, center_i, mouse)))
         
+        # quit button
+        quit_center = buttons_top + (button_number) * (button_ht + button_gap) + button_ht // 2
+        quit_rect = make_button("Quit", quit_center, mouse)
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if quit_rect.collidepoint(mouse):
+                    running = False
+                    sys.exit()
+                for game_name, game_rect in game_rect_list:
+                    if game_rect.collidepoint(mouse):
+                        running = False
+                        subprocess.run(["python3", GAME_PATH[game_name]])
+                
         pygame.display.update()
 
 start_menu()
