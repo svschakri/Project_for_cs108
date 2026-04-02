@@ -23,8 +23,17 @@ header_ht = SCREEN_HEIGHT // 6
 header_wt = 2 * (SCREEN_WIDTH // 3)
 HEADER_BORDER_RADIUS = 50
 
-GAME_LIST = ["Tic-Tac-Toe", "Othello", "Connect Four"]
-GAME_PATH = {"Tic-Tac-Toe": "games/tictactoe.py", "Othello": "games/othello.py", "Connect Four": "games/connect4.py"}
+GAME_PATH = {} 
+GAME_LIST = []
+
+with open("games.csv", "r") as f:
+    for line in f:
+        lineArr = line.strip().split(",")
+        GAME_PATH[lineArr[0]] = lineArr[1]
+        GAME_LIST.append(lineArr[0])
+
+GAME_LIST = list(GAME_PATH.keys())
+
 button_number = len(GAME_LIST)
 button_wt = SCREEN_WIDTH // 3
 button_ht = SCREEN_HEIGHT // 12
