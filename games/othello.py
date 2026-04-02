@@ -1,1 +1,1 @@
-print("Hello I am Othello")
+print("Hello ")

@@ -77,13 +77,17 @@ class Game:
         return
     
 # menu design
-pygame.init()
+def init_pygame():
+    pygame.init()
+    screen = pygame.display.set_mode(screen_size)
 
-title_font = pygame.font.SysFont(None, 100)
-header_font = pygame.font.SysFont("timesnewroman", 60)
-button_font = pygame.font.SysFont("calibri", 40)
+    title_font = pygame.font.SysFont(None, 100)
+    header_font = pygame.font.SysFont("timesnewroman", 60)
+    button_font = pygame.font.SysFont("calibri", 40)
 
-screen = pygame.display.set_mode(screen_size)
+    return screen, title_font, header_font, button_font
+
+screen, title_font, header_font, button_font = init_pygame()
 
 def make_box(text, center_y, wt, ht, box_color, box_border_radius = 0):
     bg_rect = pygame.Rect(0, 0, wt, ht)
@@ -107,7 +111,45 @@ def make_button(text_str, center_y, mouse):
     screen.blit(text, text_rect)
     return button_rect
 
+def play_game(game_name):
+    pygame.quit()
 
+    output = subprocess.run(["python3", GAME_PATH[game_name], user1, user2], capture_output=True, text=True)
+    with open("history.csv", "a") as f:
+        result = output.stdout.strip().split()
+        command = result.pop()
+        row = ",".join(result)
+        f.write(f"{row}\n")
+
+    pygame.init()
+    global screen, title_font, header_font, button_font
+    screen, title_font, header_font, button_font = init_pygame()
+    return int(command)
+ 
+def analysis_menu():
+    subprocess.run(["bash", "leaderboard.sh"])
+    # display matplotlib charts
+    
+    # back to menu or quit shown on screen
+    back_to_menu = True
+    # if next run post_game_loop and return true
+    return back_to_menu
+
+
+def game_over_menu(game_name):
+    while True:
+        command = play_game(game_name)
+        if command == 0: # quit
+            return False
+        elif command == 1: # play again
+            continue
+        elif command == 2: # show leaderboard
+            continueDisplay = analysis_menu()
+            return continueDisplay
+        else:
+            return True
+        
+# start menu
 def start_menu():
     pygame.display.set_caption("GAME HUB")
     running = True
@@ -149,9 +191,10 @@ def start_menu():
                     sys.exit()
                 for game_name, game_rect in game_rect_list:
                     if game_rect.collidepoint(mouse):
-                        running = False
-                        subprocess.run(["python3", GAME_PATH[game_name]])
-                
+                        running = game_over_menu(game_name)
+                        
         pygame.display.update()
 
 start_menu()
+pygame.quit()
+sys.exit()
