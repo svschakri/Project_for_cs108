@@ -1,13 +1,14 @@
-import pygame
 import numpy as np 
 import matplotlib
 import pathlib
 import sys
 import os 
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
+import pygame
 import time
 import subprocess
 
-sys.path.append(os.path.abspath(".."))
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 from game import Game, Player, Board
 
 # screen dimensions
@@ -38,6 +39,7 @@ BALL_COLOR1 = (255, 0, 0)
 BALL_COLOR2 = (0, 0, 255)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+GREY = (152, 163, 181)
 
 # make a function to check win condition in new game class
 class Connect4(Game):
@@ -48,25 +50,23 @@ class Connect4(Game):
 user1 = sys.argv[1]
 user2 = sys.argv[2]
 
-turn = 1
-player1 = Player(user1, 1)
-player2 = Player(user2, 0)
+INIT_TURN = 1
+player1 = Player(user1)
+player2 = Player(user2)
 
 game_board = Board(7, 6)
+
+game = Game(player1, player2, game_board, INIT_TURN)
+
 
 # make GUI
 pygame.init()
 screen = pygame.display.set_mode(screen_size)
 title_font = pygame.font.SysFont("Calibri", 60)
 
-def make_title(turn):
+def make_title(text_str):
     bg_rect = pygame.Rect(0, 0, SCREEN_WIDTH, title_ht)
     bg_rect.center = (SCREEN_WIDTH // 2, title_ht // 2)
-
-    if turn == 1:
-        text_str = f"{user1}'s turn"
-    else:
-        text_str = f"{user2}'s turn"
 
     pygame.draw.rect(screen, TITLE_COLOR, bg_rect)
     text = title_font.render(text_str, True, TITLE_FONT_COLOR)
@@ -84,12 +84,21 @@ def make_board_circle(x, y, color_code):
         ball_color = WHITE
     elif (color_code == 1):
         ball_color = BALL_COLOR1
-    else:
+    elif (color_code == 2):
         ball_color = BALL_COLOR2
+    else:
+        ball_color = GREY
 
     pygame.draw.circle(screen, ball_color, (center_x, center_y), r)
 
-def make_board(board_matrix):
+def collide_col(i, mouse):
+    top = title_ht + title_board_gap
+    left = (SCREEN_WIDTH - board_wt) // 2 + i * (col_gap + 2 * circle_radius) + col_gap
+
+    col_rect = pygame.Rect(left, top, 2 * circle_radius, board_ht)
+    return col_rect.collidepoint(mouse)
+
+def make_board(board_matrix, mouse):
     center_y = title_ht + title_board_gap + board_ht // 2
     board_rect = pygame.Rect(0, 0, board_wt, board_ht)
     board_rect.center = (SCREEN_WIDTH // 2, center_y)
@@ -99,28 +108,59 @@ def make_board(board_matrix):
         for j in range(0, ROWS):
             make_board_circle(i+1, j+1, board_matrix[i][j])
 
-
-def fill_board():
-    # takes numpy array as input and fills board
-    pass
+    for i in range(COLS):
+        if collide_col(i, mouse):
+            for j in range(ROWS):
+                if board_matrix[i][j] == 0:
+                    make_board_circle(i+1, j+1, 3)
 
 pygame.display.set_caption("Connect Four")
 running = True
 
 while running:
+    mouse = pygame.mouse.get_pos()
+    turn = game.turn
+
+    if game.check_win() == 1:
+        make_title("f{user1} WON!")
+    elif game.check_win() == 2:
+        make_title("f{user2} WON!")
+    elif game.check_win() == 0:
+        make_title("DRAW!")
+
     if (turn == 1):
         bg_col = BG_COLOR1
+        col_code = 1
+        title_text = f"{user1}'s turn"
     else:
         bg_col = BG_COLOR2
+        col_code = 2
+        title_text = f"{user2}'s turn"
     
     screen.fill(bg_col)
-    make_title(turn)
-    make_board(game_board.board)
+    board_matrix = game_board.board
+
+    make_title(title_text)
+    make_board(board_matrix, mouse)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-            sys.exit()
 
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            filled = False
+            for i in range(COLS):
+                if collide_col(i, mouse):
+                    for j in range(ROWS - 1, -1, -1):
+                        if board_matrix[i][j] == 0:
+                            make_board_circle(i+1, j+1, col_code)
+                            board_matrix[i][j] = col_code
+                            game.switch_turn()
+                            filled = True
+                            break
+                if (filled):
+                    break
+                
     pygame.display.update()
+
 pygame.quit()
 sys.exit()

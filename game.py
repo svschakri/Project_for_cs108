@@ -1,16 +1,17 @@
-import pygame
 import numpy as np 
 import matplotlib
 import pathlib
 import sys
 import os 
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
+
+import pygame
 import time
 import subprocess
 
 class Player:
-    def __init__(self, user_name, turn):
+    def __init__(self, user_name):
         self.user_name = user_name
-        self.turn = turn
     
 class Board:
     def __init__(self, width, height):
@@ -19,14 +20,14 @@ class Board:
         self.board = np.zeros((width , height))
 
 class Game:
-    def __init__(self, player1, player2, board):
+    def __init__(self, player1, player2, board, turn):
         self.player1 = player1
         self.player2 = player2
         self.board = board
+        self.turn = turn
 
     def switch_turn(self):
-        self.player1.turn = 1 - self.player1.turn
-        self.player2.turn = 1 - self.player2.turn
+        self.turn = 1 - self.turn
 
     def check_win(self):
         """ This would be used to check win condition """
@@ -124,13 +125,15 @@ if __name__ == "__main__":
 
     def play_game(game_name):
 
-        output = subprocess.run(["python3", GAME_PATH[game_name], user1, user2], capture_output=True, text=True)
+        proc = subprocess.Popen(["python3", GAME_PATH[game_name], user1, user2])
         with open("history.csv", "a") as f:
-            result = output.stdout.strip().split(",")
+            result = []
+            with open("games/temp_result.csv") as temp:
+                line = temp.readline().strip()
+                result = line.split(",")
             command = result.pop()
             row = ",".join(result)
             f.write(f"{row}\n")
-
         return int(command)
     
     def analysis_menu():
@@ -153,7 +156,7 @@ if __name__ == "__main__":
             elif command == 2: # show leaderboard
                 return analysis_menu()
             else:
-                return True
+                return False
             
     # start menu
     def start_menu():
