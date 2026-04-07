@@ -44,7 +44,39 @@ GREY = (152, 163, 181)
 # make a function to check win condition in new game class
 class Connect4(Game):
     def check_win(self):
-        pass
+        board_matrix = self.board.matrix
+        board_t = np.transpose(board_matrix)
+        ht = self.board.height
+        wt = self.board.width
+        matches = 4
+        
+        a = np.arange(matches)
+        b = np.arange(wt - matches + 1)
+        c = np.arange(ht - matches + 1)
+
+        # rows
+        d = a[None, :] + b[:, None]
+        rowFours = board_t[:, d]
+        
+        # columns
+        e = a[None, :] + c[:, None]
+        colFours = board_matrix[:, e]
+
+        # anti diagonal
+        anti_diagFours = board_t[e[:, None, :], d[None, :, :]]
+
+        # main diagonal
+        f = np.flip(e)
+        main_diagFours = board_t[f[:, None, :], d[None, :, :]]
+
+        if np.any(np.all( rowFours == 1, axis=2)) or np.any(np.all(colFours == 1, axis=2)) or np.any(np.all(main_diagFours == 1, axis=2)) or np.any(np.all(anti_diagFours == 1, axis=2)):
+            return 1
+        elif np.any(np.all( rowFours == 2, axis=2)) or np.any(np.all(colFours == 2, axis=2)) or np.any(np.all(main_diagFours == 2, axis=2)) or np.any(np.all(anti_diagFours == 2, axis=2)):
+            return 2
+        elif not np.any(board_matrix == 0):
+            return 0
+        else:
+            return -1
     
 # initialize players and board
 user1 = sys.argv[1]
@@ -56,7 +88,7 @@ player2 = Player(user2)
 
 game_board = Board(7, 6)
 
-game = Game(player1, player2, game_board, INIT_TURN)
+game = Connect4(player1, player2, game_board, INIT_TURN)
 
 
 # make GUI
@@ -114,6 +146,18 @@ def make_board(board_matrix, mouse):
                 if board_matrix[i][j] == 0:
                     make_board_circle(i+1, j+1, 3)
 
+def check_game_over(game):
+    msgDict = {1 : f"{user1} WON!", 2 : f"{user2} WON!", 0 : "DRAW!"}
+    win = game.check_win()
+
+    if win == 1 or win == 2 or win == 0:
+        make_title(msgDict[win])
+        pygame.display.flip()
+        pygame.time.wait(1000)
+        return True
+    
+    return False
+
 pygame.display.set_caption("Connect Four")
 running = True
 
@@ -121,12 +165,8 @@ while running:
     mouse = pygame.mouse.get_pos()
     turn = game.turn
 
-    if game.check_win() == 1:
-        make_title("f{user1} WON!")
-    elif game.check_win() == 2:
-        make_title("f{user2} WON!")
-    elif game.check_win() == 0:
-        make_title("DRAW!")
+    if check_game_over(game):
+        break
 
     if (turn == 1):
         bg_col = BG_COLOR1
@@ -138,7 +178,7 @@ while running:
         title_text = f"{user2}'s turn"
     
     screen.fill(bg_col)
-    board_matrix = game_board.board
+    board_matrix = game_board.matrix
 
     make_title(title_text)
     make_board(board_matrix, mouse)
@@ -160,7 +200,7 @@ while running:
                 if (filled):
                     break
                 
-    pygame.display.update()
+    pygame.display.flip()
 
 pygame.quit()
 sys.exit()
