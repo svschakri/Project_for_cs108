@@ -59,15 +59,127 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREY = (152, 163, 181) 
 
-# make a function to check win condition in new game class
-class tictactoe(Game):
-    def check_win(self):
-        pass
 
 
 game_board = Board(10,10)
 
 game = Game(player1, player2, game_board, INIT_TURN)
+
+
+
+board_matrix = game_board.board
+
+
+
+
+# make a function to check win condition in new game class
+class tictactoe(Game):
+    def check_win(self):
+        # wse have to check in board matrix for winning sequence
+        
+        Board_decider = board_matrix
+        
+        # horizontal 
+
+        for i in range(COLS-4) :
+            for j in range(ROWS) :
+                arr = Board_decider[i:i+5,j]
+                if (len(set(arr)) == 1 ):
+                    if (arr[0]==0) :
+                        continue 
+                    elif ( arr[0] == 1 ) :
+                        make_title(f"{user1} wins ")
+                        print(f"{user1} wins ")
+                    elif ( arr[0] == 2 ) :
+                        make_title(f"{user2} wins ")
+                        print(f"{user2} wins ")
+                    
+                    left_centre_x = (SCREEN_WIDTH - board_wt) //2 + i*(col_gap) + col_gap//2
+                    right_centre_x = (SCREEN_WIDTH - board_wt) //2 + (i+4)*(col_gap) + col_gap//2
+                    left_centre_y = title_ht + title_board_gap + j*(row_gap) + row_gap//2
+                    right_centre_y = title_ht + title_board_gap + j*(row_gap) + row_gap//2
+
+
+                    pygame.draw.line(screen,BLACK,(left_centre_x,left_centre_y),(right_centre_x,right_centre_y),3)
+                    return arr[0]
+
+
+
+
+        # vertical 
+
+        for i in range(COLS) :
+            for j in range(ROWS-4) :
+                arr = Board_decider[i,j:j+5]
+                if (len(set(arr)) == 1 ):
+                    if (arr[0]==0) :
+                        continue 
+                    elif ( arr[0] == 1 ) :
+                        make_title(f"{user1} wins ")
+                        print(f"{user1} wins ")
+                    elif ( arr[0] == 2 ) :
+                        make_title(f"{user2} wins ")
+                        print(f"{user2} wins ")
+                    
+                    left_centre_x = (SCREEN_WIDTH - board_wt) //2 + i*(col_gap) + col_gap//2
+                    right_centre_x = left_centre_x
+                    left_centre_y = title_ht + title_board_gap + j*(row_gap) + row_gap//2 - row_gap//5
+                    right_centre_y = title_ht + title_board_gap + (j+4)*(row_gap) + row_gap//2 +  row_gap//5
+
+                    pygame.draw.line(screen,BLACK,(left_centre_x,left_centre_y),(right_centre_x,right_centre_y),3)
+                    return arr[0]
+                
+        # diagonal-down 
+
+        for i in range(COLS-4) :
+            for j in range(ROWS-4) :
+                arr = np.diag(Board_decider[i:i+5,j:j+5])
+                if (len(set(arr)) == 1 ):
+                    if (arr[0]==0) :
+                        continue 
+                    elif ( arr[0] == 1 ) :
+                        make_title(f"{user1} wins ")
+                        print(f"{user1} wins ")
+                    elif ( arr[0] == 2 ) :
+                        make_title(f"{user2} wins ")
+                        print(f"{user2} wins ")
+                    
+                    left_centre_x = (SCREEN_WIDTH - board_wt) //2 + i*(col_gap) + col_gap//2
+                    right_centre_x = left_centre_x + 4*col_gap 
+                    left_centre_y = title_ht + title_board_gap + j*(row_gap) + row_gap//2 
+                    right_centre_y = title_ht + title_board_gap + (j+4)*(row_gap) + row_gap//2 
+
+                    pygame.draw.line(screen,BLACK,(left_centre_x,left_centre_y),(right_centre_x,right_centre_y),3)
+                    return arr[0]
+                
+
+        # diagonal-up
+
+        for i in range(4, COLS) :
+            for j in range(ROWS-4) :
+                arr = np.diag(np.fliplr(Board_decider[i-4:i+1,j:j+5]))
+                if (len(set(arr)) == 1 ):
+                    if (arr[0]==0) :
+                        continue 
+                    elif ( arr[0] == 1 ) :
+                        make_title(f"{user1} wins ")
+                        print(f"{user1} wins ")
+                    elif ( arr[0] == 2 ) :
+                        make_title(f"{user2} wins ")
+                        print(f"{user2} wins ")
+                    
+                    left_centre_x = (SCREEN_WIDTH - board_wt) //2 + i*(col_gap) + col_gap//2
+                    right_centre_x = left_centre_x - 4*col_gap 
+                    left_centre_y = title_ht + title_board_gap + j*(row_gap) + row_gap//2 
+                    right_centre_y = title_ht + title_board_gap + (j+4)*(row_gap) + row_gap//2 
+
+                    pygame.draw.line(screen,BLACK,(left_centre_x,left_centre_y),(right_centre_x,right_centre_y),3)
+                    return arr[0]
+                
+        
+        return 4
+
+
 
 screen = pygame.display.set_mode(screen_size)
 title_font = pygame.font.SysFont("Calibri", 60)
@@ -151,20 +263,29 @@ while running:
     mouse = pygame.mouse.get_pos()
     turn = game.turn
 
-    if game.check_win() == 1:
-        make_title("f{user1} WON!")
-    elif game.check_win() == 2:
-        make_title("f{user2} WON!")
-    elif game.check_win() == 0:
+    win_situation = tictactoe(player1, player2, game_board, game.turn).check_win()
+
+
+    if win_situation == 1:
+        make_title(f"{user1} WON!")
+        pygame.display.update()
+
+        break
+    elif win_situation == 2:
+        make_title(f"{user2} WON!")
+        pygame.display.update()
+
+        break
+    elif win_situation == 0:
         make_title("DRAW!")
 
     if (turn == 1):
         bg_col = BG_COLOR1
-        col_code = 1
+        val_code = 1
         title_text = f"{user1}'s turn"
     else:
         bg_col = BG_COLOR2
-        col_code = 2
+        val_code = 2
         title_text = f"{user2}'s turn"
     
     screen.fill(bg_col)
@@ -182,8 +303,8 @@ while running:
                 for j in range(ROWS - 1, -1, -1):
                     if collide_box(i+1,j+1,mouse):
                         if board_matrix[i][j] != 0 : break
-                        make_board_box(i+1, j+1, col_code)
-                        board_matrix[i][j] = col_code
+                        make_board_box(i+1, j+1, val_code)
+                        board_matrix[i][j] = val_code
                         game.switch_turn()
                         filled = True
                         break
@@ -192,11 +313,22 @@ while running:
                 
     pygame.display.update()
 
+
+final_run =True
+
+
+while final_run :
+
+    for event in pygame.event.get() :
+        if event.type == pygame.QUIT :
+            final_run = False
+            break
+
+
 pygame.quit()
 sys.exit()  
 
 
 
 
-print("I,am,Tic-Tac-Toe,2")
 
