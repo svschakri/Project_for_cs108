@@ -17,7 +17,7 @@ class Board:
     def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.board = np.zeros((width , height))
+        self.matrix = np.zeros((width , height))
 
 class Game:
     def __init__(self, player1, player2, board, turn):
