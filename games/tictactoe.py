@@ -168,7 +168,7 @@ while running:
         title_text = f"{user2}'s turn"
     
     screen.fill(bg_col)
-    board_matrix = game_board.board
+    board_matrix = game_board.matrix
 
     make_title(title_text)
     make_board(board_matrix, mouse)
