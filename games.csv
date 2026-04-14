@@ -1,3 +1,3 @@
-Tic-Tac-Toe,games/tictactoe.py
-Othello,games/othello.py
-Connect Four,games/connect4.py
+Tic-Tac-Toe,games.tictactoe
+Othello,games.othello
+Connect Four,games.connect4
