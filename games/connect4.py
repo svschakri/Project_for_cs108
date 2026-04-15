@@ -79,24 +79,12 @@ class Connect4(Game):
             return -1
     
 # initialize players and board
-user1 = sys.argv[1]
-user2 = sys.argv[2]
-
-INIT_TURN = 1
-player1 = Player(user1)
-player2 = Player(user2)
-
-game_board = Board(7, 6)
-
-game = Connect4(player1, player2, game_board, INIT_TURN)
-
+# user1 = sys.argv[1]
+# user2 = sys.argv[2]
 
 # make GUI
-pygame.init()
-screen = pygame.display.set_mode(screen_size)
-title_font = pygame.font.SysFont("Calibri", 60)
 
-def make_title(text_str):
+def make_title(screen,title_font,text_str):
     bg_rect = pygame.Rect(0, 0, SCREEN_WIDTH, title_ht)
     bg_rect.center = (SCREEN_WIDTH // 2, title_ht // 2)
 
@@ -105,7 +93,7 @@ def make_title(text_str):
     text_rect = text.get_rect(center = bg_rect.center)
     screen.blit(text, text_rect)
 
-def make_board_circle(x, y, color_code):
+def make_board_circle(screen, x, y, color_code):
     r = circle_radius
     gap_x = col_gap
     gap_y = row_gap
@@ -130,7 +118,7 @@ def collide_col(i, mouse):
     col_rect = pygame.Rect(left, top, 2 * circle_radius, board_ht)
     return col_rect.collidepoint(mouse)
 
-def make_board(board_matrix, mouse):
+def make_board(screen, board_matrix, mouse):
     center_y = title_ht + title_board_gap + board_ht // 2
     board_rect = pygame.Rect(0, 0, board_wt, board_ht)
     board_rect.center = (SCREEN_WIDTH // 2, center_y)
@@ -138,69 +126,89 @@ def make_board(board_matrix, mouse):
     pygame.draw.rect(screen, BOARD_COLOR, board_rect, 0, 10, 10)
     for i in range(0, COLS):
         for j in range(0, ROWS):
-            make_board_circle(i+1, j+1, board_matrix[i][j])
+            make_board_circle(screen, i+1, j+1, board_matrix[i][j])
 
     for i in range(COLS):
         if collide_col(i, mouse):
             for j in range(ROWS):
                 if board_matrix[i][j] == 0:
-                    make_board_circle(i+1, j+1, 3)
+                    make_board_circle(screen, i+1, j+1, 3)
 
-def check_game_over(game):
+def check_game_over(screen, title_font, game):
+    user1 = game.player1.user_name
+    user2 = game.player2.user_name
     msgDict = {1 : f"{user1} WON!", 2 : f"{user2} WON!", 0 : "DRAW!"}
     win = game.check_win()
 
     if win == 1 or win == 2 or win == 0:
-        make_title(msgDict[win])
+        make_title(screen, title_font, msgDict[win])
         pygame.display.flip()
         pygame.time.wait(1000)
+        # with open("temp_result.csv", "w") as f:
+        #     f.write("GO,BACK,TO,MENU,2")
         return True
     
     return False
 
-pygame.display.set_caption("Connect Four")
-running = True
+def run(user1, user2):
+    INIT_TURN = 1
+    player1 = Player(user1)
+    player2 = Player(user2)
 
-while running:
-    mouse = pygame.mouse.get_pos()
-    turn = game.turn
+    game_board = Board(7, 6)
 
-    if check_game_over(game):
-        break
+    game = Connect4(player1, player2, game_board, INIT_TURN)
 
-    if (turn == 1):
-        bg_col = BG_COLOR1
-        col_code = 1
-        title_text = f"{user1}'s turn"
-    else:
-        bg_col = BG_COLOR2
-        col_code = 2
-        title_text = f"{user2}'s turn"
-    
-    screen.fill(bg_col)
-    board_matrix = game_board.matrix
+    if not pygame.get_init():
+        pygame.init()
+    screen = pygame.display.set_mode(screen_size)
+    title_font = pygame.font.SysFont("Calibri", 60)
+    pygame.display.set_caption("Connect Four")
 
-    make_title(title_text)
-    make_board(board_matrix, mouse)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+    pygame.event.clear()
+    running = True
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            filled = False
-            for i in range(COLS):
-                if collide_col(i, mouse):
-                    for j in range(ROWS - 1, -1, -1):
-                        if board_matrix[i][j] == 0:
-                            make_board_circle(i+1, j+1, col_code)
-                            board_matrix[i][j] = col_code
-                            game.switch_turn()
-                            filled = True
-                            break
-                if (filled):
-                    break
-                
-    pygame.display.flip()
+    while running:
+        mouse = pygame.mouse.get_pos()
+        turn = game.turn
 
-pygame.quit()
-sys.exit()
+        if (turn == 1):
+            bg_col = BG_COLOR1
+            col_code = 1
+            title_text = f"{user1}'s turn"
+        else:
+            bg_col = BG_COLOR2
+            col_code = 2
+            title_text = f"{user2}'s turn"
+
+        screen.fill(bg_col)
+        board_matrix = game_board.matrix
+
+        make_title(screen, title_font, title_text)
+        make_board(screen, board_matrix, mouse)
+
+        if check_game_over(screen, title_font, game):
+            break
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                filled = False
+                for i in range(COLS):
+                    if collide_col(i, mouse):
+                        for j in range(ROWS - 1, -1, -1):
+                            if board_matrix[i][j] == 0:
+                                make_board_circle(screen, i+1, j+1, col_code)
+                                board_matrix[i][j] = col_code
+                                game.switch_turn()
+                                filled = True
+                                break
+                    if (filled):
+                        break
+                    
+        pygame.display.flip()
+
+    pygame.quit()
+    return 2

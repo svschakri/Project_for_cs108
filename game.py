@@ -99,9 +99,7 @@ if __name__ == "__main__":
 
         return screen, title_font, header_font, button_font
 
-    screen, title_font, header_font, button_font = init_pygame()
-
-    def make_box(text, center_y, wt, ht, box_color, box_border_radius = 0):
+    def make_box(screen, text, center_y, wt, ht, box_color, box_border_radius = 0):
         bg_rect = pygame.Rect(0, 0, wt, ht)
         bg_rect.center = (SCREEN_WIDTH // 2, center_y)
 
@@ -109,7 +107,7 @@ if __name__ == "__main__":
         text_rect = text.get_rect(center = bg_rect.center)
         screen.blit(text, text_rect)
 
-    def make_button(text_str, center_y, mouse):
+    def make_button(screen, button_font, text_str, center_y, mouse):
         text = button_font.render(text_str, True, BUTTON_FONT_COLOR)
         button_rect = pygame.Rect(0, 0, button_wt, button_ht)
         button_rect.center = (SCREEN_WIDTH // 2, center_y)
@@ -124,17 +122,13 @@ if __name__ == "__main__":
         return button_rect
 
     def play_game(game_name):
+        module_path = GAME_PATH[game_name]   # e.g. "games.tictactoe"
 
-        proc = subprocess.Popen(["python3", GAME_PATH[game_name], user1, user2])
-        with open("history.csv", "a") as f:
-            result = []
-            with open("games/temp_result.csv") as temp:
-                line = temp.readline().strip()
-                result = line.split(",")
-            command = result.pop()
-            row = ",".join(result)
-            f.write(f"{row}\n")
-        return int(command)
+        game_module = __import__(module_path, fromlist=['run'])
+
+        command = game_module.run(user1, user2)
+
+        return command
     
     def analysis_menu():
         subprocess.run(["bash", "leaderboard.sh"])
@@ -160,6 +154,7 @@ if __name__ == "__main__":
             
     # start menu
     def start_menu():
+        screen, title_font, header_font, button_font = init_pygame()
         pygame.display.set_caption("GAME HUB")
         running = True
         while running:
@@ -170,12 +165,12 @@ if __name__ == "__main__":
             # title
             title_text = title_font.render("GAME HUB", True, TITLE_COLOR)
             title_center_y = title_ht // 2
-            make_box(title_text, title_center_y, title_wt, title_ht, TITLE_BG)
+            make_box(screen, title_text, title_center_y, title_wt, title_ht, TITLE_BG)
 
             # header
             header_text = header_font.render(f"{user1} V/S {user2}", True, HEADER_COLOR)
             header_center_y = title_ht + title_header_gap + header_ht // 2
-            make_box(header_text, header_center_y, header_wt, header_ht, HEADER_BG, HEADER_BORDER_RADIUS)
+            make_box(screen, header_text, header_center_y, header_wt, header_ht, HEADER_BG, HEADER_BORDER_RADIUS)
 
             # game buttons
             game_rect_list = []
@@ -184,11 +179,11 @@ if __name__ == "__main__":
             for i in range(button_number):
                 game_name = GAME_LIST[i]
                 center_i = buttons_top + i * (button_ht + button_gap) + button_ht // 2
-                game_rect_list.append((game_name, make_button(game_name, center_i, mouse)))
+                game_rect_list.append((game_name, make_button(screen, button_font, game_name, center_i, mouse)))
             
             # quit button
             quit_center = buttons_top + (button_number) * (button_ht + button_gap) + button_ht // 2
-            quit_rect = make_button("Quit", quit_center, mouse)
+            quit_rect = make_button(screen, button_font, "Quit", quit_center, mouse)
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -200,7 +195,17 @@ if __name__ == "__main__":
 
                     for game_name, game_rect in game_rect_list:
                         if game_rect.collidepoint(mouse):
+                            while True:
+                                e = pygame.event.wait()
+                                if e.type == pygame.MOUSEBUTTONUP:
+                                    break
+                            pygame.event.clear()
+                            pygame.display.quit()
+                            
                             running = game_over_menu(game_name)
+                            if running:
+                                screen, title_font, header_font, button_font = init_pygame()
+                                pygame.display.set_caption("GAME HUB")
             if not running:
                 break
             pygame.display.update()
