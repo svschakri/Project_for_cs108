@@ -84,7 +84,7 @@ class Connect4(Game):
 
 # make GUI
 
-def make_title(screen,title_font,text_str):
+def make_title(screen, title_font, text_str):
     bg_rect = pygame.Rect(0, 0, SCREEN_WIDTH, title_ht)
     bg_rect.center = (SCREEN_WIDTH // 2, title_ht // 2)
 
@@ -158,6 +158,7 @@ def run(user1, user2):
     game_board = Board(7, 6)
 
     game = Connect4(player1, player2, game_board, INIT_TURN)
+    board_matrix = game_board.matrix
 
     if not pygame.get_init():
         pygame.init()
@@ -182,7 +183,6 @@ def run(user1, user2):
             title_text = f"{user2}'s turn"
 
         screen.fill(bg_col)
-        board_matrix = game_board.matrix
 
         make_title(screen, title_font, title_text)
         make_board(screen, board_matrix, mouse)
