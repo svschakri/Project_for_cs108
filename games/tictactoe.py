@@ -360,7 +360,7 @@ def run(user1, user2):
 
     game_board = Board(10,10)
 
-    game = Game(player1, player2, game_board, INIT_TURN)
+    game = tictactoe(player1, player2, game_board, INIT_TURN)
     board_matrix = game_board.matrix
 
     if not pygame.get_init():
@@ -380,17 +380,20 @@ def run(user1, user2):
 
 
         if win_situation == 1:
-            make_title(f"{user1} WON!")
+            make_title(screen, title_font, f"{user1} WON!")
             pygame.display.update()
-
+            pygame.time.wait(1000)
             break
         elif win_situation == 2:
-            make_title(f"{user2} WON!")
+            make_title(screen, title_font, f"{user2} WON!")
             pygame.display.update()
-
+            pygame.time.wait(1000)
             break
         elif win_situation == 0:
-            make_title("DRAW!")
+            make_title(screen, title_font, "DRAW!")
+            pygame.display.update()
+            pygame.time.wait(1000)
+            break
 
         if (turn == 1):
             bg_col = BG_COLOR1
