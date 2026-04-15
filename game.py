@@ -29,7 +29,7 @@ class Game:
     def switch_turn(self):
         self.turn = 1 - self.turn
 
-    def check_win(self):
+    def check_win(self, screen = None):
         """ This would be used to check win condition """
         return
 
