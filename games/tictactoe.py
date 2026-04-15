@@ -67,117 +67,226 @@ game = Game(player1, player2, game_board, INIT_TURN)
 
 
 
-board_matrix = game_board.board
+board_matrix = game_board.matrix
 
-
+def draw_line(x,y,theta) :
+    X_centre = (SCREEN_WIDTH - board_wt)/2 + col_gap*x + col_gap // 2 
+    Y_centre =  title_ht + title_board_gap + row_gap*x + row_gap // 2
+    X_final = X_centre if theta == 90 else X_centre + 4*col_gap 
+    if theta == -45 :
+        X_centre += col_gap
+        X_final =X_centre - 4*col_gap 
+        Y_centre-=row_gap
+    Y_final = Y_centre if theta == 0 else Y_centre + 4*row_gap 
+    pygame.draw.line(screen,BLACK,(X_centre,Y_centre),(X_final,Y_final),3) 
 
 
 # make a function to check win condition in new game class
 class tictactoe(Game):
+    def for_each_box(self,arr):
+        hori_2 = np.any(np.all(arr)==2,axis=1)
+        col_2 = np.any(np.all(arr)==2,axis=0)
+        hori_1 = np.any(np.all(arr)==1,axis=1)
+        col_1 = np.any(np.all(arr)==1,axis=0)
+        if (hori_2 or col_2 ) :
+            return 2
+        if (hori_1 or col_1 ) :
+            return 1
+        if(len(set(np.diag(arr)))==1) : 
+            return arr[2,2]
+        if(len(set(np.diag(np.fliplr(arr))))==1) : 
+            return arr[2,2]
+        return 0
+
     def check_win(self):
-        # wse have to check in board matrix for winning sequence
+        board_matrix = self.board.matrix
+        board_t = np.transpose(board_matrix)
+        ht = self.board.height
+        wt = self.board.width
+        matches = 5
+
+        a = np.arange(matches)
+        b = np.arange(wt - matches + 1)
+        c = np.arange(ht - matches + 1)
+
+        # rows
+        d = a[None, :] + b[:, None]
+        rowFives = board_t[:, d]
         
-        Board_decider = board_matrix
+        # columns
+        e = a[None, :] + c[:, None]
+        colFives = board_matrix[:, e]
+
+        # anti diagonal
+        main_diagFives = board_t[e[:, None, :], d[None, :, :]]
+
+        # main diagonal
+        f = np.flip(e)
+        anti_diagFives = board_t[f[:, None, :], d[None, :, :]]
         
-        # horizontal 
 
-        for i in range(COLS-4) :
-            for j in range(ROWS) :
-                arr = Board_decider[i:i+5,j]
-                if (len(set(arr)) == 1 ):
-                    if (arr[0]==0) :
-                        continue 
-                    elif ( arr[0] == 1 ) :
-                        make_title(f"{user1} wins ")
-                        print(f"{user1} wins ")
-                    elif ( arr[0] == 2 ) :
-                        make_title(f"{user2} wins ")
-                        print(f"{user2} wins ")
+        # horizontal lines
+        if np.any(np.all( rowFives == 1, axis=2)) :
+            x=np.where(np.all( rowFives == 1, axis=2))[0][0]
+            y=np.where(np.all( rowFives == 1, axis=2))[1][0]
+            draw_line(x,y,0)
+        if np.any(np.all( rowFives == 2, axis=2)) :
+            x=np.where(np.all( rowFives == 2, axis=2))[0][0]
+            y=np.where(np.all( rowFives == 2, axis=2))[1][0]
+            draw_line(x,y,0)
+        
+
+        # vertical lines
+        if np.any(np.all( colFives == 1, axis=2)) :
+            x=np.where(np.all( colFives == 1, axis=2))[0][0]
+            y=np.where(np.all( colFives == 1, axis=2))[1][0]
+            draw_line(x,y,90)
+        if np.any(np.all( colFives == 2, axis=2)) :
+            x=np.where(np.all( colFives == 2, axis=2))[0][0]
+            y=np.where(np.all( colFives == 2, axis=2))[1][0]
+            draw_line(x,y,90)
+        
+        #diagonal-lines
+        if np.any(np.all( main_diagFives == 1, axis=2)) :
+            x=np.where(np.all( main_diagFives == 1, axis=2))[0][0]
+            y=np.where(np.all( main_diagFives == 1, axis=2))[1][0]
+            draw_line(x,y,45)
+        if np.any(np.all( main_diagFives == 2, axis=2)) :
+            x=np.where(np.all( main_diagFives == 2, axis=2))[0][0]
+            y=np.where(np.all( main_diagFives == 2, axis=2))[1][0]
+            draw_line(x,y,45)
+        
+
+        #anti-diagonal-lines
+        if np.any(np.all( anti_diagFives == 1, axis=2)) :
+            x=np.where(np.all( anti_diagFives == 1, axis=2))[0][0]
+            y=np.where(np.all( anti_diagFives == 1, axis=2))[1][0]
+            draw_line(x,y,-45)
+        if np.any(np.all( anti_diagFives == 2, axis=2)) :
+            x=np.where(np.all( anti_diagFives == 2, axis=2))[0][0]
+            y=np.where(np.all( anti_diagFives == 2, axis=2))[1][0]
+            draw_line(x,y,-45)
+        
+        if np.any(np.all( rowFives == 1, axis=2)) or np.any(np.all (colFives == 1, axis=2)) or np.any(np.all(main_diagFives == 1, axis=2)) or np.any(np.all(anti_diagFives == 1, axis=2)):
+            return 1
+        elif np.any(np.all( rowFives == 2, axis=2)) or np.any(np.all (colFives == 2, axis=2)) or np.any(np.all(main_diagFives == 2, axis=2)) or np.any(np.all(anti_diagFives == 2, axis=2)):
+            return 2
+        elif not np.any(board_matrix == 0):
+            return 0
+        else:
+            return -1
+        # sub_box_arr = "new_logic"
+
+
+        # if np.any(self.for_each_box(sub_box_arr)==1,axis=(1,2)) :
+        #     return 1
+        # if np.any(self.for_each_box(sub_box_arr)==2,axis=(1,2)) :
+        #     return 2
+        
+    # def check_win(self):
+    #     # wse have to check in board matrix for winning sequence
+        
+    #     Board_decider = board_matrix
+        
+    #     # horizontal 
+
+    #     for i in range(COLS-4) :
+    #         for j in range(ROWS) :
+    #             arr = Board_decider[i:i+5,j]
+    #             if (len(set(arr)) == 1 ):
+    #                 if (arr[0]==0) :
+    #                     continue 
+    #                 elif ( arr[0] == 1 ) :
+    #                     make_title(f"{user1} wins ")
+    #                     print(f"{user1} wins ")
+    #                 elif ( arr[0] == 2 ) :
+    #                     make_title(f"{user2} wins ")
+    #                     print(f"{user2} wins ")
                     
-                    left_centre_x = (SCREEN_WIDTH - board_wt) //2 + i*(col_gap) + col_gap//2
-                    right_centre_x = (SCREEN_WIDTH - board_wt) //2 + (i+4)*(col_gap) + col_gap//2
-                    left_centre_y = title_ht + title_board_gap + j*(row_gap) + row_gap//2
-                    right_centre_y = title_ht + title_board_gap + j*(row_gap) + row_gap//2
+    #                 left_centre_x = (SCREEN_WIDTH - board_wt) //2 + i*(col_gap) + col_gap//2
+    #                 right_centre_x = (SCREEN_WIDTH - board_wt) //2 + (i+4)*(col_gap) + col_gap//2
+    #                 left_centre_y = title_ht + title_board_gap + j*(row_gap) + row_gap//2
+    #                 right_centre_y = title_ht + title_board_gap + j*(row_gap) + row_gap//2
 
 
-                    pygame.draw.line(screen,BLACK,(left_centre_x,left_centre_y),(right_centre_x,right_centre_y),3)
-                    return arr[0]
+    #                 pygame.draw.line(screen,BLACK,(left_centre_x,left_centre_y),(right_centre_x,right_centre_y),3)
+    #                 return arr[0]
 
 
 
 
-        # vertical 
+    #     # vertical 
 
-        for i in range(COLS) :
-            for j in range(ROWS-4) :
-                arr = Board_decider[i,j:j+5]
-                if (len(set(arr)) == 1 ):
-                    if (arr[0]==0) :
-                        continue 
-                    elif ( arr[0] == 1 ) :
-                        make_title(f"{user1} wins ")
-                        print(f"{user1} wins ")
-                    elif ( arr[0] == 2 ) :
-                        make_title(f"{user2} wins ")
-                        print(f"{user2} wins ")
+    #     for i in range(COLS) :
+    #         for j in range(ROWS-4) :
+    #             arr = Board_decider[i,j:j+5]
+    #             if (len(set(arr)) == 1 ):
+    #                 if (arr[0]==0) :
+    #                     continue 
+    #                 elif ( arr[0] == 1 ) :
+    #                     make_title(f"{user1} wins ")
+    #                     print(f"{user1} wins ")
+    #                 elif ( arr[0] == 2 ) :
+    #                     make_title(f"{user2} wins ")
+    #                     print(f"{user2} wins ")
                     
-                    left_centre_x = (SCREEN_WIDTH - board_wt) //2 + i*(col_gap) + col_gap//2
-                    right_centre_x = left_centre_x
-                    left_centre_y = title_ht + title_board_gap + j*(row_gap) + row_gap//2 - row_gap//5
-                    right_centre_y = title_ht + title_board_gap + (j+4)*(row_gap) + row_gap//2 +  row_gap//5
+    #                 left_centre_x = (SCREEN_WIDTH - board_wt) //2 + i*(col_gap) + col_gap//2
+    #                 right_centre_x = left_centre_x
+    #                 left_centre_y = title_ht + title_board_gap + j*(row_gap) + row_gap//2 - row_gap//5
+    #                 right_centre_y = title_ht + title_board_gap + (j+4)*(row_gap) + row_gap//2 +  row_gap//5
 
-                    pygame.draw.line(screen,BLACK,(left_centre_x,left_centre_y),(right_centre_x,right_centre_y),3)
-                    return arr[0]
+    #                 pygame.draw.line(screen,BLACK,(left_centre_x,left_centre_y),(right_centre_x,right_centre_y),3)
+    #                 return arr[0]
                 
-        # diagonal-down 
+    #     # diagonal-down 
 
-        for i in range(COLS-4) :
-            for j in range(ROWS-4) :
-                arr = np.diag(Board_decider[i:i+5,j:j+5])
-                if (len(set(arr)) == 1 ):
-                    if (arr[0]==0) :
-                        continue 
-                    elif ( arr[0] == 1 ) :
-                        make_title(f"{user1} wins ")
-                        print(f"{user1} wins ")
-                    elif ( arr[0] == 2 ) :
-                        make_title(f"{user2} wins ")
-                        print(f"{user2} wins ")
+    #     for i in range(COLS-4) :
+    #         for j in range(ROWS-4) :
+    #             arr = np.diag(Board_decider[i:i+5,j:j+5])
+    #             if (len(set(arr)) == 1 ):
+    #                 if (arr[0]==0) :
+    #                     continue 
+    #                 elif ( arr[0] == 1 ) :
+    #                     make_title(f"{user1} wins ")
+    #                     print(f"{user1} wins ")
+    #                 elif ( arr[0] == 2 ) :
+    #                     make_title(f"{user2} wins ")
+    #                     print(f"{user2} wins ")
                     
-                    left_centre_x = (SCREEN_WIDTH - board_wt) //2 + i*(col_gap) + col_gap//2
-                    right_centre_x = left_centre_x + 4*col_gap 
-                    left_centre_y = title_ht + title_board_gap + j*(row_gap) + row_gap//2 
-                    right_centre_y = title_ht + title_board_gap + (j+4)*(row_gap) + row_gap//2 
+    #                 left_centre_x = (SCREEN_WIDTH - board_wt) //2 + i*(col_gap) + col_gap//2
+    #                 right_centre_x = left_centre_x + 4*col_gap 
+    #                 left_centre_y = title_ht + title_board_gap + j*(row_gap) + row_gap//2 
+    #                 right_centre_y = title_ht + title_board_gap + (j+4)*(row_gap) + row_gap//2 
 
-                    pygame.draw.line(screen,BLACK,(left_centre_x,left_centre_y),(right_centre_x,right_centre_y),3)
-                    return arr[0]
+    #                 pygame.draw.line(screen,BLACK,(left_centre_x,left_centre_y),(right_centre_x,right_centre_y),3)
+    #                 return arr[0]
                 
 
-        # diagonal-up
+    #     # diagonal-up
 
-        for i in range(4, COLS) :
-            for j in range(ROWS-4) :
-                arr = np.diag(np.fliplr(Board_decider[i-4:i+1,j:j+5]))
-                if (len(set(arr)) == 1 ):
-                    if (arr[0]==0) :
-                        continue 
-                    elif ( arr[0] == 1 ) :
-                        make_title(f"{user1} wins ")
-                        print(f"{user1} wins ")
-                    elif ( arr[0] == 2 ) :
-                        make_title(f"{user2} wins ")
-                        print(f"{user2} wins ")
+    #     for i in range(4, COLS) :
+    #         for j in range(ROWS-4) :
+    #             arr = np.diag(np.fliplr(Board_decider[i-4:i+1,j:j+5]))
+    #             if (len(set(arr)) == 1 ):
+    #                 if (arr[0]==0) :
+    #                     continue 
+    #                 elif ( arr[0] == 1 ) :
+    #                     make_title(f"{user1} wins ")
+    #                     print(f"{user1} wins ")
+    #                 elif ( arr[0] == 2 ) :
+    #                     make_title(f"{user2} wins ")
+    #                     print(f"{user2} wins ")
                     
-                    left_centre_x = (SCREEN_WIDTH - board_wt) //2 + i*(col_gap) + col_gap//2
-                    right_centre_x = left_centre_x - 4*col_gap 
-                    left_centre_y = title_ht + title_board_gap + j*(row_gap) + row_gap//2 
-                    right_centre_y = title_ht + title_board_gap + (j+4)*(row_gap) + row_gap//2 
+    #                 left_centre_x = (SCREEN_WIDTH - board_wt) //2 + i*(col_gap) + col_gap//2
+    #                 right_centre_x = left_centre_x - 4*col_gap 
+    #                 left_centre_y = title_ht + title_board_gap + j*(row_gap) + row_gap//2 
+    #                 right_centre_y = title_ht + title_board_gap + (j+4)*(row_gap) + row_gap//2 
 
-                    pygame.draw.line(screen,BLACK,(left_centre_x,left_centre_y),(right_centre_x,right_centre_y),3)
-                    return arr[0]
+    #                 pygame.draw.line(screen,BLACK,(left_centre_x,left_centre_y),(right_centre_x,right_centre_y),3)
+    #                 return arr[0]
                 
         
-        return 4
+    #     return 4
 
 
 

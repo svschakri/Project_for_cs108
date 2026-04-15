@@ -49,8 +49,8 @@ col_gap = board_wt // 8
 
 
 # colors used
-BG_COLOR1= (245, 88, 49)
-BG_COLOR2 = (85, 85, 250)
+BG_COLOR1= (245, 255, 230)
+BG_COLOR2 = (5, 5, 5)
 BOARD_COLOR = (0, 255, 0)
 BALL_COLOR1 = (255, 255, 255)
 BALL_COLOR2 = (0, 0, 0)
@@ -64,7 +64,19 @@ GREEN = (0,255,0)
 # make a function to check win condition in new game class
 class tictactoe(Game):
     def check_win(self):
-        pass
+        board_matrix = self.board.matrix
+        a = len(np.where(board_matrix == 1.5 ))
+        b = len(np.where(board_matrix == 2.5 ))
+        if a ==0 and b==0 :
+            p1 = len(np.where(board_matrix == 1))
+            p2 = len(np.where(board_matrix == 2))
+            if p1 >p2 : 
+                return 1
+            elif p2 >p1 :
+                return 2
+            else :
+                return 0
+        return -1
 
 game_board = Board(8,8)
 
@@ -73,6 +85,224 @@ game = Game(player1, player2, game_board, INIT_TURN)
 screen = pygame.display.set_mode(screen_size)
 title_font = pygame.font.SysFont("Calibri", 60)
 
+def update_possible_moves():
+    board_matrix = game.board.matrix
+
+    for i in range(8):
+        for j in range(8):
+            if board_matrix[i,j] != 0 :
+                continue
+            #VERTICAL - DOWN 
+            if j<7 :
+                if board_matrix[i,j+1] in (1,2) :
+                    a,b = i,j+1
+                    while b < 8 and board_matrix[a,b] == board_matrix[i,j+1] :
+                        b+=1
+                    if b == j+1 : pass
+                    elif  b > 7 : pass
+                    elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
+                    else :
+                        board_matrix[i,j] = 3.5 - board_matrix[i,j+1]
+                        continue
+            # VERTICAL - UP
+            if j>0 :
+                if board_matrix[i,j-1] in (1,2) :
+                    a,b = i,j-1
+                    while b > -1 and board_matrix[a,b] == board_matrix[i,j-1] :
+                        b-=1
+                    if b == j-1 : pass
+                    elif  b < 0 : pass
+                    elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
+                    else :
+                        board_matrix[i,j] = 3.5 - board_matrix[i,j-1]
+                        continue
+            #HORIZONTAL - RIGHT
+            if i<7 :
+                if board_matrix[i+1,j] in (1,2) :
+                    a,b = i+1,j
+                    while a < 8 and board_matrix[a,b] == board_matrix[i+1,j] :
+                        a+=1
+                    if a == i+1 : pass
+                    elif  a > 7 : pass
+                    elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
+                    else :
+                        board_matrix[i,j] = 3.5 - board_matrix[i+1,j]
+                        continue
+            #HORIZONTAL - LEFT
+            if i >0 :
+                if board_matrix[i-1,j] in (1,2) :
+                    a,b = i-1,j
+                    while a > -1 and board_matrix[a,b] == board_matrix[i-1,j] :
+                        a-=1
+                    if a == i-1 : pass
+                    elif  a < 0 : pass
+                    elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
+                    else :
+                        board_matrix[i,j] = 3.5 - board_matrix[i-1,j]
+                        continue
+                
+            # TOP-LEFT-DIAG
+            if i > 0 and j>0 : 
+                if board_matrix[i-1,j-1] in (1,2) :
+                    a,b = i-1,j-1
+                    while a > -1 and b>-1 and board_matrix[a,b] == board_matrix[i-1,j-1] :
+                        a-=1
+                        b-=1
+                    if b == j-1 : pass
+                    elif  b<0 or a<0 : pass
+                    elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
+                    else :
+                        board_matrix[i,j] = 3.5 - board_matrix[i-1,j-1]
+                        continue
+            # BOTTOM-RIGHT-DIAG 
+            if i < 7 and j < 7 : 
+                if board_matrix[i+1,j+1] in (1,2) :
+                    a,b = i+1,j+1
+                    while a <8 and b<8 and board_matrix[a,b] == board_matrix[i+1,j+1] :
+                        a+=1
+                        b+=1
+                    if b == j+1 : pass
+                    elif  b>7 or a>7 : pass
+                    elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
+                    else :
+                        board_matrix[i,j] = 3.5 - board_matrix[i+1,j+1]
+                        continue
+            # TOP-RIGHT-DIAG 
+            if i < 7 and j>0 : 
+                if board_matrix[i+1,j-1] in (1,2) :
+                    a,b = i+1,j-1
+                    while a <8 and b>-1 and board_matrix[a,b] == board_matrix[i+1,j-1] :
+                        a+=1
+                        b-=1
+                    if b == j-1 : pass
+                    elif  b<0 or a>7 : pass
+                    elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
+                    else :
+                        board_matrix[i,j] = 3.5 - board_matrix[i+1,j-1]
+                        continue
+            # BOTTOM-LEFT-DIAG 
+            if i > 0 and j < 7 : 
+                if board_matrix[i-1,j+1] in (1,2) :
+                    a,b = i-1,j+1
+                    while a > -1 and b<8 and board_matrix[a,b] == board_matrix[i-1,j+1] :
+                        a-=1
+                        b+=1
+                    if b == j+1 : pass
+                    elif  b>7 or a<0 : pass
+                    elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
+                    else :
+                        board_matrix[i,j] = 3.5 - board_matrix[i-1,j+1]
+                        continue
+    game.board.matrix = board_matrix
+
+
+def update_values(i,j):
+    board_matrix = game.board.matrix
+    color_code = board_matrix[i,j]
+    board_matrix[board_matrix == 1.5] = 0
+    board_matrix[board_matrix == 2.5] = 0
+    #VERTICAL - DOWN 
+    if j<7 :
+        if board_matrix[i,j+1] == 3-color_code :
+            a,b = i,j+1
+            while b < 8 and board_matrix[a,b] == board_matrix[i,j+1] :
+                b+=1
+            if b == j+1 : pass
+            elif  b > 7 : pass
+            elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
+            else :
+                board_matrix[i,j:b]=color_code
+    #VERTICAL - UP 
+    if j>0 :
+        if board_matrix[i,j-1] == 3-color_code :
+            a,b = i,j-1
+            while b >-1 and board_matrix[a,b] == board_matrix[i,j-1] :
+                b-=1
+            if b == j-1 : pass
+            elif  b <0 : pass
+            elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
+            else :
+                board_matrix[i,b:j]=color_code
+    #HORIZONTAL - RIGHT
+    if i<7 :
+        if board_matrix[i+1,j] == 3-color_code :
+            a,b = i+1,j
+            while a < 8 and board_matrix[a,b] == board_matrix[i+1,j] :
+                a+=1
+            if a == i-1 : pass
+            elif  a > 7 : pass
+            elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
+            else :
+                board_matrix[i:a,j] = 3 - board_matrix[i+1,j]
+                pass
+    #HORIZONTAL - LEFT
+    if i >0 :
+        if board_matrix[i-1,j] == 3-color_code :
+            a,b = i-1,j
+            while a > -1 and board_matrix[a,b] == board_matrix[i-1,j] :
+                a-=1
+            if a == i-1 : pass
+            elif  a < 0 : pass
+            elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
+            else :
+                board_matrix[a:i,j] = 3 - board_matrix[i-1,j]
+                pass
+        
+    # TOP-LEFT-DIAG
+    if i > 0 and j>0 : 
+        if board_matrix[i-1,j-1] == 3-color_code :
+            a,b = i-1,j-1
+            while a > -1 and b>-1 and board_matrix[a,b] == board_matrix[i-1,j-1] :
+                a-=1
+                b-=1
+            if b == j-1 : pass
+            elif  b<0 or a<0 : pass
+            elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
+            else :
+                np.fill_diagonal(board_matrix[a:i, b:j], 3 - board_matrix[i-1, j-1])
+                pass
+    # BOTTOM-RIGHT-DIAG 
+    if i < 7 and j < 7 : 
+        if board_matrix[i+1,j+1] == 3-color_code :
+            a,b = i+1,j+1
+            while a <8 and b<8 and board_matrix[a,b] == board_matrix[i+1,j+1] :
+                a+=1
+                b+=1
+            if b == j+1 : pass
+            elif  b>7 or a>7 : pass
+            elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
+            else :
+                np.fill_diagonal(board_matrix[i:a, j:b], 3 - board_matrix[i+1, j+1])
+                pass
+    # TOP-RIGHT-DIAG 
+    if i < 7 and j>0 : 
+        if board_matrix[i+1,j-1] == 3-color_code :
+            a,b = i+1,j-1
+            while a <8 and b>-1 and board_matrix[a,b] == board_matrix[i+1,j-1] :
+                a+=1
+                b-=1
+            if b == j-1 : pass
+            elif  b<0 or a>7 : pass
+            elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
+            else :
+                for k in range (b,j) :
+                    board_matrix[i+abs(j-k),k] = 3 - board_matrix[i+1,j-1]
+                pass
+    # BOTTOM-LEFT-DIAG 
+    if i > 0 and j < 7 : 
+        if board_matrix[i-1,j+1] == 3-color_code :
+            a,b = i-1,j+1
+            while a > -1 and b<8 and board_matrix[a,b] == board_matrix[i-1,j+1] :
+                a-=1
+                b+=1
+            if b == j+1 : pass
+            elif  b>7 or a<0 : pass
+            elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
+            else :
+                for k in range (a,i) :
+                    board_matrix[k,j+abs(i-k)] = 3 - board_matrix[i-1,j+1]
+                pass
+    game.board.matrix =board_matrix
 
 def make_title(text_str):
     bg_rect = pygame.Rect(0, 0, SCREEN_WIDTH, title_ht)
@@ -96,10 +326,14 @@ def make_board_circle(x, y, color_code):
         ball_color = BALL_COLOR1
     elif (color_code == 2):
         ball_color = BALL_COLOR2
-    else:
-        ball_color = GREY
-    
-    pygame.draw.circle(screen, ball_color, (center_x , center_y), r)
+    elif (color_code == 1.5):
+        ball_color = BALL_COLOR1
+    elif (color_code == 2.5):
+        ball_color = BALL_COLOR2
+    if color_code in (1.5,2.5) :
+        pygame.draw.circle(screen, ball_color, (center_x , center_y), r,3)
+    else :
+        pygame.draw.circle(screen, ball_color, (center_x , center_y), r)
     pygame.draw.rect(screen,BLACK,(center_x-col_gap//2,center_y-row_gap//2,col_gap,row_gap),3)
     
 
@@ -135,15 +369,33 @@ def make_board(board_matrix, mouse):
 pygame.display.set_caption("othello")
 running = True
 
+
+game_board.matrix[3][3]=1
+game_board.matrix[4][4]=1
+game_board.matrix[4][3]=2
+game_board.matrix[3][4]=2
+
+game_board.matrix[5][3]=1.5
+game_board.matrix[3][5]=1.5
+game_board.matrix[2][4]=1.5
+game_board.matrix[4][2]=1.5
+game_board.matrix[2][3]=2.5
+game_board.matrix[3][2]=2.5
+game_board.matrix[4][5]=2.5
+game_board.matrix[5][4]=2.5
+
+
 while running:
     mouse = pygame.mouse.get_pos()
     turn = game.turn
 
-    if game.check_win() == 1:
+    win_status = game.check_win()
+
+    if win_status == 1:
         make_title("f{user1} WON!")
-    elif game.check_win() == 2:
+    elif win_status == 2:
         make_title("f{user2} WON!")
-    elif game.check_win() == 0:
+    elif win_status == 0:
         make_title("DRAW!")
 
     if (turn == 1):
@@ -169,9 +421,11 @@ while running:
             for i in range(COLS):
                 for j in range(ROWS - 1, -1, -1):
                     if collide_box(i+1,j+1,mouse):
-                        if board_matrix[i][j] != 0 : break
+                        if board_matrix[i][j] != col_code+0.5  : break
                         make_board_circle(i+1, j+1, col_code)
                         board_matrix[i][j] = col_code
+                        update_values(i,j)
+                        update_possible_moves()
                         game.switch_turn()
                         filled = True
                         break
