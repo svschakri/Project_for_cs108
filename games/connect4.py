@@ -41,6 +41,24 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREY = (152, 163, 181)
 
+# Game over screen constants
+over_title_wt = 2* (SCREEN_WIDTH // 3)
+over_title_ht = title_ht
+over_title_y = SCREEN_HEIGHT // 4
+title_button_gap = over_title_ht
+button_wt = SCREEN_WIDTH // 3    
+button_ht = SCREEN_HEIGHT // 12
+button_gap = SCREEN_HEIGHT // 24
+BOX_BORDER_RADIUS = 10
+
+BGCOLOR = (245, 182, 66)
+BUTTON_BG = (245, 66, 233)
+LIGHT_BUTTON_BG = (237, 147, 227)
+BUTTON_FONT_COLOR = WHITE
+
+QUIT_BG = (242, 90, 63)
+LIGHT_QUIT_BG = (242, 121, 99)
+
 # make a function to check win condition in new game class
 class Connect4(Game):
     def check_win(self):
@@ -84,9 +102,9 @@ class Connect4(Game):
 
 # make GUI
 
-def make_title(screen,title_font,text_str):
-    bg_rect = pygame.Rect(0, 0, SCREEN_WIDTH, title_ht)
-    bg_rect.center = (SCREEN_WIDTH // 2, title_ht // 2)
+def make_title(screen, title_font, text_str, wt = SCREEN_WIDTH, ht = title_ht, center_y = title_ht // 2):
+    bg_rect = pygame.Rect(0, 0, wt, ht)
+    bg_rect.center = (SCREEN_WIDTH // 2, center_y)
 
     pygame.draw.rect(screen, TITLE_COLOR, bg_rect)
     text = title_font.render(text_str, True, TITLE_FONT_COLOR)
@@ -134,7 +152,65 @@ def make_board(screen, board_matrix, mouse):
                 if board_matrix[i][j] == 0:
                     make_board_circle(screen, i+1, j+1, 3)
 
-def check_game_over(screen, title_font, game):
+def make_rect(center_y):   
+        button_rect = pygame.Rect(0, 0, button_wt, button_ht)
+        button_rect.center = (SCREEN_WIDTH // 2, center_y)
+        return button_rect
+
+def make_button(screen, button_font, button_rect, text_str, mouse):
+        button_color = BUTTON_BG if text_str != "Quit" else QUIT_BG
+        if button_rect.collidepoint(mouse):
+            button_color = LIGHT_BUTTON_BG if text_str != "Quit" else LIGHT_QUIT_BG
+
+        text = button_font.render(text_str, True, BUTTON_FONT_COLOR)
+        pygame.draw.rect(screen, button_color, button_rect, border_radius=BOX_BORDER_RADIUS)
+        text_rect = text.get_rect(center = button_rect.center)
+        screen.blit(text, text_rect)
+        return button_rect
+
+def draw_game_over(screen, title_font, game, msg):
+    pygame.event.clear()
+
+    if not pygame.get_init():
+        pygame.init()
+
+    command = 0
+
+    running = True
+    button_font = pygame.font.SysFont("calibri", 40)
+    while(running):
+        mouse = pygame.mouse.get_pos()
+        screen.fill(BGCOLOR)
+        make_title(screen, title_font, msg, over_title_wt, over_title_ht, over_title_y)
+        rect_dict = {}
+        first_button_y = over_title_y + over_title_ht // 2 + title_button_gap + button_ht // 2
+        rect_dict["Play Again"] = make_rect(first_button_y)
+        rect_dict["Show Leaderboard"] = make_rect(first_button_y + button_ht + button_gap)
+        quit_rect = make_rect(first_button_y + 2*(button_ht + button_gap))
+
+        for name, rect in rect_dict.items():
+            make_button(screen, button_font, rect, name, mouse)
+        make_button(screen, button_font, quit_rect, "Quit", mouse)
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                    command = 0
+                    running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if quit_rect.collidepoint(mouse):
+                    command = 0
+                    running = False
+                
+                for name, rect in rect_dict.items():
+                    if rect.collidepoint(mouse):
+                        command = 1 if name == "Play Again" else 2
+                        running = False
+        pygame.display.update()
+    pygame.quit()
+    return command
+    
+
+def check_result(screen, title_font, game):
     user1 = game.player1.user_name
     user2 = game.player2.user_name
     msgDict = {1 : f"{user1} WON!", 2 : f"{user2} WON!", 0 : "DRAW!"}
@@ -144,11 +220,9 @@ def check_game_over(screen, title_font, game):
         make_title(screen, title_font, msgDict[win])
         pygame.display.flip()
         pygame.time.wait(1000)
-        # with open("temp_result.csv", "w") as f:
-        #     f.write("GO,BACK,TO,MENU,2")
-        return True
+        return draw_game_over(screen, title_font, game, msgDict[win])
     
-    return False
+    return -1
 
 def run(user1, user2):
     INIT_TURN = 1
@@ -187,11 +261,13 @@ def run(user1, user2):
         make_title(screen, title_font, title_text)
         make_board(screen, board_matrix, mouse)
 
-        if check_game_over(screen, title_font, game):
-            break
+        command = check_result(screen, title_font, game)
+        if command != -1:
+            return command
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                command = 0
                 running = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -209,6 +285,5 @@ def run(user1, user2):
                         break
                     
         pygame.display.flip()
-
     pygame.quit()
-    return 2
+    return command

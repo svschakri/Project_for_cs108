@@ -140,7 +140,7 @@ if __name__ == "__main__":
         return back_to_menu
 
 
-    def game_over_menu(game_name):
+    def game_loop(game_name):
         while True:
             command = play_game(game_name)
             if command == 0: # quit
@@ -199,10 +199,9 @@ if __name__ == "__main__":
                                 e = pygame.event.wait()
                                 if e.type == pygame.MOUSEBUTTONUP:
                                     break
-                            pygame.event.clear()
-                            pygame.display.quit()
                             
-                            running = game_over_menu(game_name)
+                            pygame.quit()
+                            running = game_loop(game_name)
                             if running:
                                 screen, title_font, header_font, button_font = init_pygame()
                                 pygame.display.set_caption("GAME HUB")
