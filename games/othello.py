@@ -349,11 +349,10 @@ def run(user1,user2):
     INIT_TURN = 1
     player1 = Player(user1)
     player2 = Player(user2)
-
+    if not pygame.get_init():
+        pygame.init()
     pygame.display.set_caption("othello")
     running = True
-
-
 
 
     game_board = Board(8,8)

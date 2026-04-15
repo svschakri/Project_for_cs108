@@ -168,8 +168,7 @@ def make_button(screen, button_font, button_rect, text_str, mouse):
         screen.blit(text, text_rect)
         return button_rect
 
-def draw_game_over(screen, title_font, game, msg):
-    pygame.event.clear()
+def draw_game_over(screen, title_font, msg):
 
     if not pygame.get_init():
         pygame.init()
@@ -205,7 +204,7 @@ def draw_game_over(screen, title_font, game, msg):
                     if rect.collidepoint(mouse):
                         command = 1 if name == "Play Again" else 2
                         running = False
-        pygame.display.update()
+        pygame.display.flip()
     pygame.quit()
     return command
     
