@@ -63,20 +63,22 @@ GREEN = (0,255,0)
 
 # make a function to check win condition in new game class
 class tictactoe(Game):
-    def check_win(self):
-        board_matrix = self.board.matrix
-        a = len(np.where(board_matrix == 1.5 ))
-        b = len(np.where(board_matrix == 2.5 ))
-        if a ==0 and b==0 :
-            p1 = len(np.where(board_matrix == 1))
-            p2 = len(np.where(board_matrix == 2))
-            if p1 >p2 : 
-                return 1
-            elif p2 >p1 :
-                return 2
-            else :
-                return 0
-        return -1
+   def check_win(self):
+    board_matrix = self.board.matrix
+
+    a = np.sum(board_matrix == 1.5)
+    b = np.sum(board_matrix == 2.5)
+
+    if a == 0 and b == 0:
+        p1 = np.sum(board_matrix == 1)
+        p2 = np.sum(board_matrix == 2)
+        if p1 > p2:
+            return 1
+        elif p2 > p1:
+            return 2
+        else:
+            return 0
+    return -1
 
 game_board = Board(8,8)
 
@@ -85,7 +87,7 @@ game = Game(player1, player2, game_board, INIT_TURN)
 screen = pygame.display.set_mode(screen_size)
 title_font = pygame.font.SysFont("Calibri", 60)
 
-def update_possible_moves():
+def update_possible_moves(req_color):
     board_matrix = game.board.matrix
 
     for i in range(8):
@@ -94,7 +96,7 @@ def update_possible_moves():
                 continue
             #VERTICAL - DOWN 
             if j<7 :
-                if board_matrix[i,j+1] in (1,2) :
+                if board_matrix[i,j+1] == req_color :
                     a,b = i,j+1
                     while b < 8 and board_matrix[a,b] == board_matrix[i,j+1] :
                         b+=1
@@ -106,7 +108,7 @@ def update_possible_moves():
                         continue
             # VERTICAL - UP
             if j>0 :
-                if board_matrix[i,j-1] in (1,2) :
+                if board_matrix[i,j-1] == req_color :
                     a,b = i,j-1
                     while b > -1 and board_matrix[a,b] == board_matrix[i,j-1] :
                         b-=1
@@ -118,7 +120,7 @@ def update_possible_moves():
                         continue
             #HORIZONTAL - RIGHT
             if i<7 :
-                if board_matrix[i+1,j] in (1,2) :
+                if board_matrix[i+1,j] == req_color :
                     a,b = i+1,j
                     while a < 8 and board_matrix[a,b] == board_matrix[i+1,j] :
                         a+=1
@@ -130,7 +132,7 @@ def update_possible_moves():
                         continue
             #HORIZONTAL - LEFT
             if i >0 :
-                if board_matrix[i-1,j] in (1,2) :
+                if board_matrix[i-1,j] == req_color :
                     a,b = i-1,j
                     while a > -1 and board_matrix[a,b] == board_matrix[i-1,j] :
                         a-=1
@@ -143,7 +145,7 @@ def update_possible_moves():
                 
             # TOP-LEFT-DIAG
             if i > 0 and j>0 : 
-                if board_matrix[i-1,j-1] in (1,2) :
+                if board_matrix[i-1,j-1] == req_color :
                     a,b = i-1,j-1
                     while a > -1 and b>-1 and board_matrix[a,b] == board_matrix[i-1,j-1] :
                         a-=1
@@ -156,7 +158,7 @@ def update_possible_moves():
                         continue
             # BOTTOM-RIGHT-DIAG 
             if i < 7 and j < 7 : 
-                if board_matrix[i+1,j+1] in (1,2) :
+                if board_matrix[i+1,j+1] == req_color :
                     a,b = i+1,j+1
                     while a <8 and b<8 and board_matrix[a,b] == board_matrix[i+1,j+1] :
                         a+=1
@@ -169,7 +171,7 @@ def update_possible_moves():
                         continue
             # TOP-RIGHT-DIAG 
             if i < 7 and j>0 : 
-                if board_matrix[i+1,j-1] in (1,2) :
+                if board_matrix[i+1,j-1] == req_color :
                     a,b = i+1,j-1
                     while a <8 and b>-1 and board_matrix[a,b] == board_matrix[i+1,j-1] :
                         a+=1
@@ -182,7 +184,7 @@ def update_possible_moves():
                         continue
             # BOTTOM-LEFT-DIAG 
             if i > 0 and j < 7 : 
-                if board_matrix[i-1,j+1] in (1,2) :
+                if board_matrix[i-1,j+1] == req_color :
                     a,b = i-1,j+1
                     while a > -1 and b<8 and board_matrix[a,b] == board_matrix[i-1,j+1] :
                         a-=1
@@ -375,14 +377,6 @@ game_board.matrix[4][4]=1
 game_board.matrix[4][3]=2
 game_board.matrix[3][4]=2
 
-game_board.matrix[5][3]=1.5
-game_board.matrix[3][5]=1.5
-game_board.matrix[2][4]=1.5
-game_board.matrix[4][2]=1.5
-game_board.matrix[2][3]=2.5
-game_board.matrix[3][2]=2.5
-game_board.matrix[4][5]=2.5
-game_board.matrix[5][4]=2.5
 
 
 while running:
@@ -393,10 +387,16 @@ while running:
 
     if win_status == 1:
         make_title("f{user1} WON!")
+        pygame.display.update()
+        break
     elif win_status == 2:
         make_title("f{user2} WON!")
+        pygame.display.update()
+        break
     elif win_status == 0:
         make_title("DRAW!")
+        pygame.display.update()
+        break
 
     if (turn == 1):
         bg_col = BG_COLOR1
@@ -409,7 +409,7 @@ while running:
     
     screen.fill(bg_col)
     board_matrix = game_board.matrix
-
+    update_possible_moves(3-col_code)
     make_title(title_text)
     make_board(board_matrix, mouse)
     for event in pygame.event.get():
@@ -425,7 +425,7 @@ while running:
                         make_board_circle(i+1, j+1, col_code)
                         board_matrix[i][j] = col_code
                         update_values(i,j)
-                        update_possible_moves()
+                        # update_possible_moves(3-col_code)
                         game.switch_turn()
                         filled = True
                         break
@@ -434,9 +434,14 @@ while running:
                 
     pygame.display.update()
 
+#buffer loop
+after_win = True
+while after_win :
+    for event in pygame.event.get() :
+        if  event.type == pygame.QUIT:
+            ater_win = False
 pygame.quit()
 sys.exit()  
-
 
 
 

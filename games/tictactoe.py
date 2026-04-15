@@ -14,12 +14,9 @@ from game import Game, Player, Board
 pygame.init()
 
 # initialize players and board
-user1 = sys.argv[1]
-user2 = sys.argv[2]
+# user1 = sys.argv[1]
+# user2 = sys.argv[2]
 
-INIT_TURN = 1
-player1 = Player(user1)
-player2 = Player(user2)
 
 
 
@@ -61,15 +58,8 @@ GREY = (152, 163, 181)
 
 
 
-game_board = Board(10,10)
 
-game = Game(player1, player2, game_board, INIT_TURN)
-
-
-
-board_matrix = game_board.matrix
-
-def draw_line(x,y,theta) :
+def draw_line(screen, x,y,theta) :
     X_centre = (SCREEN_WIDTH - board_wt)/2 + col_gap*x + col_gap // 2 
     Y_centre =  title_ht + title_board_gap + row_gap*x + row_gap // 2
     X_final = X_centre if theta == 90 else X_centre + 4*col_gap 
@@ -98,7 +88,7 @@ class tictactoe(Game):
             return arr[2,2]
         return 0
 
-    def check_win(self):
+    def check_win(self, screen):
         board_matrix = self.board.matrix
         board_t = np.transpose(board_matrix)
         ht = self.board.height
@@ -129,43 +119,43 @@ class tictactoe(Game):
         if np.any(np.all( rowFives == 1, axis=2)) :
             x=np.where(np.all( rowFives == 1, axis=2))[0][0]
             y=np.where(np.all( rowFives == 1, axis=2))[1][0]
-            draw_line(x,y,0)
+            draw_line(screen, x,y,0)
         if np.any(np.all( rowFives == 2, axis=2)) :
             x=np.where(np.all( rowFives == 2, axis=2))[0][0]
             y=np.where(np.all( rowFives == 2, axis=2))[1][0]
-            draw_line(x,y,0)
+            draw_line(screen, x,y,0)
         
 
         # vertical lines
         if np.any(np.all( colFives == 1, axis=2)) :
             x=np.where(np.all( colFives == 1, axis=2))[0][0]
             y=np.where(np.all( colFives == 1, axis=2))[1][0]
-            draw_line(x,y,90)
+            draw_line(screen, x,y,90)
         if np.any(np.all( colFives == 2, axis=2)) :
             x=np.where(np.all( colFives == 2, axis=2))[0][0]
             y=np.where(np.all( colFives == 2, axis=2))[1][0]
-            draw_line(x,y,90)
+            draw_line(screen, x,y,90)
         
         #diagonal-lines
         if np.any(np.all( main_diagFives == 1, axis=2)) :
             x=np.where(np.all( main_diagFives == 1, axis=2))[0][0]
             y=np.where(np.all( main_diagFives == 1, axis=2))[1][0]
-            draw_line(x,y,45)
+            draw_line(screen, x,y,45)
         if np.any(np.all( main_diagFives == 2, axis=2)) :
             x=np.where(np.all( main_diagFives == 2, axis=2))[0][0]
             y=np.where(np.all( main_diagFives == 2, axis=2))[1][0]
-            draw_line(x,y,45)
+            draw_line(screen, x,y,45)
         
 
         #anti-diagonal-lines
         if np.any(np.all( anti_diagFives == 1, axis=2)) :
             x=np.where(np.all( anti_diagFives == 1, axis=2))[0][0]
             y=np.where(np.all( anti_diagFives == 1, axis=2))[1][0]
-            draw_line(x,y,-45)
+            draw_line(screen, x,y,-45)
         if np.any(np.all( anti_diagFives == 2, axis=2)) :
             x=np.where(np.all( anti_diagFives == 2, axis=2))[0][0]
             y=np.where(np.all( anti_diagFives == 2, axis=2))[1][0]
-            draw_line(x,y,-45)
+            draw_line(screen, x,y,-45)
         
         if np.any(np.all( rowFives == 1, axis=2)) or np.any(np.all (colFives == 1, axis=2)) or np.any(np.all(main_diagFives == 1, axis=2)) or np.any(np.all(anti_diagFives == 1, axis=2)):
             return 1
@@ -289,12 +279,9 @@ class tictactoe(Game):
     #     return 4
 
 
+ 
 
-screen = pygame.display.set_mode(screen_size)
-title_font = pygame.font.SysFont("Calibri", 60)
-
-
-def make_title(text_str):
+def make_title(screen, title_font, text_str):
     bg_rect = pygame.Rect(0, 0, SCREEN_WIDTH, title_ht)
     bg_rect.center = (SCREEN_WIDTH // 2, title_ht // 2)
 
@@ -303,25 +290,25 @@ def make_title(text_str):
     text_rect = text.get_rect(center = bg_rect.center)
     screen.blit(text, text_rect)
 
-def make_board_box(x, y, value_code ):
+def make_board_box(screen, x, y, value_code ):
     gap_x = col_gap
     gap_y = row_gap
     center_x = (SCREEN_WIDTH - board_wt) // 2  + (x-1) * (gap_x) + gap_x//2
     center_y = title_ht + title_board_gap + (y-1) * (gap_y) + gap_y//2
 
     if (value_code == 0):
-        draw_rect(center_x-gap_x//2,center_y-gap_y//2)
+        draw_rect(screen, center_x-gap_x//2,center_y-gap_y//2)
     elif (value_code == 1):
-        draw_cross(center_x-gap_x//2,center_y-gap_y//2,2*min(row_gap,col_gap)//3)
+        draw_cross(screen, center_x-gap_x//2,center_y-gap_y//2,2*min(row_gap,col_gap)//3)
     elif (value_code == 2):
-        draw_O(center_x-gap_x//2,center_y-gap_y//2,min(row_gap,col_gap)//3)
+        draw_O(screen, center_x-gap_x//2,center_y-gap_y//2,min(row_gap,col_gap)//3)
     else:
         ball_color = GREY
 
-def draw_rect(x,y):
+def draw_rect(screen, x,y):
     pygame.draw.rect(screen,BLACK,(x,y,col_gap,row_gap),3)
 
-def draw_cross(x,y,len):
+def draw_cross(screen, x,y,len):
 
     dia_len = pow(pow(col_gap,2)+pow(row_gap,2),0.5) 
 
@@ -331,7 +318,7 @@ def draw_cross(x,y,len):
 
 
 
-def draw_O(x,y,r):
+def draw_O(screen, x,y,r):
     pygame.draw.rect(screen,BLACK,(x,y,col_gap,row_gap),3)
     pygame.draw.circle(screen,WHITE,(x+col_gap//2,y+row_gap//2),r,3)
 
@@ -344,7 +331,7 @@ def collide_box(x,y, mouse):
     return col_rect.collidepoint(mouse)
 
 
-def make_board(board_matrix, mouse):
+def make_board(screen, board_matrix, mouse):
     center_y = title_ht + title_board_gap + board_ht // 2
     board_rect = pygame.Rect(0, 0, board_wt, board_ht)
     board_rect.center = (SCREEN_WIDTH // 2, center_y)
@@ -353,89 +340,106 @@ def make_board(board_matrix, mouse):
     pygame.draw.rect(screen, BOARD_COLOR, board_rect, 0, 10)
     for i in range(COLS):
         for j in range(ROWS):
-            make_board_box(i+1, j+1, board_matrix[i][j])
+            make_board_box(screen, i+1, j+1, board_matrix[i][j])
 
     for i in range(COLS):
         for j in range(ROWS):
             if collide_box(i,j,mouse):
                 if board_matrix[i][j] == 0:
-                    make_board_box(i+1, j+1,0) 
+                    make_board_box(screen, i+1, j+1,0) 
 
 
 
+def run(user1, user2):
 
+    INIT_TURN = 1
+    player1 = Player(user1)
+    player2 = Player(user2)
 
-pygame.display.set_caption("Tic-Tac-Toe")
-running = True
+    pygame.display.set_caption("Tic-Tac-Toe")
 
-while running:
-    mouse = pygame.mouse.get_pos()
-    turn = game.turn
+    game_board = Board(10,10)
 
-    win_situation = tictactoe(player1, player2, game_board, game.turn).check_win()
-
-
-    if win_situation == 1:
-        make_title(f"{user1} WON!")
-        pygame.display.update()
-
-        break
-    elif win_situation == 2:
-        make_title(f"{user2} WON!")
-        pygame.display.update()
-
-        break
-    elif win_situation == 0:
-        make_title("DRAW!")
-
-    if (turn == 1):
-        bg_col = BG_COLOR1
-        val_code = 1
-        title_text = f"{user1}'s turn"
-    else:
-        bg_col = BG_COLOR2
-        val_code = 2
-        title_text = f"{user2}'s turn"
-    
-    screen.fill(bg_col)
+    game = Game(player1, player2, game_board, INIT_TURN)
     board_matrix = game_board.matrix
 
-    make_title(title_text)
-    make_board(board_matrix, mouse)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+    if not pygame.get_init():
+        pygame.init()
+    screen = pygame.display.set_mode(screen_size)
+    title_font = pygame.font.SysFont("Calibri", 60)
+    pygame.display.set_caption("Connect Four")
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            filled = False
-            for i in range(COLS):
-                for j in range(ROWS - 1, -1, -1):
-                    if collide_box(i+1,j+1,mouse):
-                        if board_matrix[i][j] != 0 : break
-                        make_board_box(i+1, j+1, val_code)
-                        board_matrix[i][j] = val_code
-                        game.switch_turn()
-                        filled = True
-                        break
-            if (filled):
-                break
-                
-    pygame.display.update()
+    pygame.event.clear()
+    running = True
+
+    while running:
+        mouse = pygame.mouse.get_pos()
+        turn = game.turn
+
+        win_situation = game.check_win(screen)
 
 
-final_run =True
+        if win_situation == 1:
+            make_title(f"{user1} WON!")
+            pygame.display.update()
 
-
-while final_run :
-
-    for event in pygame.event.get() :
-        if event.type == pygame.QUIT :
-            final_run = False
             break
+        elif win_situation == 2:
+            make_title(f"{user2} WON!")
+            pygame.display.update()
+
+            break
+        elif win_situation == 0:
+            make_title("DRAW!")
+
+        if (turn == 1):
+            bg_col = BG_COLOR1
+            val_code = 1
+            title_text = f"{user1}'s turn"
+        else:
+            bg_col = BG_COLOR2
+            val_code = 2
+            title_text = f"{user2}'s turn"
+        
+        screen.fill(bg_col)
+        board_matrix = game_board.matrix
+
+        make_title(screen, title_font, title_text)
+        make_board(screen, board_matrix, mouse)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                filled = False
+                for i in range(COLS):
+                    for j in range(ROWS - 1, -1, -1):
+                        if collide_box(i+1,j+1,mouse):
+                            if board_matrix[i][j] != 0 : break
+                            make_board_box(screen, i+1, j+1, val_code)
+                            board_matrix[i][j] = val_code
+                            game.switch_turn()
+                            filled = True
+                            break
+                if (filled):
+                    break
+                    
+        pygame.display.update()
 
 
-pygame.quit()
-sys.exit()  
+    # final_run =True
+
+
+    # while final_run :
+
+    #     for event in pygame.event.get() :
+    #         if event.type == pygame.QUIT :
+    #             final_run = False
+    #             break
+
+
+    pygame.quit()
+    return 2
 
 
 
