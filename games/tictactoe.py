@@ -61,12 +61,10 @@ GREY = (152, 163, 181)
 
 def draw_line(screen, x,y,theta) :
     X_centre = (SCREEN_WIDTH - board_wt)/2 + col_gap*x + col_gap // 2 
-    Y_centre =  title_ht + title_board_gap + row_gap*x + row_gap // 2
+    Y_centre =  title_ht + title_board_gap + row_gap*y + row_gap // 2
     X_final = X_centre if theta == 90 else X_centre + 4*col_gap 
     if theta == -45 :
-        X_centre += col_gap
         X_final =X_centre - 4*col_gap 
-        Y_centre-=row_gap
     Y_final = Y_centre if theta == 0 else Y_centre + 4*row_gap 
     pygame.draw.line(screen,BLACK,(X_centre,Y_centre),(X_final,Y_final),3) 
 
@@ -140,22 +138,22 @@ class tictactoe(Game):
         if np.any(np.all( main_diagFives == 1, axis=2)) :
             x=np.where(np.all( main_diagFives == 1, axis=2))[0][0]
             y=np.where(np.all( main_diagFives == 1, axis=2))[1][0]
-            draw_line(screen, x,y,45)
+            draw_line(screen, y,x,45)
         if np.any(np.all( main_diagFives == 2, axis=2)) :
             x=np.where(np.all( main_diagFives == 2, axis=2))[0][0]
             y=np.where(np.all( main_diagFives == 2, axis=2))[1][0]
-            draw_line(screen, x,y,45)
+            draw_line(screen, y,x,45)
         
 
         #anti-diagonal-lines
         if np.any(np.all( anti_diagFives == 1, axis=2)) :
             x=np.where(np.all( anti_diagFives == 1, axis=2))[0][0]
             y=np.where(np.all( anti_diagFives == 1, axis=2))[1][0]
-            draw_line(screen, x,y,-45)
+            draw_line(screen, y+4,5-x,-45)
         if np.any(np.all( anti_diagFives == 2, axis=2)) :
             x=np.where(np.all( anti_diagFives == 2, axis=2))[0][0]
             y=np.where(np.all( anti_diagFives == 2, axis=2))[1][0]
-            draw_line(screen, x,y,-45)
+            draw_line(screen, y+4,5-x,-45)
         
         if np.any(np.all( rowFives == 1, axis=2)) or np.any(np.all (colFives == 1, axis=2)) or np.any(np.all(main_diagFives == 1, axis=2)) or np.any(np.all(anti_diagFives == 1, axis=2)):
             return 1
@@ -377,7 +375,6 @@ def run(user1, user2):
         turn = game.turn
 
         win_situation = game.check_win(screen)
-
 
         if win_situation == 1:
             make_title(screen, title_font, f"{user1} WON!")
