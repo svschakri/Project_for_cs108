@@ -391,15 +391,18 @@ def run(user1,user2):
         if win_status == 1:
             make_title(screen,title_font,f"{user1} WON!")
             pygame.display.update()
-            break
+    
         elif win_status == 2:
             make_title(screen,title_font,f"{user2} WON!")
             pygame.display.update()
-            break
+
         elif win_status == 0:
             make_title(screen,title_font,"DRAW!")
             pygame.display.update()
-            break
+
+        command = game.update_result(screen, title_font, game, win_status)
+        if command != -1:
+            return command
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -424,7 +427,7 @@ def run(user1,user2):
 
    
     pygame.quit()
-    return 2
+    return command
 
 
 

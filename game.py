@@ -61,7 +61,7 @@ TITLE_FONT_COLOR = (255, 255, 255)
 
 # Game over screen constants
 over_title_wt = 2* (SCREEN_WIDTH // 3)
-over_title_ht = SCREEN_HEIGHT // 7
+over_title_ht = SCREEN_HEIGHT // 8
 over_title_y = SCREEN_HEIGHT // 4
 title_button_gap = over_title_ht
 OVER_TITLE_BG = (85, 250, 148)
@@ -156,7 +156,7 @@ class Game:
         pygame.quit()
         return command
 
-    def check_result(self, screen, title_font, game, win):
+    def update_result(self, screen, title_font, game, win):
         user1 = game.player1.user_name
         user2 = game.player2.user_name
         msgDict = {1 : f"{user1} WON!", 2 : f"{user2} WON!", 0 : "DRAW!"}

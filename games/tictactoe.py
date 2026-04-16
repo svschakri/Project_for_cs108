@@ -163,121 +163,6 @@ class tictactoe(Game):
             return 0
         else:
             return -1
-        # sub_box_arr = "new_logic"
-
-
-        # if np.any(self.for_each_box(sub_box_arr)==1,axis=(1,2)) :
-        #     return 1
-        # if np.any(self.for_each_box(sub_box_arr)==2,axis=(1,2)) :
-        #     return 2
-        
-    # def check_win(self):
-    #     # wse have to check in board matrix for winning sequence
-        
-    #     Board_decider = board_matrix
-        
-    #     # horizontal 
-
-    #     for i in range(COLS-4) :
-    #         for j in range(ROWS) :
-    #             arr = Board_decider[i:i+5,j]
-    #             if (len(set(arr)) == 1 ):
-    #                 if (arr[0]==0) :
-    #                     continue 
-    #                 elif ( arr[0] == 1 ) :
-    #                     make_title(f"{user1} wins ")
-    #                     print(f"{user1} wins ")
-    #                 elif ( arr[0] == 2 ) :
-    #                     make_title(f"{user2} wins ")
-    #                     print(f"{user2} wins ")
-                    
-    #                 left_centre_x = (SCREEN_WIDTH - board_wt) //2 + i*(col_gap) + col_gap//2
-    #                 right_centre_x = (SCREEN_WIDTH - board_wt) //2 + (i+4)*(col_gap) + col_gap//2
-    #                 left_centre_y = title_ht + title_board_gap + j*(row_gap) + row_gap//2
-    #                 right_centre_y = title_ht + title_board_gap + j*(row_gap) + row_gap//2
-
-
-    #                 pygame.draw.line(screen,BLACK,(left_centre_x,left_centre_y),(right_centre_x,right_centre_y),3)
-    #                 return arr[0]
-
-
-
-
-    #     # vertical 
-
-    #     for i in range(COLS) :
-    #         for j in range(ROWS-4) :
-    #             arr = Board_decider[i,j:j+5]
-    #             if (len(set(arr)) == 1 ):
-    #                 if (arr[0]==0) :
-    #                     continue 
-    #                 elif ( arr[0] == 1 ) :
-    #                     make_title(f"{user1} wins ")
-    #                     print(f"{user1} wins ")
-    #                 elif ( arr[0] == 2 ) :
-    #                     make_title(f"{user2} wins ")
-    #                     print(f"{user2} wins ")
-                    
-    #                 left_centre_x = (SCREEN_WIDTH - board_wt) //2 + i*(col_gap) + col_gap//2
-    #                 right_centre_x = left_centre_x
-    #                 left_centre_y = title_ht + title_board_gap + j*(row_gap) + row_gap//2 - row_gap//5
-    #                 right_centre_y = title_ht + title_board_gap + (j+4)*(row_gap) + row_gap//2 +  row_gap//5
-
-    #                 pygame.draw.line(screen,BLACK,(left_centre_x,left_centre_y),(right_centre_x,right_centre_y),3)
-    #                 return arr[0]
-                
-    #     # diagonal-down 
-
-    #     for i in range(COLS-4) :
-    #         for j in range(ROWS-4) :
-    #             arr = np.diag(Board_decider[i:i+5,j:j+5])
-    #             if (len(set(arr)) == 1 ):
-    #                 if (arr[0]==0) :
-    #                     continue 
-    #                 elif ( arr[0] == 1 ) :
-    #                     make_title(f"{user1} wins ")
-    #                     print(f"{user1} wins ")
-    #                 elif ( arr[0] == 2 ) :
-    #                     make_title(f"{user2} wins ")
-    #                     print(f"{user2} wins ")
-                    
-    #                 left_centre_x = (SCREEN_WIDTH - board_wt) //2 + i*(col_gap) + col_gap//2
-    #                 right_centre_x = left_centre_x + 4*col_gap 
-    #                 left_centre_y = title_ht + title_board_gap + j*(row_gap) + row_gap//2 
-    #                 right_centre_y = title_ht + title_board_gap + (j+4)*(row_gap) + row_gap//2 
-
-    #                 pygame.draw.line(screen,BLACK,(left_centre_x,left_centre_y),(right_centre_x,right_centre_y),3)
-    #                 return arr[0]
-                
-
-    #     # diagonal-up
-
-    #     for i in range(4, COLS) :
-    #         for j in range(ROWS-4) :
-    #             arr = np.diag(np.fliplr(Board_decider[i-4:i+1,j:j+5]))
-    #             if (len(set(arr)) == 1 ):
-    #                 if (arr[0]==0) :
-    #                     continue 
-    #                 elif ( arr[0] == 1 ) :
-    #                     make_title(f"{user1} wins ")
-    #                     print(f"{user1} wins ")
-    #                 elif ( arr[0] == 2 ) :
-    #                     make_title(f"{user2} wins ")
-    #                     print(f"{user2} wins ")
-                    
-    #                 left_centre_x = (SCREEN_WIDTH - board_wt) //2 + i*(col_gap) + col_gap//2
-    #                 right_centre_x = left_centre_x - 4*col_gap 
-    #                 left_centre_y = title_ht + title_board_gap + j*(row_gap) + row_gap//2 
-    #                 right_centre_y = title_ht + title_board_gap + (j+4)*(row_gap) + row_gap//2 
-
-    #                 pygame.draw.line(screen,BLACK,(left_centre_x,left_centre_y),(right_centre_x,right_centre_y),3)
-    #                 return arr[0]
-                
-        
-    #     return 4
-
-
- 
 
 def make_title(screen, title_font, text_str):
     bg_rect = pygame.Rect(0, 0, SCREEN_WIDTH, title_ht)
@@ -346,8 +231,6 @@ def make_board(screen, board_matrix, mouse):
                 if board_matrix[i][j] == 0:
                     make_board_box(screen, i+1, j+1,0) 
 
-
-
 def run(user1, user2):
 
     INIT_TURN = 1
@@ -379,19 +262,19 @@ def run(user1, user2):
         if win_situation == 1:
             make_title(screen, title_font, f"{user1} WON!")
             pygame.display.update()
-            pygame.time.wait(1000)
-            break
+
         elif win_situation == 2:
             make_title(screen, title_font, f"{user2} WON!")
             pygame.display.update()
-            pygame.time.wait(1000)
-            break
+
         elif win_situation == 0:
             make_title(screen, title_font, "DRAW!")
             pygame.display.update()
-            pygame.time.wait(1000)
-            break
-
+        
+        command = game.update_result(screen, title_font, game, win_situation)
+        if command != -1:
+            return command
+        
         if (turn == 1):
             bg_col = BG_COLOR1
             val_code = 1
@@ -408,6 +291,7 @@ def run(user1, user2):
         make_board(screen, board_matrix, mouse)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                command = 0
                 running = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -426,20 +310,8 @@ def run(user1, user2):
                     
         pygame.display.update()
 
-
-    # final_run =True
-
-
-    # while final_run :
-
-    #     for event in pygame.event.get() :
-    #         if event.type == pygame.QUIT :
-    #             final_run = False
-    #             break
-
-
     pygame.quit()
-    return 2
+    return command
 
 
 

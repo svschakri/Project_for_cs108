@@ -17,7 +17,7 @@ SCREEN_HEIGHT = 1000
 screen_size = SCREEN_WIDTH, SCREEN_HEIGHT
 
 # title dimensions
-title_ht, title_wt = SCREEN_HEIGHT // 7, SCREEN_WIDTH
+title_ht, title_wt = SCREEN_HEIGHT // 8, SCREEN_WIDTH
 TITLE_COLOR = (85, 250, 148)
 TITLE_FONT_COLOR = (255, 255, 255)
 
@@ -26,7 +26,7 @@ ROWS = 6
 COLS = 7
 title_board_gap = title_ht // 4
 board_wt = (2 * SCREEN_WIDTH) // 3
-board_ht  = SCREEN_HEIGHT - title_ht
+board_ht  = SCREEN_HEIGHT - title_ht - title_board_gap
 circle_radius = (3 * board_ht) // (7 * ROWS + 2)
 row_gap = circle_radius // 3
 col_gap = (board_wt - 2 * circle_radius * COLS) // (1 + COLS)
@@ -95,12 +95,6 @@ class Connect4(Game):
             return 0
         else:
             return -1
-    
-# initialize players and board
-# user1 = sys.argv[1]
-# user2 = sys.argv[2]
-
-# make GUI
 
 def make_title(screen, title_font, text_str, wt = SCREEN_WIDTH, ht = title_ht, center_y = title_ht // 2):
     bg_rect = pygame.Rect(0, 0, wt, ht)
@@ -141,7 +135,7 @@ def make_board(screen, board_matrix, mouse):
     board_rect = pygame.Rect(0, 0, board_wt, board_ht)
     board_rect.center = (SCREEN_WIDTH // 2, center_y)
 
-    pygame.draw.rect(screen, BOARD_COLOR, board_rect, 0, BOARD_BORDER_RADIUS, BOARD_BORDER_RADIUS)
+    pygame.draw.rect(screen, BOARD_COLOR, board_rect, 0, 0, BOARD_BORDER_RADIUS, BOARD_BORDER_RADIUS, 0, 0)
     for i in range(0, COLS):
         for j in range(0, ROWS):
             make_board_circle(screen, i+1, j+1, board_matrix[i][j])
@@ -190,7 +184,7 @@ def run(user1, user2):
         make_board(screen, board_matrix, mouse)
 
         win = game.check_win()
-        command = game.check_result(screen, title_font, game, win)
+        command = game.update_result(screen, title_font, game, win)
         if command != -1:
             return command
 
