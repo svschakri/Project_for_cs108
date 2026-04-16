@@ -149,12 +149,10 @@ class tictactoe(Game):
         if np.any(np.all( anti_diagFives == 1, axis=2)) :
             x=np.where(np.all( anti_diagFives == 1, axis=2))[0][0]
             y=np.where(np.all( anti_diagFives == 1, axis=2))[1][0]
-            print(np.where(np.all( anti_diagFives == 1, axis=2)))
             draw_line(screen, y+4,5-x,-45)
         if np.any(np.all( anti_diagFives == 2, axis=2)) :
             x=np.where(np.all( anti_diagFives == 2, axis=2))[0][0]
             y=np.where(np.all( anti_diagFives == 2, axis=2))[1][0]
-            print(np.where(np.all( anti_diagFives == 2, axis=2)))
             draw_line(screen, y+4,5-x,-45)
         
         if np.any(np.all( rowFives == 1, axis=2)) or np.any(np.all (colFives == 1, axis=2)) or np.any(np.all(main_diagFives == 1, axis=2)) or np.any(np.all(anti_diagFives == 1, axis=2)):
