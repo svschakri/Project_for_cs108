@@ -22,17 +22,20 @@ TITLE_COLOR = (85, 250, 148)
 TITLE_FONT_COLOR = (255, 255, 255)
 
 # board dimensions
-ROWS = 6
+ROWS = 7
 COLS = 7
-title_board_gap = title_ht // 4
+title_board_gap = 4*title_ht // 5
 board_wt = (2 * SCREEN_WIDTH) // 3
 board_ht  = SCREEN_HEIGHT - title_ht - title_board_gap
 circle_radius = (3 * board_ht) // (7 * ROWS + 2)
+border_width = circle_radius // 6
 row_gap = circle_radius // 3
+start_circle_gap = 2*row_gap
 col_gap = (board_wt - 2 * circle_radius * COLS) // (1 + COLS)
+hover_circle_offset = 2*(circle_radius // 3)
 
 # colors used
-BG_COLOR1= (245, 88, 49)
+BG_COLOR1 = (245, 88, 49)
 BG_COLOR2 = (85, 85, 250)
 BOARD_COLOR = (104, 118, 143)
 BALL_COLOR1 = (255, 0, 0)
@@ -40,6 +43,9 @@ BALL_COLOR2 = (0, 0, 255)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREY = (152, 163, 181)
+
+# Animation related
+ANIM_TIME = 100
 
 # Game over screen constants
 over_title_wt = 2* (SCREEN_WIDTH // 3)
@@ -105,23 +111,24 @@ def make_title(screen, title_font, text_str, wt = SCREEN_WIDTH, ht = title_ht, c
     text_rect = text.get_rect(center = bg_rect.center)
     screen.blit(text, text_rect)
 
-def make_board_circle(screen, x, y, color_code):
+def make_board_circle(screen, x, y, ball_color, offset_y = 0):
     r = circle_radius
     gap_x = col_gap
     gap_y = row_gap
     center_x = (SCREEN_WIDTH - board_wt) // 2  + (x-1) * (2 * r + gap_x) + gap_x + r
-    center_y = title_ht + title_board_gap + (y-1) * (2 * r + gap_y) + gap_y + r
+    center_y = title_ht + title_board_gap + (y-1) * (2 * r + gap_y) + gap_y + r + start_circle_gap
 
-    if (color_code == 0):
-        ball_color = WHITE
-    elif (color_code == 1):
-        ball_color = BALL_COLOR1
-    elif (color_code == 2):
-        ball_color = BALL_COLOR2
-    else:
-        ball_color = GREY
+    # if (color_code == 0):
+    #     ball_color = WHITE
+    # elif (color_code == 1):
+    #     ball_color = BALL_COLOR1
+    # elif (color_code == 2):
+    #     ball_color = BALL_COLOR2
+    # else:
+    #     ball_color = GREY
 
-    pygame.draw.circle(screen, ball_color, (center_x, center_y), r)
+    pygame.draw.circle(screen, ball_color, (center_x, center_y - offset_y), r)
+    pygame.draw.circle(screen, BLACK, (center_x, center_y - offset_y), r, border_width)
 
 def collide_col(i, mouse):
     top = title_ht + title_board_gap
@@ -130,28 +137,60 @@ def collide_col(i, mouse):
     col_rect = pygame.Rect(left, top, 2 * circle_radius, board_ht)
     return col_rect.collidepoint(mouse)
 
-def make_board(screen, board_matrix, mouse):
+def make_board(screen, board_matrix, mouse, ball_color):
     center_y = title_ht + title_board_gap + board_ht // 2
     board_rect = pygame.Rect(0, 0, board_wt, board_ht)
     board_rect.center = (SCREEN_WIDTH // 2, center_y)
 
-    pygame.draw.rect(screen, BOARD_COLOR, board_rect, 0, 0, BOARD_BORDER_RADIUS, BOARD_BORDER_RADIUS, 0, 0)
-    for i in range(0, COLS):
-        for j in range(0, ROWS):
-            make_board_circle(screen, i+1, j+1, board_matrix[i][j])
-
     for i in range(COLS):
         if collide_col(i, mouse):
+            make_board_circle(screen, i+1, 1, ball_color, row_gap + start_circle_gap + circle_radius + hover_circle_offset)
             for j in range(ROWS):
                 if board_matrix[i][j] == 0:
-                    make_board_circle(screen, i+1, j+1, 3)
+                    make_board_circle(screen, i+1, j+1, GREY)
+
+    pygame.draw.rect(screen, BOARD_COLOR, board_rect, 0, 0, BOARD_BORDER_RADIUS, BOARD_BORDER_RADIUS, 0, 0)
+    pygame.draw.rect(screen, BLACK, board_rect, border_width, 0, BOARD_BORDER_RADIUS, BOARD_BORDER_RADIUS, 0, 0)
+    for i in range(0, COLS):
+        for j in range(0, ROWS):
+            code = board_matrix[i][j]
+            if (code == 1):
+                ball_color = BALL_COLOR1
+            elif (code == 2):
+                ball_color = BALL_COLOR2
+            elif (code == 0):
+                ball_color = WHITE
+            make_board_circle(screen, i+1, j+1, ball_color)
+
+def update_screen(screen, title_font, title_text, board_matrix, mouse, turn):
+    init_col = BG_COLOR1 if turn == 1 else BG_COLOR2
+    fin_col = BG_COLOR2 if turn == 1 else BG_COLOR1
+    init_ball_col = BALL_COLOR1 if turn == 1 else BALL_COLOR2
+    fin_ball_col = BALL_COLOR2 if turn == 1 else BALL_COLOR1
+
+    for i in range(ANIM_TIME):
+        col_r = init_col[0] + ((fin_col[0] - init_col[0]) / (ANIM_TIME)) * i
+        col_g = init_col[1] + ((fin_col[1] - init_col[1]) / (ANIM_TIME)) * i
+        col_b = init_col[2] + ((fin_col[2] - init_col[2]) / (ANIM_TIME)) * i
+        bg_col = (int(col_r), int(col_g), int(col_b))
+
+        ball_col_r = init_ball_col[0] + ((fin_ball_col[0] - init_ball_col[0]) / (ANIM_TIME)) * i
+        ball_col_g = init_ball_col[1] + ((fin_ball_col[1] - init_ball_col[1]) / (ANIM_TIME)) * i
+        ball_col_b = init_ball_col[2] + ((fin_ball_col[2] - init_ball_col[2]) / (ANIM_TIME)) * i
+        ball_col = (int(ball_col_r), int(ball_col_g), int(ball_col_b))
+
+        screen.fill(bg_col)
+        make_title(screen, title_font, title_text)
+        make_board(screen, board_matrix, mouse, ball_col)
+        pygame.display.flip()
+        
 
 def run(user1, user2):
     INIT_TURN = 1
     player1 = Player(user1)
     player2 = Player(user2)
 
-    game_board = Board(7, 6)
+    game_board = Board(7, 7)
 
     game = Connect4(player1, player2, game_board, INIT_TURN)
     board_matrix = game_board.matrix
@@ -171,17 +210,19 @@ def run(user1, user2):
 
         if (turn == 1):
             bg_col = BG_COLOR1
-            col_code = 1
+            code = 1
+            ball_color = BALL_COLOR1
             title_text = f"{user1}'s turn"
         else:
             bg_col = BG_COLOR2
-            col_code = 2
+            code = 2
+            ball_color = BALL_COLOR2
             title_text = f"{user2}'s turn"
 
         screen.fill(bg_col)
 
         make_title(screen, title_font, title_text)
-        make_board(screen, board_matrix, mouse)
+        make_board(screen, board_matrix, mouse, ball_color)
 
         win = game.check_win()
         command = game.update_result(screen, title_font, game, win)
@@ -199,8 +240,9 @@ def run(user1, user2):
                     if collide_col(i, mouse):
                         for j in range(ROWS - 1, -1, -1):
                             if board_matrix[i][j] == 0:
-                                make_board_circle(screen, i+1, j+1, col_code)
-                                board_matrix[i][j] = col_code
+                                make_board_circle(screen, i+1, j+1, ball_color)
+                                board_matrix[i][j] = code
+                                update_screen(screen, title_font, title_text, board_matrix, mouse, turn)
                                 game.switch_turn()
                                 filled = True
                                 break

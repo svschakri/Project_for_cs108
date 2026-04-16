@@ -4,7 +4,7 @@ import pathlib
 import sys
 import os 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
-
+import csv
 import pygame
 import time
 import subprocess
@@ -165,6 +165,8 @@ class Game:
             self.make_title(screen, title_font, msgDict[win])
             pygame.display.flip()
             pygame.time.wait(1000)
+            # Add result to history.csv
+
             return self.draw_game_over(screen, title_font, msgDict[win])
         
         return -1
@@ -174,7 +176,6 @@ if __name__ == "__main__":
     user1 = sys.argv[1] 
     user2 = sys.argv[2]
 
-        
     # menu design
     def init_pygame():
         pygame.init()
@@ -217,7 +218,7 @@ if __name__ == "__main__":
 
         return command
     
-    def analysis_menu():
+    def analysis_menu(game_name):
         subprocess.run(["bash", "leaderboard.sh"])
         # display matplotlib charts
         
@@ -235,7 +236,7 @@ if __name__ == "__main__":
             elif command == 1: # play again
                 continue
             elif command == 2: # show leaderboard
-                return analysis_menu()
+                return analysis_menu(game_name)
             else:
                 return False
             
@@ -298,4 +299,3 @@ if __name__ == "__main__":
 
     start_menu()
     pygame.quit()
-    sys.exit()
