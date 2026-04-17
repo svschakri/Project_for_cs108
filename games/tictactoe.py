@@ -117,11 +117,13 @@ class tictactoe(Game):
         if np.any(np.all( rowFives == 1, axis=2)) :
             x=np.where(np.all( rowFives == 1, axis=2))[0][0]
             y=np.where(np.all( rowFives == 1, axis=2))[1][0]
-            draw_line(screen, x,y,0)
+            print(np.where(np.all( rowFives == 1, axis=2)))
+            draw_line(screen, y,x,0)
         if np.any(np.all( rowFives == 2, axis=2)) :
             x=np.where(np.all( rowFives == 2, axis=2))[0][0]
             y=np.where(np.all( rowFives == 2, axis=2))[1][0]
-            draw_line(screen, x,y,0)
+            print(np.where(np.all( rowFives == 2, axis=2)))
+            draw_line(screen, y,x,0)
         
 
         # vertical lines
