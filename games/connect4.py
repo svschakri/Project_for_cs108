@@ -12,8 +12,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 from game import Game, Player, Board
 
 # screen dimensions
-SCREEN_WIDTH = 1920
-SCREEN_HEIGHT = 1000
+SCREEN_WIDTH = 1536
+SCREEN_HEIGHT = 1024
 screen_size = SCREEN_WIDTH, SCREEN_HEIGHT
 
 # title dimensions

@@ -21,8 +21,8 @@ pygame.init()
 
 
 # screen dimensions
-SCREEN_WIDTH = 1920
-SCREEN_HEIGHT = 1000
+SCREEN_WIDTH = 1536
+SCREEN_HEIGHT = 1024
 screen_size = (SCREEN_WIDTH, SCREEN_HEIGHT)
 
 
@@ -248,7 +248,7 @@ def run(user1, user2):
         pygame.init()
     screen = pygame.display.set_mode(screen_size)
     title_font = pygame.font.SysFont("Calibri", 60)
-    pygame.display.set_caption("Connect Four")
+    pygame.display.set_caption("Tic-Tac-Toe")
 
     pygame.event.clear()
     running = True
