@@ -31,12 +31,23 @@ bottom_ht = SCREEN_HEIGHT // 20
 # board dimensions
 ROWS = 8
 COLS = 8
+LEFT_BOARD=488
+TOP_BOARD=149
 title_board_gap = title_ht // 4
-board_wt = (2 * SCREEN_WIDTH) // 3
-board_ht  = SCREEN_HEIGHT - title_ht-bottom_ht
-row_gap = board_ht // 8
-col_gap = board_wt // 8
+board_wt = 567
+board_ht  = 685
+row_gap = board_ht / 8
+col_gap = board_wt / 8
 
+#score box position
+LEFT_P1 = 148
+LEFT_P2 = 1203
+TOP_P1 = 679
+TOP_P2 = 678
+RIGHT_P1 =339
+RIGHT_P2 =1398
+BOTTOM_P1 =889
+BOTTOM_P2 = 887
 
 # colors used
 BG_COLOR1= (245, 255, 230)
@@ -48,7 +59,6 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREY = (152, 163, 181) 
 GREEN = (0,255,0)
-
 
 
 # make a function to check win condition in new game class
@@ -289,50 +299,70 @@ def make_title(screen, title_font,text_str):
     bg_rect = pygame.Rect(0, 0, SCREEN_WIDTH, title_ht)
     bg_rect.center = (SCREEN_WIDTH // 2, title_ht // 2)
 
-    pygame.draw.rect(screen, TITLE_COLOR, bg_rect)
-    text = title_font.render(text_str, True, TITLE_FONT_COLOR)
-    text_rect = text.get_rect(center = bg_rect.center)
-    screen.blit(text, text_rect)
+    # pygame.draw.rect(screen, TITLE_COLOR, bg_rect)
+    # text = title_font.render(text_str, True, TITLE_FONT_COLOR)
+    # text_rect = text.get_rect(center = bg_rect.center)
+    # screen.blit(text, text_rect)
+
+def make_score(screen,board_matrix,Number_font):
+    tot_1 = np.sum(board_matrix == 1)
+    tot_2 = np.sum(board_matrix == 2)
+
+    Player_1_score_board = pygame.Rect(LEFT_P1, TOP_P1, RIGHT_P1-LEFT_P1, BOTTOM_P1-TOP_P1)
+    Player_2_score_board = pygame.Rect(LEFT_P2, TOP_P2, RIGHT_P2-LEFT_P2, BOTTOM_P2-TOP_P2)
+
+    text_1 = Number_font.render(str(tot_1), True, (250, 250, 250))
+    text_2 = Number_font.render(str(tot_2), True, (250, 250, 250))
+
+    screen.blit(text_1, Player_1_score_board.center)
+    screen.blit(text_2, Player_2_score_board.center)
+
 
 def make_board_circle(screen,x, y, color_code):
-    r = min(col_gap,row_gap)//3 
+    r = min(col_gap,row_gap)*2/5 
     gap_x = col_gap
     gap_y = row_gap
-    center_x = (SCREEN_WIDTH - board_wt) // 2  + (x-1) * ( gap_x ) +  gap_x //2 
-    center_y = title_ht + title_board_gap + (y-1) * ( gap_y ) + gap_y //2
+    center_x = LEFT_BOARD  + (x-1) * ( gap_x ) +  gap_x //2 
+    center_y = TOP_BOARD + (y-1) * ( gap_y ) + gap_y //2
 
     if (color_code == 0):
         ball_color = GREEN
     elif (color_code == 1):
-        ball_color = BALL_COLOR1
+        ball_img =pygame.image.load("images/White_othello.jpeg").convert()
+        ball_img.set_colorkey((0, 0, 0))
+        ball_img = pygame.transform.scale(ball_img,(2*r,2*r))
+        rect = ball_img.get_rect(center=(center_x, center_y))
     elif (color_code == 2):
-        ball_color = BALL_COLOR2
+        ball_img =pygame.image.load("images/Black_othello.jpeg").convert_alpha()
+        ball_img.set_colorkey((0, 0, 0))
+        ball_img = pygame.transform.scale(ball_img,(2*r,2*r))
+        rect = ball_img.get_rect(center=(center_x, center_y))
     elif (color_code == 1.5):
         ball_color = BALL_COLOR1
     elif (color_code == 2.5):
         ball_color = BALL_COLOR2
     if color_code in (1.5,2.5) :
         pygame.draw.circle(screen, ball_color, (center_x , center_y), r,3)
-    else :
-        pygame.draw.circle(screen, ball_color, (center_x , center_y), r)
-    pygame.draw.rect(screen,BLACK,(center_x-col_gap//2,center_y-row_gap//2,col_gap,row_gap),3)
+    elif color_code != 0 :
+        screen.blit(ball_img,rect)
+    # pygame.draw.rect(screen,BLACK,(center_x-col_gap//2,center_y-row_gap//2,col_gap,row_gap),3)
     
 
 def collide_box(x,y, mouse):
-    top = title_ht + title_board_gap + (y-1)*row_gap 
-    left = (SCREEN_WIDTH - board_wt) // 2 + (x-1) * (col_gap)
+    top = TOP_BOARD + (y-1)*row_gap 
+    left = LEFT_BOARD + (x-1) * (col_gap)
 
     col_rect = pygame.Rect(left, top, col_gap, row_gap)
     return col_rect.collidepoint(mouse)
 
 
-def make_board(screen,board_matrix, mouse):
+def make_board(screen,board_matrix,Number_font, mouse):
     center_y = title_ht + title_board_gap + board_ht // 2
     board_rect = pygame.Rect(0, 0, board_wt, board_ht)
     board_rect.center = (SCREEN_WIDTH // 2, center_y)
 
-   
-    pygame.draw.rect(screen, BOARD_COLOR, board_rect, 0, 10)
+    make_score(screen,board_matrix,Number_font)
+    #pygame.draw.rect(screen, BOARD_COLOR, board_rect, 0, 10)
 
 
     for i in range(COLS):
@@ -362,6 +392,7 @@ def run(user1,user2):
 
     screen = pygame.display.set_mode(screen_size)
     title_font = pygame.font.SysFont("Calibri", 60)
+    Number_font = pygame.font.SysFont("Calibri", 60)
 
     game_board.matrix[3][3]=1
     game_board.matrix[4][4]=1
@@ -387,7 +418,7 @@ def run(user1,user2):
         board_matrix = game_board.matrix
         update_possible_moves(3-col_code,board_matrix)
         make_title(screen,title_font,title_text)
-        make_board(screen, board_matrix, mouse)
+        make_board(screen, board_matrix,Number_font, mouse)
         win_status = game.check_win()
 
         if win_status == 1:
@@ -422,7 +453,7 @@ def run(user1,user2):
                             game.switch_turn()
                             filled = True
                             break
-                if (filled):
+                if (filled): # what is the use of this condition any ways
                     break
                     
         pygame.display.update()
