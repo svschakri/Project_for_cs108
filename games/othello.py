@@ -60,6 +60,9 @@ WHITE = (255, 255, 255)
 GREY = (152, 163, 181) 
 GREEN = (0,255,0)
 
+# colors used for making glow
+GLOW_COLOR1 = (235, 64, 52)
+GLOW_COLOR2 = (52, 92, 235)
 
 # make a function to check win condition in new game class
 class othello(Game):
@@ -338,15 +341,23 @@ def make_board_circle(screen,x, y, color_code):
         ball_img = pygame.transform.scale(ball_img,(2*r,2*r))
         rect = ball_img.get_rect(center=(center_x, center_y))
     elif (color_code == 1.5):
-        ball_color = BALL_COLOR1
+        # ball_color = BALL_COLOR1
+        glow_col = GLOW_COLOR1
     elif (color_code == 2.5):
-        ball_color = BALL_COLOR2
+        # ball_color = BALL_COLOR2
+        glow_col = GLOW_COLOR2
+
     if color_code in (1.5,2.5) :
-        pygame.draw.circle(screen, ball_color, (center_x , center_y), r,3)
+        # pygame.draw.circle(screen, ball_color, (center_x , center_y), r,3)
+        create_glow(screen, r, center_x, center_y, glow_col)
     elif color_code != 0 :
         screen.blit(ball_img,rect)
     # pygame.draw.rect(screen,BLACK,(center_x-col_gap//2,center_y-row_gap//2,col_gap,row_gap),3)
-    
+
+def create_glow(screen, radius, x, y, glow_color = (255, 255, 0), alpha = 80):
+    glow = pygame.Surface((radius*2, radius*2), pygame.SRCALPHA)
+    pygame.draw.circle(glow, (*glow_color, alpha), (radius, radius), radius)
+    screen.blit(glow, (x-radius, y-radius))
 
 def collide_box(x,y, mouse):
     top = TOP_BOARD + (y-1)*row_gap 
