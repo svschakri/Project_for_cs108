@@ -56,9 +56,6 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREY = (152, 163, 181) 
 
-
-
-
 def draw_line(screen, x,y,theta) :
     X_centre = (SCREEN_WIDTH - board_wt)/2 + col_gap*x + col_gap // 2 
     Y_centre =  title_ht + title_board_gap + row_gap*y + row_gap // 2

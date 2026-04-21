@@ -428,7 +428,3 @@ def run(user1,user2):
    
     pygame.quit()
     return command
-
-
-
-
