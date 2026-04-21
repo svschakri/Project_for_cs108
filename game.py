@@ -10,8 +10,8 @@ import time
 import subprocess
 
 # dimensions
-SCREEN_WIDTH = 1920
-SCREEN_HEIGHT = 1000
+SCREEN_WIDTH = 1536
+SCREEN_HEIGHT = 1024
 screen_size = SCREEN_WIDTH, SCREEN_HEIGHT
 
 title_ht, title_wt = SCREEN_HEIGHT // 5, SCREEN_WIDTH
@@ -245,10 +245,13 @@ if __name__ == "__main__":
         screen, title_font, header_font, button_font = init_pygame()
         pygame.display.set_caption("GAME HUB")
         running = True
+        #images
+        menu_img = pygame.image.load("./images/menu.png")
         while running:
             mouse = pygame.mouse.get_pos()
 
             screen.fill(BGCOLOR)
+            screen.blit( menu_img ,(0,0))
 
             # title
             title_text = title_font.render("GAME HUB", True, TITLE_COLOR)

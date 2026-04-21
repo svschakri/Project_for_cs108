@@ -21,8 +21,8 @@ pygame.init()
 
 
 # screen dimensions
-SCREEN_WIDTH = 1920
-SCREEN_HEIGHT = 1000
+SCREEN_WIDTH = 1536
+SCREEN_HEIGHT = 1024
 screen_size = (SCREEN_WIDTH, SCREEN_HEIGHT)
 
 
@@ -114,11 +114,11 @@ class tictactoe(Game):
         if np.any(np.all( rowFives == 1, axis=2)) :
             x=np.where(np.all( rowFives == 1, axis=2))[0][0]
             y=np.where(np.all( rowFives == 1, axis=2))[1][0]
-            draw_line(screen, x,y,0)
+            draw_line(screen, y,x,0)
         if np.any(np.all( rowFives == 2, axis=2)) :
             x=np.where(np.all( rowFives == 2, axis=2))[0][0]
             y=np.where(np.all( rowFives == 2, axis=2))[1][0]
-            draw_line(screen, x,y,0)
+            draw_line(screen, y,x,0)
         
 
         # vertical lines
@@ -245,7 +245,7 @@ def run(user1, user2):
         pygame.init()
     screen = pygame.display.set_mode(screen_size)
     title_font = pygame.font.SysFont("Calibri", 60)
-    pygame.display.set_caption("Connect Four")
+    pygame.display.set_caption("Tic-Tac-Toe")
 
     pygame.event.clear()
     running = True
