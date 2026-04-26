@@ -1,5 +1,5 @@
 import numpy as np 
-import matplotlib
+import matplotlib.pyplot as plt
 import pathlib
 import sys
 import os 
@@ -226,15 +226,59 @@ if __name__ == "__main__":
 
         return command
     
-    def analysis_menu(game_name):
+    def analysis_menu():
         subprocess.run(["bash", "leaderboard.sh"])
         # display matplotlib charts
+        game_freq = {}
+        player_data = {} # [wins, losses, win/loss ratio]
+        with open("history.csv", "r") as f:
+            reader = csv.reader(f)
+            next(reader)
+            for row in reader:
+                if (row[0] not in game_freq):
+                    game_freq[row[0]] = 0
+                game_freq[row[0]] += 1
+
+                if (row[2] not in player_data):
+                    player_data[row[2]] = [0, 0]
+                if (row[3] not in player_data):
+                    player_data[row[3]] = [0, 0]
+
+                player_data[row[2]][0] += 1
+                player_data[row[3]][1] += 1
         
+        for data in player_data.values():
+            data.append(data[0]/data[1] if data[1] != 0 else "INF")
+
+        wins = sorted([(name, wins[0]) for name, wins in player_data.items()], reverse=True, key=lambda x: x[1])
+        top_wins = wins[0:5]
+        w_l_ratio = sorted([(name, wins[2] if wins[2] != "INF" else 5) for name, wins in player_data.items()], reverse=True, key=lambda x: x[1])
+        top_w_l_ratio = w_l_ratio[:5]
+
+        fig, axs = plt.subplots(2, 2, figsize = (12, 10))
+        # Top 5 wins
+        axs[0][0].bar([data[0] for data in top_wins], [data[1] for data in top_wins])
+        axs[0][0].set_title("Top 5 Players (By win count)")
+
+        # Top 5 W/L ratio
+        axs[0][1].bar([data[0] for data in top_w_l_ratio], [data[1] for data in top_w_l_ratio])
+        axs[0][1].set_title("Top 5 Players (By Win/Loss ratio)")
+
+        # wins pie chart
+        axs[1][0].pie([data[1] for data in top_wins], autopct='%1.1f%%')
+        axs[1][0].legend([data[0] for data in top_wins])
+        axs[1][0].set_title("Percentage of Wins")
+
+        # most played games pie chart
+        axs[1][1].pie([n for n in game_freq.values()], autopct='%1.1f%%')
+        axs[1][1].legend([name for name in game_freq.keys()])
+        axs[1][1].set_title("Most Played Games")
+        fig.savefig("plot.png")
+
         # back to menu or quit shown on screen
         back_to_menu = True
         # if next run post_game_loop and return true
         return back_to_menu
-
 
     def game_loop(game_name):
         while True:
@@ -244,7 +288,7 @@ if __name__ == "__main__":
             elif command == 1: # play again
                 continue
             elif command == 2: # show leaderboard
-                return analysis_menu(game_name)
+                return analysis_menu()
             elif command == 3: # back to menu
                 return True
             else:
@@ -311,4 +355,5 @@ if __name__ == "__main__":
             pygame.display.update()
 
     start_menu()
+    # analysis_menu()
     pygame.quit()
