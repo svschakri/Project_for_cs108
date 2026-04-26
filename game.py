@@ -64,6 +64,17 @@ over_title_wt = 2* (SCREEN_WIDTH // 3)
 over_title_ht = SCREEN_HEIGHT // 8
 over_title_y = SCREEN_HEIGHT // 4
 title_button_gap = over_title_ht
+# Function to fix dimensions
+def dim(coords):
+    return [((SCREEN_HEIGHT // 1024)*coords[i] if i%2 == 1 else (SCREEN_WIDTH // 1536)*coords[i] ) for i in range(len(coords))]
+
+# button_name: [top_left_corner_x, top_left_corner_y, width, height]
+button_dict = {
+    "PLAY AGAIN": dim([607, 380, 320, 105]),
+    "LEADERBOARD": dim([607, 497, 320, 100]),
+    "GO TO MENU": dim([607, 605, 320, 100]),
+    "QUIT": dim([607, 715, 320, 100])
+}
 OVER_TITLE_BG = (85, 250, 148)
 BOX_BORDER_RADIUS = 15
 
@@ -100,21 +111,8 @@ class Game:
         text_rect = text.get_rect(center = bg_rect.center)
         screen.blit(text, text_rect)
 
-    def make_rect(self, center_y):   
-        button_rect = pygame.Rect(0, 0, button_wt, button_ht)
-        button_rect.center = (SCREEN_WIDTH // 2, center_y)
-        return button_rect
-
-    def make_button(self, screen, button_font, button_rect, text_str, mouse):
-        button_color = BUTTON_BG if text_str != "Quit" else QUIT_BG
-        if button_rect.collidepoint(mouse):
-            button_color = LIGHT_BUTTON_BG if text_str != "Quit" else LIGHT_QUIT_BG
-
-        text = button_font.render(text_str, True, BUTTON_FONT_COLOR)
-        pygame.draw.rect(screen, button_color, button_rect, border_radius=BOX_BORDER_RADIUS)
-        text_rect = text.get_rect(center = button_rect.center)
-        screen.blit(text, text_rect)
-        return button_rect
+    def make_rect(self, left, top, wt, ht):   
+        return pygame.Rect(left, top, wt, ht)
 
     def draw_game_over(self, screen, title_font, msg):
 
@@ -122,35 +120,36 @@ class Game:
             pygame.init()
 
         command = 0
-
+        # command = 0 --> Quit
+        # command = 1 --> Play Again
+        # command = 2 --> Show Leaderboard
+        # command = 3 --> Back to menu
+        command_dict = {
+            "QUIT": 0,
+            "PLAY AGAIN": 1,
+            "LEADERBOARD": 2,
+            "GO TO MENU": 3
+        }
+        screen_img = pygame.image.load("images/game_over_screen.png")
+        screen_img = pygame.transform.scale(screen_img,(SCREEN_WIDTH,SCREEN_HEIGHT))
         running = True
-        button_font = pygame.font.SysFont("calibri", 40)
+        # button_font = pygame.font.SysFont("calibri", 40)
         while(running):
             mouse = pygame.mouse.get_pos()
-            screen.fill(BGCOLOR)
-            self.make_title(screen, title_font, msg, over_title_wt, over_title_ht, over_title_y)
-            rect_dict = {}
-            first_button_y = over_title_y + over_title_ht // 2 + title_button_gap + button_ht // 2
-            rect_dict["Play Again"] = self.make_rect(first_button_y)
-            rect_dict["Show Leaderboard"] = self.make_rect(first_button_y + button_ht + button_gap)
-            quit_rect = self.make_rect(first_button_y + 2*(button_ht + button_gap))
+            screen.blit(screen_img, (0, 0))
 
-            for name, rect in rect_dict.items():
-                self.make_button(screen, button_font, rect, name, mouse)
-            self.make_button(screen, button_font, quit_rect, "Quit", mouse)
+            rect_dict = {}
+            for button_name, coords in button_dict.items():
+                rect_dict[button_name] = self.make_rect(coords[0], coords[1], coords[2], coords[3])
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                         command = 0
                         running = False
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if quit_rect.collidepoint(mouse):
-                        command = 0
-                        running = False
-                    
+                if event.type == pygame.MOUSEBUTTONDOWN:                   
                     for name, rect in rect_dict.items():
                         if rect.collidepoint(mouse):
-                            command = 1 if name == "Play Again" else 2
+                            command = command_dict[name]
                             running = False
             pygame.display.flip()
         pygame.quit()
@@ -237,6 +236,8 @@ if __name__ == "__main__":
                 continue
             elif command == 2: # show leaderboard
                 return analysis_menu(game_name)
+            elif command == 3: # back to menu
+                return True
             else:
                 return False
             

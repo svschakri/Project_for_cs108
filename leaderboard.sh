@@ -7,8 +7,6 @@ for line in $(cut -d "," -f1 games.csv) ; do
     games_arr+=($line)
 done
 
-Largest_game_len
-
 NAMES= #assume it as defined
 
 for a in "${games_arr[@]}" ; do 
@@ -41,6 +39,7 @@ for a in "${games_arr[@]}" ; do
         col=4
     fi
     sort -t "," -k $col,$col -nr table_${a}.csv 
+    rm table_${a}.csv temp.csv
     echo =============END==========
 
 done

@@ -80,3 +80,6 @@ for i in 1 2; do
 		break
 	done
 done
+
+echo "==================== GAME STARTING BETWEEN ${USER[1]} AND ${USER[2]} ====================="
+python3 game.py ${USER[1]} ${USER[2]}
