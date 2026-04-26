@@ -202,7 +202,7 @@ def run(user1, user2):
 
     game_board = Board(7, 7)
 
-    game = Connect4(player1, player2, game_board, INIT_TURN)
+    game = Connect4("Connect Four", player1, player2, game_board, INIT_TURN)
     board_matrix = game_board.matrix
 
     if not pygame.get_init():

@@ -6,7 +6,7 @@ import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 import csv
 import pygame
-import time
+from datetime import date
 import subprocess
 
 # dimensions
@@ -89,7 +89,8 @@ class Board:
         self.matrix = np.zeros((width , height))
 
 class Game:
-    def __init__(self, player1, player2, board, turn):
+    def __init__(self, name, player1, player2, board, turn):
+        self.name = name
         self.player1 = player1
         self.player2 = player2
         self.board = board
@@ -165,7 +166,15 @@ class Game:
             pygame.display.flip()
             pygame.time.wait(1000)
             # Add result to history.csv
-
+            with open("history.csv", "a") as f:
+                writer = csv.writer(f)
+                winner = ""
+                loser = ""
+                if win != 0:
+                    winner = user1 if win == 1 else user2
+                    loser = user1 if win == 2 else user2
+                    today_date = date.today().strftime("%d-%m-%Y")
+                writer.writerow([self.name, "Draw" if win == 0 else "", winner, loser, today_date])
             return self.draw_game_over(screen, title_font, msgDict[win])
         
         return -1

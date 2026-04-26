@@ -238,7 +238,7 @@ def run(user1, user2):
 
     game_board = Board(10,10)
 
-    game = tictactoe(player1, player2, game_board, INIT_TURN)
+    game = tictactoe("Tic-Tac-Toe", player1, player2, game_board, INIT_TURN)
     board_matrix = game_board.matrix
 
     if not pygame.get_init():

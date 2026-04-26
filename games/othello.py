@@ -399,7 +399,7 @@ def run(user1,user2):
 
     game_board = Board(8,8)
 
-    game = othello(player1, player2, game_board, INIT_TURN)
+    game = othello("Othello", player1, player2, game_board, INIT_TURN)
 
     screen = pygame.display.set_mode(screen_size)
     title_font = pygame.font.SysFont("Calibri", 60)
@@ -469,6 +469,5 @@ def run(user1,user2):
                     
         pygame.display.update()
 
-   
     pygame.quit()
     return command
