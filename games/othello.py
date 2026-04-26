@@ -387,7 +387,7 @@ def make_board(screen,board_matrix,Number_font, mouse):
                 if board_matrix[i][j] == 0:
                     make_board_circle(screen,i+1, j+1,0)
 
-def run(user1,user2):
+def run(user1,user2, screen):
     INIT_TURN = 1
     player1 = Player(user1)
     player2 = Player(user2)
@@ -401,8 +401,6 @@ def run(user1,user2):
     game_board = Board(8,8)
 
     game = othello("Othello", player1, player2, game_board, INIT_TURN)
-
-    screen = pygame.display.set_mode(screen_size)
     title_font = pygame.font.SysFont("Calibri", 60)
     Number_font = pygame.font.SysFont("Calibri", 60)
 

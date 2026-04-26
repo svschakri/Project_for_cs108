@@ -195,7 +195,7 @@ def update_screen(screen, title_font, title_text, board_matrix, mouse, turn, x, 
         pygame.display.flip()
         
 
-def run(user1, user2):
+def run(user1, user2, screen):
     INIT_TURN = 1
     player1 = Player(user1)
     player2 = Player(user2)
@@ -207,7 +207,6 @@ def run(user1, user2):
 
     if not pygame.get_init():
         pygame.init()
-    screen = pygame.display.set_mode(screen_size)
     title_font = pygame.font.SysFont("Calibri", 60)
     pygame.display.set_caption("Connect Four")
 

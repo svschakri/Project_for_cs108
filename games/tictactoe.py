@@ -228,7 +228,7 @@ def make_board(screen, board_matrix, mouse):
                 if board_matrix[i][j] == 0:
                     make_board_box(screen, i+1, j+1,0) 
 
-def run(user1, user2):
+def run(user1, user2, screen):
 
     INIT_TURN = 1
     player1 = Player(user1)
@@ -245,7 +245,6 @@ def run(user1, user2):
 
     if not pygame.get_init():
         pygame.init()
-    screen = pygame.display.set_mode(screen_size)
     title_font = pygame.font.SysFont("Calibri", 60)
     pygame.display.set_caption("Tic-Tac-Toe")
 

@@ -143,6 +143,12 @@ class Game:
             for button_name, coords in button_dict.items():
                 rect_dict[button_name] = self.make_rect(coords[0], coords[1], coords[2], coords[3])
             
+            for rect in rect_dict.values():
+                if (rect.collidepoint(mouse)):
+                    hover_surface = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
+                    hover_surface.fill((0, 0, 0, 50))
+                    screen.blit(hover_surface, rect.topleft)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                         command = 0
@@ -153,7 +159,6 @@ class Game:
                             command = command_dict[name]
                             running = False
             pygame.display.flip()
-        pygame.quit()
         return command
 
     def update_result(self, screen, title_font, game, win):
@@ -185,15 +190,12 @@ if __name__ == "__main__":
     user2 = sys.argv[2]
 
     # menu design
-    def init_pygame():
-        pygame.init()
-        screen = pygame.display.set_mode(screen_size)
-
+    def init_pygame(screen):
         title_font = pygame.font.SysFont(None, 100)
         header_font = pygame.font.SysFont("timesnewroman", 60)
         button_font = pygame.font.SysFont("calibri", 40)
 
-        return screen, title_font, header_font, button_font
+        return title_font, header_font, button_font
 
     def make_box(screen, text, center_y, wt, ht, box_color, box_border_radius = 0):
         bg_rect = pygame.Rect(0, 0, wt, ht)
@@ -217,12 +219,12 @@ if __name__ == "__main__":
         screen.blit(text, text_rect)
         return button_rect
 
-    def play_game(game_name):
+    def play_game(game_name, screen):
         module_path = GAME_PATH[game_name]
 
         game_module = __import__(module_path, fromlist=['run'])
 
-        command = game_module.run(user1, user2)
+        command = game_module.run(user1, user2, screen)
 
         return command
     
@@ -280,9 +282,9 @@ if __name__ == "__main__":
         # if next run post_game_loop and return true
         return back_to_menu
 
-    def game_loop(game_name):
+    def game_loop(game_name, screen):
         while True:
-            command = play_game(game_name)
+            command = play_game(game_name, screen)
             if command == 0: # quit
                 return False
             elif command == 1: # play again
@@ -296,7 +298,9 @@ if __name__ == "__main__":
             
     # start menu
     def start_menu():
-        screen, title_font, header_font, button_font = init_pygame()
+        pygame.init()
+        screen = pygame.display.set_mode(screen_size)
+        title_font, header_font, button_font = init_pygame(screen)
         pygame.display.set_caption("GAME HUB")
         running = True
         #images
@@ -344,11 +348,9 @@ if __name__ == "__main__":
                                 e = pygame.event.wait()
                                 if e.type == pygame.MOUSEBUTTONUP:
                                     break
-                            
-                            pygame.quit()
-                            running = game_loop(game_name)
+                            running = game_loop(game_name, screen)
                             if running:
-                                screen, title_font, header_font, button_font = init_pygame()
+                                title_font, header_font, button_font = init_pygame(screen)
                                 pygame.display.set_caption("GAME HUB")
             if not running:
                 break
