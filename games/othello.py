@@ -89,7 +89,8 @@ def update_possible_moves(req_color,board_matrix):
         for j in range(8):
             if board_matrix[i,j] != 0 :
                 continue
-            #VERTICAL - DOWN 
+            #VERTICAL     x,y = pygame.mouse.get_pos()
+                print(x,y)- DOWN 
             if j<7 :
                 if board_matrix[i,j+1] == req_color :
                     a,b = i,j+1

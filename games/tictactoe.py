@@ -235,6 +235,8 @@ def run(user1, user2):
     player2 = Player(user2)
 
     pygame.display.set_caption("Tic-Tac-Toe")
+    board_img = pygame.image.load("images/othello_board.png")
+    board_img = pygame.transform.scale(board_img,(SCREEN_WIDTH,SCREEN_HEIGHT))
 
     game_board = Board(10,10)
 
@@ -282,6 +284,7 @@ def run(user1, user2):
             title_text = f"{user2}'s turn"
         
         screen.fill(bg_col)
+        screen.blit(board_img)
         board_matrix = game_board.matrix
 
         make_title(screen, title_font, title_text)
