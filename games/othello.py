@@ -89,7 +89,8 @@ def update_possible_moves(req_color,board_matrix):
         for j in range(8):
             if board_matrix[i,j] != 0 :
                 continue
-            #VERTICAL - DOWN 
+            #VERTICAL     x,y = pygame.mouse.get_pos()
+                print(x,y)- DOWN 
             if j<7 :
                 if board_matrix[i,j+1] == req_color :
                     a,b = i,j+1
@@ -399,7 +400,7 @@ def run(user1,user2):
 
     game_board = Board(8,8)
 
-    game = othello(player1, player2, game_board, INIT_TURN)
+    game = othello("Othello", player1, player2, game_board, INIT_TURN)
 
     screen = pygame.display.set_mode(screen_size)
     title_font = pygame.font.SysFont("Calibri", 60)
@@ -469,6 +470,5 @@ def run(user1,user2):
                     
         pygame.display.update()
 
-   
     pygame.quit()
     return command
