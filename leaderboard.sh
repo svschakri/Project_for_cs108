@@ -1,6 +1,9 @@
 #!/bin/bash
 
-SORT_VAL=$1 #val contains the data of metrics to sort some how
+SORT_VAL=$1 #val contains the data of metrics to sort about
+# SORT_VAL = 0 --> Sort by wins
+# SORT_VAL = 1 --> Sort by losses
+# SORT_VAL = 2 --> Sort by W/L ratio
 game_arr=()
 
 max_len=0
@@ -14,14 +17,18 @@ done < <(cut -d "," -f1 games.csv)
 
 for game in "${games_arr[@]}" ; do 
     #logic for individual games
-    if [[ $SORT_VAL == "wins" ]]; then
-        col=2
-    elif [[ $SORT_VAL == "losses" ]]; then
-        col=3
-    elif [[ $SORT_VAL == "w_l_ratio" ]]; then
+    if [[ $SORT_VAL == 0 ]]; then
         col=4
+        sec_col=6
+    elif [[ $SORT_VAL == 1 ]]; then
+        col=5
+        sec_col=6
+    elif [[ $SORT_VAL == 2 ]]; then
+        col=6
+        sec_col=4
     else
         col=4
+        sec_col=6
     fi
 
     output=$(awk -v max_len=$max_len -v game="$game" -v sort_col="$col" '
@@ -101,7 +108,7 @@ for game in "${games_arr[@]}" ; do
         }
         ' "history.csv")
         echo "$output" | head -n 3
-        echo "$output" | tail -n +4 | head -n -2 | sort -t "|" -k"$col","$col" -nr -k4,4 -nr
+        echo "$output" | tail -n +4 | head -n -2 | sort -t "|" -k"$col","$col" -nr -k"$sec_col","$sec_col" -nr
         echo "$output" | tail -n 2
         echo -e "\n"
 done

@@ -77,6 +77,16 @@ button_dict = {
 OVER_TITLE_BG = (85, 250, 148)
 BOX_BORDER_RADIUS = 15
 
+sort_img = pygame.image.load("images/sort_dialog_box.png")
+sort_img = pygame.transform.scale(sort_img, screen_size)
+
+sort_rects = [None]*3
+sort_rect_wins = pygame.Rect(647, 390, 242, 62)
+sort_rect_losses = pygame.Rect(647, 540, 242, 62)
+sort_rect_ratio = pygame.Rect(647, 688, 242, 62)
+
+sort_rects = [sort_rect_wins, sort_rect_losses, sort_rect_ratio]
+
 class Player:
     def __init__(self, user_name):
         self.user_name = user_name
@@ -190,7 +200,7 @@ if __name__ == "__main__":
     user2 = sys.argv[2]
 
     # menu design
-    def init_pygame(screen):
+    def init_pygame():
         title_font = pygame.font.SysFont(None, 100)
         header_font = pygame.font.SysFont("timesnewroman", 60)
         button_font = pygame.font.SysFont("calibri", 40)
@@ -228,8 +238,35 @@ if __name__ == "__main__":
 
         return command
     
-    def analysis_menu():
-        subprocess.run(["bash", "leaderboard.sh"])
+    def analysis_menu(screen):
+        sort_command = 0
+        if not pygame.get_init():
+            pygame.init()
+            screen = pygame.display.set_mode(screen_size)
+            screen.blit(sort_img, (0, 0))
+        pygame.display.set_caption("Sort Leaderboard")
+        running = True
+        while(running):
+            mouse = pygame.mouse.get_pos()
+            screen.blit(sort_img, (0, 0))
+            for rect in sort_rects:
+                if rect.collidepoint(mouse):
+                    hover_surface = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
+                    hover_surface.fill((0, 0, 0, 50))
+                    screen.blit(hover_surface, rect.topleft)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse = event.pos
+                    for i in range(len(sort_rects)):
+                        if sort_rects[i].collidepoint(mouse):
+                            sort_command = sort_command + i
+                            running = False
+            pygame.display.flip()
+
+        subprocess.run(["bash", "leaderboard.sh", str(sort_command)])
         # display matplotlib charts
         game_freq = {}
         player_data = {} # [wins, losses, win/loss ratio]
@@ -298,6 +335,17 @@ if __name__ == "__main__":
         axs[1][1].set_title("Most Played Games")
         fig.savefig("plot.png")
 
+        plot_img = pygame.image.load("plot.png")
+        plot_img = pygame.transform.scale(plot_img, screen_size)
+        running = True
+        pygame.display.set_caption("Leaderboard")
+        while(running):
+            screen.blit(plot_img, (0, 0))
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return False
+            pygame.display.flip()
+        
         # back to menu or quit shown on screen
         back_to_menu = True
         # if next run post_game_loop and return true
@@ -311,17 +359,18 @@ if __name__ == "__main__":
             elif command == 1: # play again
                 continue
             elif command == 2: # show leaderboard
-                return analysis_menu()
+                return analysis_menu(screen)
             elif command == 3: # back to menu
                 return True
             else:
                 return False
             
     # start menu
+    screen = None
     def start_menu():
         pygame.init()
         screen = pygame.display.set_mode(screen_size)
-        title_font, header_font, button_font = init_pygame(screen)
+        title_font, header_font, button_font = init_pygame()
         pygame.display.set_caption("GAME HUB")
         running = True
         #images
@@ -371,11 +420,12 @@ if __name__ == "__main__":
                                     break
                             running = game_loop(game_name, screen)
                             if running:
-                                title_font, header_font, button_font = init_pygame(screen)
+                                title_font, header_font, button_font = init_pygame()
                                 pygame.display.set_caption("GAME HUB")
             if not running:
                 break
             pygame.display.update()
 
     start_menu()
+    # analysis_menu(screen)
     pygame.quit()

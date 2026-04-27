@@ -290,7 +290,7 @@ def run(user1, user2, screen):
         make_board(screen, board_matrix, mouse)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                command = 0
+                command = 3
                 running = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -309,7 +309,6 @@ def run(user1, user2, screen):
                     
         pygame.display.update()
 
-    pygame.quit()
     return command
 
 

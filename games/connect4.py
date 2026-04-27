@@ -279,15 +279,10 @@ def run(user1, user2, screen):
         add_board(screen)
         update_sprites(screen, turn)
         make_placeholders(screen, game)
-
-        win = game.check_win()
-        command = game.update_result(screen, screen_img, game, win)
-        if command != -1:
-            return command
-
+        command = -1
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                command = 0
+                command = 3
                 running = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -299,6 +294,8 @@ def run(user1, user2, screen):
                             if int(board_matrix[i][j]) == 0:
                                 board_matrix[i][j] = 1 if turn == 1 else 2
                                 update_screen(screen, board_matrix, game, mouse, i, j, turn)
+                                win = game.check_win()
+                                command = game.update_result(screen, screen_img, game, win)
                                 game.switch_turn()
                                 filled = True
                                 break
@@ -306,5 +303,7 @@ def run(user1, user2, screen):
                         break
                     
         pygame.display.flip()
-    pygame.quit()
+        if command != -1:
+            return command
+
     return command
