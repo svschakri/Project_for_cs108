@@ -1,6 +1,5 @@
 import numpy as np 
 import matplotlib.pyplot as plt
-import pathlib
 import sys
 import os 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
@@ -10,8 +9,8 @@ from datetime import date
 import subprocess
 
 # dimensions
-SCREEN_WIDTH = 1536
-SCREEN_HEIGHT = 1024
+SCREEN_WIDTH = 1537
+SCREEN_HEIGHT = 1023
 screen_size = SCREEN_WIDTH, SCREEN_HEIGHT
 
 title_ht, title_wt = SCREEN_HEIGHT // 5, SCREEN_WIDTH
@@ -66,7 +65,7 @@ over_title_y = SCREEN_HEIGHT // 4
 title_button_gap = over_title_ht
 # Function to fix dimensions
 def dim(coords):
-    return [((SCREEN_HEIGHT // 1024)*coords[i] if i%2 == 1 else (SCREEN_WIDTH // 1536)*coords[i] ) for i in range(len(coords))]
+    return [((SCREEN_HEIGHT * coords[i]) // 1024 if i%2 == 1 else (SCREEN_WIDTH * coords[i] )// 1536 ) for i in range(len(coords))]
 
 # button_name: [top_left_corner_x, top_left_corner_y, width, height]
 button_dict = {
@@ -96,26 +95,26 @@ class Game:
         self.board = board
         self.turn = turn
 
-    def switch_turn(self):
+    def switch_turn(self): 
         self.turn = 1 - self.turn
 
     def check_win(self, screen = None):
         """ This would be used to check win condition """
         return
     
-    def make_title(self, screen, title_font, text_str, wt = SCREEN_WIDTH, ht = over_title_ht, center_y = over_title_ht // 2):
-        bg_rect = pygame.Rect(0, 0, wt, ht)
-        bg_rect.center = (SCREEN_WIDTH // 2, center_y)
+    # def make_title(self, screen, title_font, text_str, wt = SCREEN_WIDTH, ht = over_title_ht, center_y = over_title_ht // 2):
+    #     bg_rect = pygame.Rect(0, 0, wt, ht)
+    #     bg_rect.center = (SCREEN_WIDTH // 2, center_y)
 
-        pygame.draw.rect(screen, OVER_TITLE_BG, bg_rect)
-        text = title_font.render(text_str, True, TITLE_FONT_COLOR)
-        text_rect = text.get_rect(center = bg_rect.center)
-        screen.blit(text, text_rect)
+    #     pygame.draw.rect(screen, OVER_TITLE_BG, bg_rect)
+    #     text = title_font.render(text_str, True, TITLE_FONT_COLOR)
+    #     text_rect = text.get_rect(center = bg_rect.center)
+    #     screen.blit(text, text_rect)
 
     def make_rect(self, left, top, wt, ht):   
         return pygame.Rect(left, top, wt, ht)
 
-    def draw_game_over(self, screen, title_font, msg):
+    def draw_game_over(self, screen):
 
         if not pygame.get_init():
             pygame.init()
@@ -161,26 +160,27 @@ class Game:
             pygame.display.flip()
         return command
 
-    def update_result(self, screen, title_font, game, win):
+    def update_result(self, screen, img_object, game, win):
         user1 = game.player1.user_name
         user2 = game.player2.user_name
-        msgDict = {1 : f"{user1} WON!", 2 : f"{user2} WON!", 0 : "DRAW!"}
 
         if win == 1 or win == 2 or win == 0:
-            self.make_title(screen, title_font, msgDict[win])
+            # self.make_title(screen, title_font, msgDict[win])
             pygame.display.flip()
-            pygame.time.wait(1000)
+            pygame.time.wait(500)
             # Add result to history.csv
             with open("history.csv", "a") as f:
                 writer = csv.writer(f)
                 winner = ""
                 loser = ""
+                today_date = date.today().strftime("%d-%m-%Y")
                 if win != 0:
                     winner = user1 if win == 1 else user2
                     loser = user1 if win == 2 else user2
-                    today_date = date.today().strftime("%d-%m-%Y")
-                writer.writerow([self.name, "Draw" if win == 0 else "", winner, loser, today_date])
-            return self.draw_game_over(screen, title_font, msgDict[win])
+                    writer.writerow([self.name,"", winner, loser, today_date])
+                else:
+                    writer.writerow([self.name, "Draw", "", "", today_date])
+            return self.draw_game_over(screen)
         
         return -1
 

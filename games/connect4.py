@@ -1,19 +1,15 @@
 import numpy as np 
-import matplotlib
-import pathlib
 import sys
 import os 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 import pygame
-import time
-import subprocess
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 from game import Game, Player, Board
 
 # screen dimensions
-SCREEN_WIDTH = 1536
-SCREEN_HEIGHT = 1024
+SCREEN_WIDTH = 1537
+SCREEN_HEIGHT = 1023
 screen_size = SCREEN_WIDTH, SCREEN_HEIGHT
 
 # title dimensions
@@ -66,6 +62,79 @@ BUTTON_FONT_COLOR = WHITE
 QUIT_BG = (242, 90, 63)
 LIGHT_QUIT_BG = (242, 121, 99)
 
+board_scale = 1.4
+board_img_ht = ((SCREEN_HEIGHT * 681) // 1023) * board_scale
+board_img_wt = ((SCREEN_WIDTH * 1024) // 1537) * board_scale
+board_left = (SCREEN_WIDTH - board_img_wt) // 2
+board_top = 50
+coin_board_left = 446
+coin_board_top = 305
+col_gap = 24
+row_gap = 18
+st_gap_x = 38
+st_gap_y = 16
+sprite_scale = 1.3
+sprite_ht = [100 * sprite_scale, 170 * sprite_scale]
+sprite_wt = [(sprite_ht[0] * 706) // 354, (sprite_ht[1] * 546) // 457]
+coin_radius = 30
+sprite_pos = [(160, 440), (1210, 440)]
+ph_wt = 550
+placeholder_dim = (ph_wt, (ph_wt * 379) // 676)
+placeholder_pos = [(-50, 690), (1030, 690)]
+FALLING_TIME = 15
+# Images
+#screen
+screen_img = pygame.image.load("images/connect4_screen.png")
+screen_img = pygame.transform.scale(screen_img, (SCREEN_WIDTH, SCREEN_HEIGHT))
+# coins
+coin1 = pygame.image.load("images/silver_connect4-removebg.png")
+glow_coin1 = pygame.image.load("images/silver_connect4_glow.png")
+
+coin2 = pygame.image.load("images/bronze_connect4-removebg.png")
+glow_coin2 = pygame.image.load("images/bronze_connect4_glowing.png")
+
+coins = [coin1, coin2]
+glow_coins = [glow_coin1, glow_coin2] 
+
+for i in range(2):
+    coins[i] = pygame.transform.smoothscale(coins[i], (coin_radius*2, coin_radius*2))
+    glow_coins[i] = pygame.transform.smoothscale(glow_coins[i], (coin_radius*2, coin_radius*2))
+
+# sprites
+sprite_passive = pygame.image.load("images/sprite_passive.png")
+sprite_active = pygame.image.load("images/sprite_active.png")
+sprites = [sprite_passive, sprite_active]
+
+for i in range(len(sprites)):
+    sprites[i] = pygame.transform.smoothscale(sprites[i], (sprite_ht[i], sprite_wt[i]))
+
+sprite_rects = [pygame.Rect(*sprite_pos[i], sprite_wt[i], sprite_ht[i]) for i in range(2)]
+
+# board
+board_img = pygame.image.load("images/connect4_board.png")
+board_img = pygame.transform.smoothscale(board_img, (board_img_wt, board_img_ht))
+coord_map = np.zeros((COLS, ROWS, 2))
+
+# placeholders
+ph_img = pygame.image.load("images/placeholder.png")
+ph_img = pygame.transform.scale(ph_img, placeholder_dim)
+# form coordinates and row-col pair map
+for i in range(COLS):
+    for j in range(ROWS):
+        coord_map[i][j][0] = coin_board_left + st_gap_x + i*(2*coin_radius + col_gap) + coin_radius
+        coord_map[i][j][1] = coin_board_top + st_gap_y + j*(2*coin_radius + row_gap) + coin_radius
+
+col_rects = []
+cell_w = 2 * coin_radius + col_gap
+cell_h = 2 * coin_radius + row_gap
+for col in range(COLS):
+    left = coin_board_left + st_gap_x + col * cell_w
+    top = coin_board_top + st_gap_y
+
+    rect = pygame.Rect(left, top, cell_w, cell_h * ROWS )
+    col_rects.append(rect)
+
+
 # make a function to check win condition in new game class
 class Connect4(Game):
     def check_win(self):
@@ -103,97 +172,83 @@ class Connect4(Game):
         else:
             return -1
 
-def make_title(screen, title_font, text_str, wt = SCREEN_WIDTH, ht = title_ht, center_y = title_ht // 2):
-    bg_rect = pygame.Rect(0, 0, wt, ht)
-    bg_rect.center = (SCREEN_WIDTH // 2, center_y)
+def make_coin(screen, x, y, turn, glow=False):
+    if not glow:
+        coin = coins[turn-1]
+    else:
+        coin = glow_coins[turn-1]
+    screen.blit(coin, (x-coin_radius, y-coin_radius))
 
-    pygame.draw.rect(screen, TITLE_COLOR, bg_rect)
-    text = title_font.render(text_str, True, TITLE_FONT_COLOR)
-    text_rect = text.get_rect(center = bg_rect.center)
-    screen.blit(text, text_rect)
-
-def make_board_circle(screen, x, y, ball_color, offset_y = 0):
-    r = circle_radius
-    gap_x = col_gap
-    gap_y = row_gap
-    center_x = (SCREEN_WIDTH - board_wt) // 2  + (x-1) * (2 * r + gap_x) + gap_x + r
-    center_y = title_ht + title_board_gap + (y-1) * (2 * r + gap_y) + gap_y + r + start_circle_gap
-
-    pygame.draw.circle(screen, ball_color, (center_x, center_y - offset_y), r)
-    pygame.draw.circle(screen, BLACK, (center_x, center_y - offset_y), r, border_width)
+def make_board_coin(screen, i, j, turn, glow=False):
+    x = coord_map[i][j][0]
+    y = coord_map[i][j][1]
+    make_coin(screen, x, y, turn, glow)
 
 def collide_col(i, mouse):
-    top = title_ht + title_board_gap
-    left = (SCREEN_WIDTH - board_wt) // 2 + i * (col_gap + 2 * circle_radius) + col_gap
+    return col_rects[i].collidepoint(mouse)
 
-    col_rect = pygame.Rect(left, top, 2 * circle_radius, board_ht)
-    return col_rect.collidepoint(mouse)
+def make_placeholders(screen, game):
+    player_names = [game.player1.user_name, game.player2.user_name]
+    rects = []
+    player_texts = []
+    player_font = pygame.font.SysFont("timesnewroman", 40)
+    for i in range(2):
+        rect = pygame.Rect(*placeholder_pos[i], *placeholder_dim)
+        screen.blit(ph_img, rect)
+        rects.append(rect)
 
-def make_board_rect(screen):
-    center_y = title_ht + title_board_gap + board_ht // 2
-    board_rect = pygame.Rect(0, 0, board_wt, board_ht)
-    board_rect.center = (SCREEN_WIDTH // 2, center_y)
+        font = player_font.render(player_names[i], True, WHITE)
+        player_texts.append(font)
 
-    pygame.draw.rect(screen, BOARD_COLOR, board_rect, 0, 0, BOARD_BORDER_RADIUS, BOARD_BORDER_RADIUS, 0, 0)
-    pygame.draw.rect(screen, BLACK, board_rect, border_width, 0, BOARD_BORDER_RADIUS, BOARD_BORDER_RADIUS, 0, 0)
-
-def make_hover_circles(screen, board_matrix, mouse, ball_color):
+    text_rects = [text.get_rect() for text in player_texts]
+    for i in range(2):
+        text_rects[i].center = rects[i].center
+        screen.blit(player_texts[i], text_rects[i])
+    
+def make_screen(screen, board_matrix, mouse):
+    for i in range(COLS):
+        for j in range(ROWS):
+            if (int(board_matrix[i][j]) != 0):
+                make_board_coin(screen, i, j, int(board_matrix[i][j]))
+    
     for i in range(COLS):
         if collide_col(i, mouse):
-            make_board_circle(screen, i+1, 1, ball_color, row_gap + start_circle_gap + circle_radius + hover_circle_offset)
             for j in range(ROWS):
-                if board_matrix[i][j] == 0:
-                    make_board_circle(screen, i+1, j+1, GREY)
+                if (int(board_matrix[i][j]) != 0):
+                    make_board_coin(screen, i, j, int(board_matrix[i][j]), True)
 
-def make_board_circles(screen, board_matrix):
-    for i in range(0, COLS):
-        for j in range(0, ROWS):
-            code = board_matrix[i][j]
-            if (code == 1):
-                ball_color = BALL_COLOR1
-            elif (code == 2):
-                ball_color = BALL_COLOR2
-            elif (code == 0):
-                ball_color = WHITE
-            make_board_circle(screen, i+1, j+1, ball_color)
 
-def make_board(screen, board_matrix, mouse, ball_color):
-    make_hover_circles(screen, board_matrix, mouse, ball_color)
-    make_board_rect(screen)
-    make_board_circles(screen, board_matrix)
+def add_board(screen):
+    screen.blit(board_img, (board_left, board_top))
 
-def update_screen(screen, title_font, title_text, board_matrix, mouse, turn, x, y):
-    init_col = BG_COLOR1 if turn == 1 else BG_COLOR2
-    fin_col = BG_COLOR2 if turn == 1 else BG_COLOR1
-    init_ball_col = BALL_COLOR1 if turn == 1 else BALL_COLOR2
-    fin_ball_col = BALL_COLOR2 if turn == 1 else BALL_COLOR1
-    
-    screen.fill(init_col)
-    make_title(screen, title_font, title_text)
-    # init_y = row_gap + start_circle_gap + circle_radius + hover_circle_offset
-    # fin_y = y
-    # init_offset = fin_y - init_y
-    # for i in range(FALLING_TIME):
-    #     offset_i = init_offset - (init_offset*i)/FALLING_TIME
-    #     make_board_circle(screen, x, y, init_ball_col, int(offset_i))
-    #     make_board(screen, board_matrix, mouse, init_ball_col)
+def make_sprite(screen, status, turn):
+    # status = 0 --> passive
+    # status = 1 --> active
+    screen.blit(sprites[status], sprite_rects[turn-1])
 
-    for i in range(TRANSITION_TIME):
-        col_r = init_col[0] + ((fin_col[0] - init_col[0]) / (TRANSITION_TIME)) * i
-        col_g = init_col[1] + ((fin_col[1] - init_col[1]) / (TRANSITION_TIME)) * i
-        col_b = init_col[2] + ((fin_col[2] - init_col[2]) / (TRANSITION_TIME)) * i
-        bg_col = (int(col_r), int(col_g), int(col_b))
+def update_sprites(screen, turn):
+    if turn == 1:
+        make_sprite(screen, 0, 1)
+        make_sprite(screen, 1, 2)
+    elif turn == 2:
+        make_sprite(screen, 0, 2)
+        make_sprite(screen, 1, 1)
 
-        ball_col_r = init_ball_col[0] + ((fin_ball_col[0] - init_ball_col[0]) / (TRANSITION_TIME)) * i
-        ball_col_g = init_ball_col[1] + ((fin_ball_col[1] - init_ball_col[1]) / (TRANSITION_TIME)) * i
-        ball_col_b = init_ball_col[2] + ((fin_ball_col[2] - init_ball_col[2]) / (TRANSITION_TIME)) * i
-        ball_col = (int(ball_col_r), int(ball_col_g), int(ball_col_b))
-
-        screen.fill(bg_col)
-        make_title(screen, title_font, title_text)
-        make_board(screen, board_matrix, mouse, ball_col)
+def update_screen(screen, board_matrix, game, mouse, i, j, turn):
+    board_matrix[i][j] = 0
+    init_y = coord_map[i][0][1]
+    fin_y = coord_map[i][j][1]
+    x = coord_map[i][j][0]
+    for k in range(FALLING_TIME):
+        y = init_y + ((fin_y - init_y)*k)/(FALLING_TIME-1)
+        screen.blit(screen_img, (0, 0))
+        make_screen(screen, board_matrix, mouse)
+        make_coin(screen, x , y, turn)
+        update_sprites(screen, turn)
+        add_board(screen)
+        make_placeholders(screen, game)
         pygame.display.flip()
-        
+    board_matrix[i][j] = turn
 
 def run(user1, user2, screen):
     INIT_TURN = 1
@@ -214,27 +269,19 @@ def run(user1, user2, screen):
     running = True
 
     while running:
+        clock = pygame.time.Clock()
+        clock.tick(120)
         mouse = pygame.mouse.get_pos()
-        turn = game.turn
+        turn = game.turn + 1
 
-        if (turn == 1):
-            bg_col = BG_COLOR1
-            code = 1
-            ball_color = BALL_COLOR1
-            title_text = f"{user1}'s turn"
-        else:
-            bg_col = BG_COLOR2
-            code = 2
-            ball_color = BALL_COLOR2
-            title_text = f"{user2}'s turn"
-
-        screen.fill(bg_col)
-
-        make_title(screen, title_font, title_text)
-        make_board(screen, board_matrix, mouse, ball_color)
+        screen.blit(screen_img, (0, 0))
+        make_screen(screen, board_matrix, mouse)
+        add_board(screen)
+        update_sprites(screen, turn)
+        make_placeholders(screen, game)
 
         win = game.check_win()
-        command = game.update_result(screen, title_font, game, win)
+        command = game.update_result(screen, screen_img, game, win)
         if command != -1:
             return command
 
@@ -244,14 +291,14 @@ def run(user1, user2, screen):
                 running = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
+                # print(mouse)
                 filled = False
                 for i in range(COLS):
-                    if collide_col(i, mouse):
+                    if collide_col(i, event.pos):
                         for j in range(ROWS - 1, -1, -1):
-                            if board_matrix[i][j] == 0:
-                                make_board_circle(screen, i+1, j+1, ball_color)
-                                update_screen(screen, title_font, title_text, board_matrix, mouse, turn, i+1, j+1)
-                                board_matrix[i][j] = code
+                            if int(board_matrix[i][j]) == 0:
+                                board_matrix[i][j] = 1 if turn == 1 else 2
+                                update_screen(screen, board_matrix, game, mouse, i, j, turn)
                                 game.switch_turn()
                                 filled = True
                                 break

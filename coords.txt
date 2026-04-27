@@ -1,0 +1,42 @@
+Connect 4
+img_size = (2528, 1682)
+player_1 sprite pos - (360, 1160)
+player_2 sprite pos - (1970, 1160)
+
+converting - 
+img_size = (1536, 1023)
+p1 pos - (219, 705)
+p2 pos - (1196, 705)
+
+board_x_center = 768 
+board_y_center = 960
+
+what do I have to do:
+1) coord_map(stgap_x, stgap_y, radius, col_gap, row_gap)
+--> make a numpy 2d array mapping 
+
+2) make_coin(coords, glow=False)
+--> make_coin at a specific place
+--> use AI to make glowy pictures of icons
+--> if glow = true blit the glowy image
+
+3) make_screen(screen, board_matrix, mouse)
+--> screen.blit(background image)
+--> screen.add --> all circles on their respective coordinates
+--> add hover effect --> Make the icons glow by make_coin(coords, glow=true)
+
+4) add_board()
+--> just blit the board png
+
+5) make_sprite(rect, status=active/passive)
+
+6) update_screen(screen, i,  j, turn) # no mouse required
+--> call make_screen first
+--> Animate ball falling down
+--> call add_board
+--> switch the sprites
+
+board_img_dimensions - (1024, 681)
+sprite dimensions:
+passive - (354, 706)
+active - (457, 546)
