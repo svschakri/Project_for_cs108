@@ -92,7 +92,7 @@ for game in "${games_arr[@]}" ; do
             for (i in Players) {
                 w = Wins[i] + 0
                 l = Losses[i] + 0
-                w_l_ratio = (l==0) ? "INF" : sprintf("%.2f", w/l)
+                w_l_ratio = (l==0) ?((w==0) ? "ND" : "INF")  : sprintf("%.2f", w/l)
                 printf "|| "
                 print format(i, mx_width["name"]), format(w, mx_width["wins"]) , format(l, mx_width["losses"]), format(w_l_ratio, mx_width["w_l_ratio"])
                 printf " ||\n"

@@ -245,25 +245,46 @@ if __name__ == "__main__":
                     player_data[row[2]] = [0, 0]
                 if (row[3] not in player_data):
                     player_data[row[3]] = [0, 0]
-
-                player_data[row[2]][0] += 1
-                player_data[row[3]][1] += 1
+                if row[1] != "Draw":
+                    player_data[row[2]][0] += 1
+                    player_data[row[3]][1] += 1
         
         for data in player_data.values():
+            if data[0] == 0 and data[1] == 0:
+                continue
             data.append(data[0]/data[1] if data[1] != 0 else "INF")
 
         wins = sorted([(name, wins[0]) for name, wins in player_data.items()], reverse=True, key=lambda x: x[1])
-        top_wins = wins[0:5]
-        w_l_ratio = sorted([(name, wins[2] if wins[2] != "INF" else 5) for name, wins in player_data.items()], reverse=True, key=lambda x: x[1])
+        top_wins = wins[:5]
+
+        w_l_ratio = []
+        inf_val = 0
+        for n_wins in player_data.values():
+            if len(n_wins) <= 2:
+                continue
+            ratio = n_wins[2]
+            if (ratio != "INF"):
+                inf_val = max(ratio, inf_val)
+        inf_val *= 2
+
+        for name, n_wins in player_data.items():
+            if len(n_wins) <= 2:
+                continue
+            w_l_ratio.append((name, (n_wins[2] if n_wins[2] != "INF" else inf_val)))
+        w_l_ratio.sort(reverse=True, key=lambda x: x[1])
+
         top_w_l_ratio = w_l_ratio[:5]
 
         fig, axs = plt.subplots(2, 2, figsize = (12, 10))
         # Top 5 wins
-        axs[0][0].bar([data[0] for data in top_wins], [data[1] for data in top_wins])
+        bars = axs[0][0].bar([data[0] for data in top_wins], [data[1] for data in top_wins])
+        axs[0][0].bar_label(bars)
         axs[0][0].set_title("Top 5 Players (By win count)")
 
         # Top 5 W/L ratio
-        axs[0][1].bar([data[0] for data in top_w_l_ratio], [data[1] for data in top_w_l_ratio])
+        bars = axs[0][1].bar([data[0] for data in top_w_l_ratio], [data[1] for data in top_w_l_ratio])
+        labels = ["INF" if r[1] == inf_val else f"{r[1]:.2f}" for r in top_w_l_ratio]
+        axs[0][1].bar_label(bars, labels=labels)
         axs[0][1].set_title("Top 5 Players (By Win/Loss ratio)")
 
         # wins pie chart
@@ -357,5 +378,4 @@ if __name__ == "__main__":
             pygame.display.update()
 
     start_menu()
-    # analysis_menu()
     pygame.quit()

@@ -14,8 +14,6 @@ for i in 1 2; do
 			echo -e "\e[31mEnter a non-Empty Username\e[0m"
 			continue
 		fi
-		# grep -E "^${User}" users.tsv > line1.txt
-		# userLine=$(grep -E "^${User}" users.tsv)
 		userLine=$( cut  -f 1 users.tsv | grep -E "^${User}\b")
 		if [[ -z "$userLine" ]]; then
 			echo -n -e "\e[31mThis username doesn't exist! Do you want to register? (y/n) \e[0m"
