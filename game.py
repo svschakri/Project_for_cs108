@@ -366,7 +366,11 @@ if __name__ == "__main__":
                                 "Connect Four"    : pygame.Rect(1060, 320, 360, 360)}
             # quit button
             quit_rect = pygame.Rect(660, 920, 220, 63)
-            
+            for rect in *game_rect_list.values(), quit_rect:
+                if rect.collidepoint(mouse):
+                    hover_surface = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
+                    hover_surface.fill((0, 0, 0, 45))
+                    screen.blit(hover_surface, rect.topleft)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False

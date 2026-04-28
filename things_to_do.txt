@@ -1,6 +1,6 @@
 --> After game over display dialog box for winning player
 --> othello, add sprites for active and passive players, and change score fonts
 --> Tic-tac-toe, completely redesign
---> Leaderboard screen --> Add options for "back to menu" and "exit"
+--> Leaderboard screen --> Add options for "back" and "exit"
 --> Inline documentation
 --> Report
