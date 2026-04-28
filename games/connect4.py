@@ -7,6 +7,8 @@ import pygame
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 from game import Game, Player, Board
 
+# FPS
+MAX_FPS = 60
 # screen dimensions
 SCREEN_WIDTH = 1537
 SCREEN_HEIGHT = 1023
@@ -318,7 +320,7 @@ def run(user1, user2, screen):
 
     while running:
         clock = pygame.time.Clock()
-        clock.tick(120)
+        clock.tick(MAX_FPS)
         mouse = pygame.mouse.get_pos()
         turn = game.turn + 1
 
@@ -347,7 +349,9 @@ def run(user1, user2, screen):
                                 win, x, y, theta = game.check_win((i, j))
                                 if (win == 1 or win == 2):
                                     make_win_glow(screen, x, y, turn, theta)
+
                                 command = game.update_result(screen, screen_img, game, win)
+
                                 game.switch_turn()
                                 filled = True
                                 break

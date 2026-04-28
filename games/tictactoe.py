@@ -12,14 +12,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 from game import Game, Player, Board
 
 pygame.init()
-
-# initialize players and board
-# user1 = sys.argv[1]
-# user2 = sys.argv[2]
-
-
-
-
+# FPS
+MAX_FPS = 60
 # screen dimensions
 SCREEN_WIDTH = 1537
 SCREEN_HEIGHT = 1023
@@ -56,12 +50,18 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREY = (152, 163, 181) 
 
+def convert_matrix_pixels(coord):
+    x = coord[0]
+    y = coord[1]
+    X = (SCREEN_WIDTH - board_wt)/2 + col_gap*x + col_gap // 2 
+    Y = title_ht + title_board_gap + row_gap*y + row_gap // 2
+    return X, Y
+
 def draw_line(screen, x,y,theta) :
-    X_centre = (SCREEN_WIDTH - board_wt)/2 + col_gap*x + col_gap // 2 
-    Y_centre =  title_ht + title_board_gap + row_gap*y + row_gap // 2
+    X_centre, Y_centre = convert_matrix_pixels((x, y))
     X_final = X_centre if theta == 90 else X_centre + 4*col_gap 
     if theta == -45 :
-        X_final =X_centre - 4*col_gap 
+        X_final = X_centre - 4*col_gap 
     Y_final = Y_centre if theta == 0 else Y_centre + 4*row_gap 
     pygame.draw.line(screen,BLACK,(X_centre,Y_centre),(X_final,Y_final),3) 
 
@@ -79,87 +79,59 @@ class tictactoe(Game):
             return 1
         if(len(set(np.diag(arr)))==1) : 
             return arr[2,2]
-        if(len(set(np.diag(np.fliplr(arr))))==1) : 
-            return arr[2,2]
-        return 0
 
-    def check_win(self, screen):
-        board_matrix = self.board.matrix
-        board_t = np.transpose(board_matrix)
-        ht = self.board.height
-        wt = self.board.width
-        matches = 5
+    def check_win(self, move):
+            board_matrix = self.board.matrix
+            x, y = move
+            player = int(board_matrix[x][y])
+            
+            # Add padding in board_matrix
+            padded_board = np.pad(board_matrix, pad_width=4)
+            if player == 0:
+                return [-1, None, None, None]
+            pad_x = x + 4
+            pad_y = y + 4
+            temp = np.arange(5) 
 
-        a = np.arange(matches)
-        b = np.arange(wt - matches + 1)
-        c = np.arange(ht - matches + 1)
+            # Horizontal
+            window_x = pad_x - temp
+            windows = padded_board[window_x[:, None] + temp, pad_y]
+            matches = np.all(windows == player, axis=1)
+            if np.any(matches):
+                idx = np.where(matches)[0][0]
+                return [player, window_x[idx]-4, y, 0]
 
-        # rows
-        d = a[None, :] + b[:, None]
-        rowFives = board_t[:, d]
-        
-        # columns
-        e = a[None, :] + c[:, None]
-        colFives = board_matrix[:, e]
+            # Vertical
+            window_y = pad_y - temp
+            windows = padded_board[pad_x, window_y[:, None] + temp]
+            matches = np.all(windows == player, axis=1)
+            if np.any(matches):
+                idx = np.where(matches)[0][0]
+                return [player, x, window_y[idx]-4, 90]
 
-        # anti diagonal
-        main_diagFives = board_t[e[:, None, :], d[None, :, :]]
+            # Main Diagonal
+            window_x = pad_x - temp
+            window_y = pad_y - temp
+            windows = padded_board[window_x[:, None] + temp, window_y[:, None] + temp]
+            matches = np.all(windows == player, axis=1)
+            if np.any(matches):
+                idx = np.where(matches)[0][0]
+                return [player, window_x[idx]-4, window_y[idx]-4, 45]
 
-        # main diagonal
-        f = np.flip(e)
-        anti_diagFives = board_t[f[:, None, :], d[None, :, :]]
-        
+            # Anti-Diagonal
+            window_x = pad_x + temp
+            window_y = pad_y - temp
+            windows = padded_board[window_x[:, None] - temp, window_y[:, None] + temp]
+            matches = np.all(windows == player, axis=1)
+            if np.any(matches):
+                idx = np.where(matches)[0][0]
+                return [player, window_x[idx]-4, window_y[idx]-4, -45]
 
-        # horizontal lines
-        if np.any(np.all( rowFives == 1, axis=2)) :
-            x=np.where(np.all( rowFives == 1, axis=2))[0][0]
-            y=np.where(np.all( rowFives == 1, axis=2))[1][0]
-            draw_line(screen, y,x,0)
-        if np.any(np.all( rowFives == 2, axis=2)) :
-            x=np.where(np.all( rowFives == 2, axis=2))[0][0]
-            y=np.where(np.all( rowFives == 2, axis=2))[1][0]
-            draw_line(screen, y,x,0)
-        
-
-        # vertical lines
-        if np.any(np.all( colFives == 1, axis=2)) :
-            x=np.where(np.all( colFives == 1, axis=2))[0][0]
-            y=np.where(np.all( colFives == 1, axis=2))[1][0]
-            draw_line(screen, x,y,90)
-        if np.any(np.all( colFives == 2, axis=2)) :
-            x=np.where(np.all( colFives == 2, axis=2))[0][0]
-            y=np.where(np.all( colFives == 2, axis=2))[1][0]
-            draw_line(screen, x,y,90)
-        
-        #diagonal-lines
-        if np.any(np.all( main_diagFives == 1, axis=2)) :
-            x=np.where(np.all( main_diagFives == 1, axis=2))[0][0]
-            y=np.where(np.all( main_diagFives == 1, axis=2))[1][0]
-            draw_line(screen, y,x,45)
-        if np.any(np.all( main_diagFives == 2, axis=2)) :
-            x=np.where(np.all( main_diagFives == 2, axis=2))[0][0]
-            y=np.where(np.all( main_diagFives == 2, axis=2))[1][0]
-            draw_line(screen, y,x,45)
-        
-
-        #anti-diagonal-lines
-        if np.any(np.all( anti_diagFives == 1, axis=2)) :
-            x=np.where(np.all( anti_diagFives == 1, axis=2))[0][0]
-            y=np.where(np.all( anti_diagFives == 1, axis=2))[1][0]
-            draw_line(screen, y+4,5-x,-45)
-        if np.any(np.all( anti_diagFives == 2, axis=2)) :
-            x=np.where(np.all( anti_diagFives == 2, axis=2))[0][0]
-            y=np.where(np.all( anti_diagFives == 2, axis=2))[1][0]
-            draw_line(screen, y+4,5-x,-45)
-        
-        if np.any(np.all( rowFives == 1, axis=2)) or np.any(np.all (colFives == 1, axis=2)) or np.any(np.all(main_diagFives == 1, axis=2)) or np.any(np.all(anti_diagFives == 1, axis=2)):
-            return 1
-        elif np.any(np.all( rowFives == 2, axis=2)) or np.any(np.all (colFives == 2, axis=2)) or np.any(np.all(main_diagFives == 2, axis=2)) or np.any(np.all(anti_diagFives == 2, axis=2)):
-            return 2
-        elif not np.any(board_matrix == 0):
-            return 0
-        else:
-            return -1
+            # Check for draw
+            if not np.any(board_matrix == 0):
+                return [0, None, None, None]
+                
+            return [-1, None, None, None]
 
 def make_title(screen, title_font, text_str):
     bg_rect = pygame.Rect(0, 0, SCREEN_WIDTH, title_ht)
@@ -252,26 +224,13 @@ def run(user1, user2, screen):
     running = True
 
     while running:
+        clock = pygame.time.Clock()
+        clock.tick(MAX_FPS)
+
         mouse = pygame.mouse.get_pos()
         turn = game.turn
 
-        win_situation = game.check_win(screen)
-
-        if win_situation == 1:
-            make_title(screen, title_font, f"{user1} WON!")
-            pygame.display.update()
-
-        elif win_situation == 2:
-            make_title(screen, title_font, f"{user2} WON!")
-            pygame.display.update()
-
-        elif win_situation == 0:
-            make_title(screen, title_font, "DRAW!")
-            pygame.display.update()
-        
-        command = game.update_result(screen, title_font, game, win_situation)
-        if command != -1:
-            return command
+        command = -1
         
         if (turn == 1):
             bg_col = BG_COLOR1
@@ -301,13 +260,34 @@ def run(user1, user2, screen):
                             if board_matrix[i][j] != 0 : break
                             make_board_box(screen, i+1, j+1, val_code)
                             board_matrix[i][j] = val_code
+                            win_situation, x, y, theta = game.check_win((i, j))
+
+                            if win_situation == 1:
+                                make_title(screen, title_font, f"{user1} WON!")
+                                draw_line(screen, x, y, theta)
+                                pygame.display.flip()
+
+                            elif win_situation == 2:
+                                make_title(screen, title_font, f"{user2} WON!")
+                                draw_line(screen, x, y, theta)
+                                pygame.display.flip()
+
+                            elif win_situation == 0:
+                                make_title(screen, title_font, "DRAW!")
+                                pygame.display.flip()
+                            
+                            command = -1
+                            command = game.update_result(screen, title_font, game, win_situation)
+
                             game.switch_turn()
                             filled = True
                             break
                 if (filled):
                     break
                     
-        pygame.display.update()
+        pygame.display.flip()
+        if command != -1:
+            return command
 
     return command
 

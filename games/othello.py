@@ -11,6 +11,8 @@ import subprocess
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 from game import Game, Player, Board
 
+# FPS
+MAX_FPS = 60
 # screen dimensions
 SCREEN_WIDTH = 1537
 SCREEN_HEIGHT = 1023
@@ -410,9 +412,11 @@ def run(user1,user2, screen):
     game_board.matrix[3][4]=2
 
     while running:
+        clock = pygame.time.Clock()
+        clock.tick(MAX_FPS)
+
         mouse = pygame.mouse.get_pos()
         turn = game.turn
-
 
         if (turn == 1):
             bg_col = BG_COLOR1

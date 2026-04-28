@@ -8,6 +8,8 @@ import pygame
 from datetime import date
 import subprocess
 
+# FPS
+MAX_FPS = 60
 # dimensions
 SCREEN_WIDTH = 1536
 SCREEN_HEIGHT = 1024
@@ -108,18 +110,9 @@ class Game:
     def switch_turn(self): 
         self.turn = 1 - self.turn
 
-    def check_win(self, screen = None):
+    def check_win(self):
         """ This would be used to check win condition """
         return
-    
-    # def make_title(self, screen, title_font, text_str, wt = SCREEN_WIDTH, ht = over_title_ht, center_y = over_title_ht // 2):
-    #     bg_rect = pygame.Rect(0, 0, wt, ht)
-    #     bg_rect.center = (SCREEN_WIDTH // 2, center_y)
-
-    #     pygame.draw.rect(screen, OVER_TITLE_BG, bg_rect)
-    #     text = title_font.render(text_str, True, TITLE_FONT_COLOR)
-    #     text_rect = text.get_rect(center = bg_rect.center)
-    #     screen.blit(text, text_rect)
 
     def make_rect(self, left, top, wt, ht):   
         return pygame.Rect(left, top, wt, ht)
@@ -145,6 +138,8 @@ class Game:
         running = True
         # button_font = pygame.font.SysFont("calibri", 40)
         while(running):
+            clock = pygame.time.Clock()
+            clock.tick(MAX_FPS)
             mouse = pygame.mouse.get_pos()
             screen.blit(screen_img, (0, 0))
 
@@ -217,6 +212,8 @@ if __name__ == "__main__":
         pygame.display.set_caption("Sort Leaderboard")
         running = True
         while(running):
+            clock = pygame.time.Clock()
+            clock.tick(MAX_FPS)
             mouse = pygame.mouse.get_pos()
             screen.blit(sort_img, (0, 0))
             for rect in sort_rects:
@@ -353,6 +350,8 @@ if __name__ == "__main__":
         #images
         menu_img = pygame.image.load("./images/Game_hub_menu.png")
         while running:
+            clock = pygame.time.Clock()
+            clock.tick(MAX_FPS)
             mouse = pygame.mouse.get_pos()
 
             screen.fill(BGCOLOR)
@@ -366,13 +365,14 @@ if __name__ == "__main__":
                                 "Othello"    : pygame.Rect(590, 320, 360, 360),
                                 "Connect Four"    : pygame.Rect(1060, 320, 360, 360)}
             # quit button
-            quit_rect = pygame.Rect(650, 850, 240, 80)
+            quit_rect = pygame.Rect(660, 920, 220, 63)
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
+                    # print(mouse)
                     if quit_rect.collidepoint(mouse):
                         running = False
 
@@ -383,10 +383,6 @@ if __name__ == "__main__":
                                 if e.type == pygame.MOUSEBUTTONUP:
                                     break
                             running = game_loop(game_name, screen)
-                            if running:
-                                pygame.init()
-                                screen = pygame.display.set_mode(screen_size) 
-                                pygame.display.set_caption("GAME HUB")
             if not running:
                 break
             pygame.display.update()
