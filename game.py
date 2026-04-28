@@ -9,8 +9,8 @@ from datetime import date
 import subprocess
 
 # dimensions
-SCREEN_WIDTH = 1537
-SCREEN_HEIGHT = 1023
+SCREEN_WIDTH = 1536
+SCREEN_HEIGHT = 1024
 screen_size = SCREEN_WIDTH, SCREEN_HEIGHT
 
 title_ht, title_wt = SCREEN_HEIGHT // 5, SCREEN_WIDTH
@@ -199,36 +199,6 @@ if __name__ == "__main__":
     user1 = sys.argv[1] 
     user2 = sys.argv[2]
 
-    # menu design
-    def init_pygame():
-        title_font = pygame.font.SysFont(None, 100)
-        header_font = pygame.font.SysFont("timesnewroman", 60)
-        button_font = pygame.font.SysFont("calibri", 40)
-
-        return title_font, header_font, button_font
-
-    def make_box(screen, text, center_y, wt, ht, box_color, box_border_radius = 0):
-        bg_rect = pygame.Rect(0, 0, wt, ht)
-        bg_rect.center = (SCREEN_WIDTH // 2, center_y)
-
-        pygame.draw.rect(screen, box_color, bg_rect, border_radius=box_border_radius)
-        text_rect = text.get_rect(center = bg_rect.center)
-        screen.blit(text, text_rect)
-
-    def make_button_icon(screen, button_font, text_str, center_y, mouse):
-        text = button_font.render(text_str, True, BUTTON_FONT_COLOR)
-        button_rect = pygame.Rect(0, 0, button_wt, button_ht)
-        button_rect.center = (SCREEN_WIDTH // 2, center_y)
-
-        button_color = BUTTON_BG if text_str != "Quit" else QUIT_BG
-        if button_rect.collidepoint(mouse):
-            button_color = LIGHT_BUTTON_BG if text_str != "Quit" else LIGHT_QUIT_BG
-
-        pygame.draw.rect(screen, button_color, button_rect, border_radius=BOX_BORDER_RADIUS)
-        text_rect = text.get_rect(center = button_rect.center)
-        screen.blit(text, text_rect)
-        return button_rect
-
     def play_game(game_name, screen):
         module_path = GAME_PATH[game_name]
 
@@ -364,45 +334,39 @@ if __name__ == "__main__":
                 return True
             else:
                 return False
-            
-    # start menu
-    screen = None
+    def write_name(screen,text,rect,font) :
+        rendered_font = font.render(text, True, "#DCBE78")
+        text_rect = rendered_font.get_rect()
+        text_rect.center = rect.center
+        screen.blit(rendered_font, text_rect)
+        
     def start_menu():
         pygame.init()
         screen = pygame.display.set_mode(screen_size)
-        title_font, header_font, button_font = init_pygame()
         pygame.display.set_caption("GAME HUB")
         running = True
+        #Font
+        font = pygame.font.Font("./fonts/Cinzel-VariableFont_wght.ttf", 48)
+        #playes name rects
+        player1_rect = pygame.Rect(322, 765, 280, 90)
+        player2_rect = pygame.Rect(929, 765, 280, 90)
         #images
-        menu_img = pygame.image.load("./images/menu.png")
+        menu_img = pygame.image.load("./images/Game_hub_menu.png")
         while running:
             mouse = pygame.mouse.get_pos()
 
             screen.fill(BGCOLOR)
             screen.blit( menu_img ,(0,0))
-
-            # title
-            title_text = title_font.render("GAME HUB", True, TITLE_COLOR)
-            title_center_y = title_ht // 2
-            make_box(screen, title_text, title_center_y, title_wt, title_ht, TITLE_BG)
-
-            # header
-            header_text = header_font.render(f"{user1} V/S {user2}", True, HEADER_COLOR)
-            header_center_y = title_ht + title_header_gap + header_ht // 2
-            make_box(screen, header_text, header_center_y, header_wt, header_ht, HEADER_BG, HEADER_BORDER_RADIUS)
+            #write player names
+            write_name(screen,sys.argv[1].capitalize(),player1_rect,font)
+            write_name(screen,sys.argv[2].capitalize(),player2_rect,font)
 
             # game buttons
-            game_rect_list = []
-            buttons_top =  title_ht + title_header_gap + header_ht + header_box_gap
-
-            for i in range(button_number):
-                game_name = GAME_LIST[i]
-                center_i = buttons_top + i * (button_ht + button_gap) + button_ht // 2
-                game_rect_list.append((game_name, make_button_icon(screen, button_font, game_name, center_i, mouse)))
-            
+            game_rect_list = {  "Tic-Tac-Toe" : pygame.Rect(120, 350, 350, 350),
+                                "Othello"    : pygame.Rect(590, 320, 360, 360),
+                                "Connect Four"    : pygame.Rect(1060, 320, 360, 360)}
             # quit button
-            quit_center = buttons_top + (button_number) * (button_ht + button_gap) + button_ht // 2
-            quit_rect = make_button_icon(screen, button_font, "Quit", quit_center, mouse)
+            quit_rect = pygame.Rect(650, 850, 240, 80)
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -412,15 +376,16 @@ if __name__ == "__main__":
                     if quit_rect.collidepoint(mouse):
                         running = False
 
-                    for game_name, game_rect in game_rect_list:
-                        if game_rect.collidepoint(mouse):
+                    for game_name in game_rect_list:
+                        if game_rect_list[game_name].collidepoint(mouse):
                             while True:
                                 e = pygame.event.wait()
                                 if e.type == pygame.MOUSEBUTTONUP:
                                     break
                             running = game_loop(game_name, screen)
                             if running:
-                                title_font, header_font, button_font = init_pygame()
+                                pygame.init()
+                                screen = pygame.display.set_mode(screen_size) 
                                 pygame.display.set_caption("GAME HUB")
             if not running:
                 break
