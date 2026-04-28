@@ -40,3 +40,6 @@ board_img_dimensions - (1024, 681)
 sprite dimensions:
 passive - (354, 706)
 active - (457, 546)
+
+What to add more?
+--> In connect4 after game over, matched things should glow and next option should show at bottom

@@ -89,16 +89,20 @@ screen_img = pygame.transform.scale(screen_img, (SCREEN_WIDTH, SCREEN_HEIGHT))
 # coins
 coin1 = pygame.image.load("images/silver_connect4-removebg.png")
 glow_coin1 = pygame.image.load("images/silver_connect4_glow.png")
+win_glow_coin1 = pygame.image.load("images/spider_glowing.png")
 
 coin2 = pygame.image.load("images/bronze_connect4-removebg.png")
 glow_coin2 = pygame.image.load("images/bronze_connect4_glowing.png")
+win_glow_coin2 = pygame.image.load("images/skull_glowing.png")
 
 coins = [coin1, coin2]
 glow_coins = [glow_coin1, glow_coin2] 
+win_glow_coins = [win_glow_coin1, win_glow_coin2]
 
 for i in range(2):
     coins[i] = pygame.transform.smoothscale(coins[i], (coin_radius*2, coin_radius*2))
     glow_coins[i] = pygame.transform.smoothscale(glow_coins[i], (coin_radius*2, coin_radius*2))
+    win_glow_coins[i] = pygame.transform.smoothscale(win_glow_coins[i], (coin_radius*2, coin_radius*2))
 
 # sprites
 sprite_passive = pygame.image.load("images/sprite_passive.png")
@@ -128,61 +132,105 @@ col_rects = []
 cell_w = 2 * coin_radius + col_gap
 cell_h = 2 * coin_radius + row_gap
 for col in range(COLS):
-    left = coin_board_left + st_gap_x + col * cell_w
+    left = coin_board_left + st_gap_x + col * cell_w - col_gap // 2
     top = coin_board_top + st_gap_y
 
     rect = pygame.Rect(left, top, cell_w, cell_h * ROWS )
     col_rects.append(rect)
 
-
-# make a function to check win condition in new game class
 class Connect4(Game):
-    def check_win(self):
+    def check_win(self, move):
         board_matrix = self.board.matrix
-        board_t = np.transpose(board_matrix)
-        ht = self.board.height
-        wt = self.board.width
-        matches = 4
+        x, y = move
+        player = int(board_matrix[x][y])
         
-        a = np.arange(matches)
-        b = np.arange(wt - matches + 1)
-        c = np.arange(ht - matches + 1)
+        # Add padding in board_matrix
+        padded_board = np.pad(board_matrix, pad_width=3)
+        if player == 0:
+            return [-1, None, None, None]
+        pad_x = x + 3
+        pad_y = y + 3
+        temp = np.arange(4) 
 
-        # rows
-        d = a[None, :] + b[:, None]
-        rowFours = board_t[:, d]
+        # Horizontal
+        window_x = pad_x - temp
+        windows = padded_board[window_x[:, None] + temp, pad_y]
+        matches = np.all(windows == player, axis=1)
+        if np.any(matches):
+            idx = np.where(matches)[0][0]
+            return [player, window_x[idx]-3, y, 0]
+
+        # Vertical
+        window_y = pad_y - temp
+        windows = padded_board[pad_x, window_y[:, None] + temp]
+        matches = np.all(windows == player, axis=1)
+        if np.any(matches):
+            idx = np.where(matches)[0][0]
+            return [player, x, window_y[idx]-3, 90]
+
+        # Main Diagonal
+        window_x = pad_x - temp
+        window_y = pad_y - temp
+        windows = padded_board[window_x[:, None] + temp, window_y[:, None] + temp]
+        matches = np.all(windows == player, axis=1)
+        if np.any(matches):
+            idx = np.where(matches)[0][0]
+            return [player, window_x[idx]-3, window_y[idx]-3, 45]
+
+        # Anti-Diagonal
+        window_x = pad_x + temp
+        window_y = pad_y - temp
+        windows = padded_board[window_x[:, None] - temp, window_y[:, None] + temp]
+        matches = np.all(windows == player, axis=1)
+        if np.any(matches):
+            idx = np.where(matches)[0][0]
+            return [player, window_x[idx]-3, window_y[idx]-3, -45]
+
+        # Check for draw
+        if not np.any(board_matrix == 0):
+            return [0, None, None, None]
+            
+        return [-1, None, None, None]
         
-        # columns
-        e = a[None, :] + c[:, None]
-        colFours = board_matrix[:, e]
+# glow == 0 --> No glow
+# glow == 1 --> Natural hover glow
+# glow == 2 --> Golden (after win glow)
 
-        # anti diagonal
-        anti_diagFours = board_t[e[:, None, :], d[None, :, :]]
-
-        # main diagonal
-        f = np.flip(e)
-        main_diagFours = board_t[f[:, None, :], d[None, :, :]]
-
-        if np.any(np.all(rowFours == 1, axis=2)) or np.any(np.all(colFours == 1, axis=2)) or np.any(np.all(main_diagFours == 1, axis=2)) or np.any(np.all(anti_diagFours == 1, axis=2)):
-            return 1
-        elif np.any(np.all(rowFours == 2, axis=2)) or np.any(np.all(colFours == 2, axis=2)) or np.any(np.all(main_diagFours == 2, axis=2)) or np.any(np.all(anti_diagFours == 2, axis=2)):
-            return 2
-        elif not np.any(board_matrix == 0):
-            return 0
-        else:
-            return -1
-
-def make_coin(screen, x, y, turn, glow=False):
-    if not glow:
+def make_coin(screen, x, y, turn, glow=0):
+    if glow == 0:
         coin = coins[turn-1]
-    else:
+    elif glow == 1:
         coin = glow_coins[turn-1]
+    elif glow == 2:
+        coin = win_glow_coins[turn-1]
     screen.blit(coin, (x-coin_radius, y-coin_radius))
 
-def make_board_coin(screen, i, j, turn, glow=False):
+def make_board_coin(screen, i, j, turn, glow=0):
     x = coord_map[i][j][0]
     y = coord_map[i][j][1]
     make_coin(screen, x, y, turn, glow)
+
+def make_win_glow(screen, x, y, turn, theta):
+    if theta == 0:
+        for i in range(4):
+            x_i = x + i
+            y_i = y
+            make_board_coin(screen, x_i, y, turn, glow=2)
+    elif theta == -45 :
+        for i in range(4):
+            x_i = x - i
+            y_i = y + i
+            make_board_coin(screen, x_i, y_i, turn, glow=2)
+    elif theta == 45:
+        for i in range(4):
+            x_i = x + i
+            y_i = y + i
+            make_board_coin(screen, x_i, y_i, turn, glow=2)
+    elif theta == 90:
+        for i in range(4):
+            x_i = x
+            y_i = y + i
+            make_board_coin(screen, x_i, y_i, turn, glow=2)
 
 def collide_col(i, mouse):
     return col_rects[i].collidepoint(mouse)
@@ -215,7 +263,7 @@ def make_screen(screen, board_matrix, mouse):
         if collide_col(i, mouse):
             for j in range(ROWS):
                 if (int(board_matrix[i][j]) != 0):
-                    make_board_coin(screen, i, j, int(board_matrix[i][j]), True)
+                    make_board_coin(screen, i, j, int(board_matrix[i][j]), 1)
 
 
 def add_board(screen):
@@ -294,7 +342,11 @@ def run(user1, user2, screen):
                             if int(board_matrix[i][j]) == 0:
                                 board_matrix[i][j] = 1 if turn == 1 else 2
                                 update_screen(screen, board_matrix, game, mouse, i, j, turn)
-                                win = game.check_win()
+                                pygame.event.clear(pygame.MOUSEBUTTONDOWN) # Clears all clicks in event queue registered in update_screen
+
+                                win, x, y, theta = game.check_win((i, j))
+                                if (win == 1 or win == 2):
+                                    make_win_glow(screen, x, y, turn, theta)
                                 command = game.update_result(screen, screen_img, game, win)
                                 game.switch_turn()
                                 filled = True

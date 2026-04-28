@@ -177,7 +177,7 @@ class Game:
         if win == 1 or win == 2 or win == 0:
             # self.make_title(screen, title_font, msgDict[win])
             pygame.display.flip()
-            pygame.time.wait(500)
+            pygame.time.wait(1000)
             # Add result to history.csv
             with open("history.csv", "a") as f:
                 writer = csv.writer(f)
