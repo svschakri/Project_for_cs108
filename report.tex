@@ -1,18 +1,17 @@
-\documentclass[12pt, letterpaper]{article}
+\documentclass{article}
 \usepackage[utf8]{inputenc}
 \usepackage{subcaption}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{hyperref}
 \usepackage{titlesec}
+\usepackage{listings}
 \usepackage{xcolor}
 \usepackage{fancyhdr}
 \usepackage{float}
 \usepackage{graphicx}
 \usepackage{multirow}
 \usepackage[rightcaption]{sidecap}
-\usepackage{verbatim}
-\usepackage{listings}
 \usepackage{dirtree}
 \usepackage[backend=bibtex]{biblatex}
 \addbibresource{references.bib}
@@ -65,37 +64,40 @@ This Project emphasizes of design of these games as well as addition of some ext
     \item The game requires python version 3.11 or above along with pip.
     \item Clone the project repository on your local device and move to the root directory in the terminal.
     \item \textbf{Optional:} Setup a virtual environment for installing dependencies as follows:
-    \begin{verbatim}
+    \begin{lstlisting}[frame=single]
         python3 -m venv .venv
-    \end{verbatim}
+    \end{lstlisting}
+
     Activate the virtual environment in the terminal by:
-    \begin{verbatim}
+    \begin{lstlisting}[frame=single]
         source .venv/bin/activate
-    \end{verbatim}
+    \end{lstlisting}
+
     \item Install dependencies from requirements.txt
-    \begin{verbatim}
+    \begin{lstlisting}[frame=single]
         pip install -r requirements.txt
-    \end{verbatim}
+    \end{lstlisting}
+
     \item Before starting the game run:
-    \begin{verbatim}
+    \begin{lstlisting}[frame=single]
         bash ./reset.sh
-    \end{verbatim}
+    \end{lstlisting}
     This resets the game and forms the necessary files for the game to start.
     \\
     \textbf{**CAUTION** : Don't run reset.sh carelessly as it resets the game history.}
     \item Start the game hub by running the following command on the terminal 
-    \begin{verbatim}
+    \begin{lstlisting}[frame=single]
         bash ./main.sh 
-    \end{verbatim}
+    \end{lstlisting}
     \item  Follow the instructions on the screen from now on.
     \item To compile the report run:
-    \begin{verbatim}
+    \begin{lstlisting}[frame=single]
         make
-    \end{verbatim}
+    \end{lstlisting}
     \item After running \texttt{make}, always run the following to clear auxiliary files generated:
-    \begin{verbatim}
+    \begin{lstlisting}[frame=single]
         make clean
-    \end{verbatim}
+    \end{lstlisting}
 \end{itemize}
 
 \section{Game Layout}
@@ -110,9 +112,9 @@ The Game starts with an authenticator which stores the usernames and passwords o
 \\
 The passwords are stored in \texttt{users.tsv} using \textbf{SHA-256 hashing}\cite{sha256sum} by using \texttt{sha256sum} command in \texttt{bash}. \\
 After authentication of two players is complete game between them is started by the command:
-\begin{verbatim}
+\begin{lstlisting}
     python3 game.py ${USER[1]} ${USER[2]}
-\end{verbatim}
+\end{lstlisting}
 \subsection{Game Engine}
 The code for the game engine is included in game.py. This includes the start menu, as well as code for game over menu and the leaderboard screen. \textbf{AI generated images} have been used for the theme of \textbf{Hollow Knight} game \cite{hollowKnight}.
 
@@ -280,6 +282,7 @@ Additionally, there is a window consisting of the following matplotlib charts:
 \subsection{Directory Structure}
 The following directory structure has been used:
 \\
+
 \dirtree{%
 .1 PROJECT\_FOR\_CS108/.
 .2 \_\_pycache\_\_/.
@@ -310,8 +313,19 @@ The following directory structure has been used:
 .2 reset.sh.
 .2 users.tsv.
 }
-
 In the directory structure used, \texttt{\_\_init\_\_.py} has been made to make the directory \texttt{games/} into a package which can be used efficiently by the game engine to import the function \texttt{run()} and run the games.
+
+\section{Modules Used}
+\begin{description}
+    \item[\texttt{numpy}] - Numpy slicing and broadcasting are used in win conditions of all games implemented
+    \item[\texttt{matplotlib}] - Used to display game statistics using data collected over the games
+    \item[\texttt{pygame}] - Used for making the entire GUI, animations and transitions
+    \item[\texttt{sys}] - Used for running \texttt{main.sh} and \texttt{leaderboard.sh} for arguments given in terminal.
+    \item[\texttt{os}] - Used for hiding pygame-ce messages in terminal.
+    \item[\texttt{csv}] - Used for writing and reading to \texttt{history.csv} for retrieving and appending data.
+    \item[\texttt{datetime}] - Used for appending date when the game was played into history.csv
+    \item[\texttt{subprocess}] - Used for running \texttt{leaderboard.sh} from game engine (\texttt{game.py}).
+\end{description}
 
 \section{Features and Additional Improvements}
 \begin{itemize}

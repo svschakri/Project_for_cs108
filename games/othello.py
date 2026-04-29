@@ -4,7 +4,8 @@ import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"  # hiding pygame msg
 import pygame
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..") #setting the absolute path 
+# Add the parent directory of the current file to Python's module search path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 from game import Game, Player, Board
 
 # FPS

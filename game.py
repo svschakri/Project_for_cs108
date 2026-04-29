@@ -10,18 +10,13 @@ import subprocess
 
 # FPS
 MAX_FPS = 60
+
 # dimensions
 SCREEN_WIDTH = 1536
 SCREEN_HEIGHT = 1024
 screen_size = SCREEN_WIDTH, SCREEN_HEIGHT
 
-title_ht, title_wt = SCREEN_HEIGHT // 5, SCREEN_WIDTH
-title_header_gap = SCREEN_HEIGHT // 20
-
-header_ht = SCREEN_HEIGHT // 6
-header_wt = 2 * (SCREEN_WIDTH // 3)
-HEADER_BORDER_RADIUS = 50
-
+# Games added : handled using games.csv
 GAME_PATH = {} 
 GAME_LIST = []
 
@@ -34,38 +29,8 @@ with open("games.csv", "r") as f:
 GAME_LIST = list(GAME_PATH.keys())
 
 button_number = len(GAME_LIST)
-button_wt = SCREEN_WIDTH // 3         
-button_ht = SCREEN_HEIGHT // 12
-button_gap = SCREEN_HEIGHT // 24
-button_stack_ht = (button_number)*button_gap + (button_number+1)*button_ht # include quit button
 
-header_box_gap = (SCREEN_HEIGHT - title_ht - title_header_gap - header_ht - button_stack_ht) // 3
-
-# colors
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-BGCOLOR = (245, 182, 66)
-
-TITLE_BG = (111, 245, 66)
-TITLE_COLOR = WHITE
-
-HEADER_BG = (239, 245, 66)
-HEADER_COLOR = BLACK
-
-BUTTON_BG = (245, 66, 233)
-LIGHT_BUTTON_BG = (237, 147, 227)
-BUTTON_FONT_COLOR = WHITE
-
-QUIT_BG = (242, 90, 63)
-LIGHT_QUIT_BG = (242, 121, 99)
-TITLE_FONT_COLOR = (255, 255, 255)
-
-# Game over screen constants
-over_title_wt = 2* (SCREEN_WIDTH // 3)
-over_title_ht = SCREEN_HEIGHT // 8
-over_title_y = SCREEN_HEIGHT // 4
-title_button_gap = over_title_ht
-# Function to fix dimensions
+# Maintain aspect ratio and relative coordinates using this function
 def dim(coords):
     return [((SCREEN_HEIGHT * coords[i]) // 1024 if i%2 == 1 else (SCREEN_WIDTH * coords[i] )// 1536 ) for i in range(len(coords))]
 
@@ -76,9 +41,8 @@ button_dict = {
     "GO TO MENU": dim([607, 605, 320, 100]),
     "QUIT": dim([607, 715, 320, 100])
 }
-OVER_TITLE_BG = (85, 250, 148)
-BOX_BORDER_RADIUS = 15
 
+# Assets used for "Sort by" GUI
 sort_img = pygame.image.load("images/sort_dialog_box.png")
 sort_img = pygame.transform.scale(sort_img, screen_size)
 
@@ -98,6 +62,8 @@ class Board:
         self.width = width
         self.height = height
         self.matrix = np.zeros((width , height))
+
+# Game class: used for creating game objects in each game
 class Game:
     def __init__(self, name, player1, player2, board, turn):
         self.name = name
@@ -110,6 +76,7 @@ class Game:
     def switch_turn(self): 
         self.turn = 1 - self.turn
 
+    # Overridable function
     def check_win(self):
         """ This would be used to check win condition """
         return
@@ -117,6 +84,7 @@ class Game:
     def make_rect(self, left, top, wt, ht):   
         return pygame.Rect(left, top, wt, ht)
 
+    # Draw GUI of game over screen
     def draw_game_over(self, screen):
 
         if not pygame.get_init():
@@ -133,21 +101,25 @@ class Game:
             "LEADERBOARD": 2,
             "GO TO MENU": 3
         }
+        # Load background image of screen
         screen_img = pygame.image.load("images/game_over_screen.png")
         screen_img = pygame.transform.scale(screen_img,(SCREEN_WIDTH,SCREEN_HEIGHT))
+        pygame.display.set_caption("Game Over")
         running = True
-        # button_font = pygame.font.SysFont("calibri", 40)
+
         while(running):
             clock = pygame.time.Clock()
             clock.tick(MAX_FPS)
             mouse = pygame.mouse.get_pos()
             screen.blit(screen_img, (0, 0))
-
+            
+            # Rectangles for each button
             rect_dict = {}
             for button_name, coords in button_dict.items():
                 rect_dict[button_name] = self.make_rect(coords[0], coords[1], coords[2], coords[3])
             
             for rect in rect_dict.values():
+                # Making hover effect on image rects using pygame surface overlay
                 if (rect.collidepoint(mouse)):
                     hover_surface = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
                     hover_surface.fill((0, 0, 0, 50))
@@ -165,14 +137,15 @@ class Game:
             pygame.display.flip()
         return command
 
+    # Updates result from played game to history.csv
     def update_result(self, screen, game, win):
         user1 = game.player1.user_name
         user2 = game.player2.user_name
 
         if win == 1 or win == 2 or win == 0:
-            # self.make_title(screen, title_font, msgDict[win])
             pygame.display.flip()
             pygame.time.wait(1000)
+
             # Add result to history.csv
             with open("history.csv", "a") as f:
                 writer = csv.writer(f)
@@ -189,16 +162,19 @@ class Game:
         
         return -1
     
+    # Updates the board matrix with the latest move
     def make_move(self, move, code):
         i, j = move
         self.board.matrix[i][j] = code
         self.move_array.append(move)
 
+    # Resets the game board
     def reset_game(self):
         self.board.matrix = np.zeros((self.board.width, self.board.height))
         self.move_array = []
         self.turn = 1
 
+    # Reverts the last move
     def back_game(self):
         if self.move_array:
             i, j = self.move_array.pop()
@@ -210,6 +186,7 @@ if __name__ == "__main__":
     user1 = sys.argv[1] 
     user2 = sys.argv[2]
 
+    # Function used for running individual games
     def play_game(game_name, screen, flag=False):
         module_path = GAME_PATH[game_name]
 
@@ -219,6 +196,7 @@ if __name__ == "__main__":
 
         return command
     
+    # Drawing 
     def analysis_menu(screen):
         sort_command = 0
         if not pygame.get_init():
@@ -226,6 +204,7 @@ if __name__ == "__main__":
             screen = pygame.display.set_mode(screen_size)
             screen.blit(sort_img, (0, 0))
         pygame.display.set_caption("Sort Leaderboard")
+
         running = True
         while(running):
             clock = pygame.time.Clock()
@@ -353,6 +332,8 @@ if __name__ == "__main__":
         
 
     def game_loop(game_name, screen):
+        # Return True --> Back to menu
+        # Return False --> Quit
         flag = False
         while True:
             command = play_game(game_name, screen, flag)
@@ -366,13 +347,16 @@ if __name__ == "__main__":
                 if action == 0:
                     return False
                 else:
+                    # play_game runs again after this, which directly redirects to game over screen when flag = True
                     flag = True
                     continue
 
             elif command == 3: # back to menu
                 return True
             else:
-                return False
+                return False # quit
+            
+    # Write name on a specified rectangle
     def write_name(screen,text,rect,font) :
         rendered_font = font.render(text, True, "#DCBE78")
         text_rect = rendered_font.get_rect()
@@ -386,20 +370,21 @@ if __name__ == "__main__":
         running = True
         #Font
         font = pygame.font.Font("./fonts/Cinzel-VariableFont_wght.ttf", 48)
-        #playes name rects
+
+        # Rects for holding player names
         player1_rect = pygame.Rect(322, 765, 280, 90)
         player2_rect = pygame.Rect(929, 765, 280, 90)
-        #images
+
+        # Menu background image
         menu_img = pygame.image.load("./images/Game_hub_menu.png")
         while running:
             clock = pygame.time.Clock()
             clock.tick(MAX_FPS)
             mouse = pygame.mouse.get_pos()
 
-            screen.fill(BGCOLOR)
             screen.blit( menu_img ,(0,0))
 
-            #write player names
+            # Write player names
             write_name(screen,sys.argv[1].capitalize(),player1_rect,font)
             write_name(screen,sys.argv[2].capitalize(),player2_rect,font)
 
@@ -411,15 +396,16 @@ if __name__ == "__main__":
             quit_rect = pygame.Rect(660, 920, 220, 63)
             for rect in *game_rect_list.values(), quit_rect:
                 if rect.collidepoint(mouse):
+                    # Add hover effect by adding overlay to surface
                     hover_surface = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
                     hover_surface.fill((0, 0, 0, 45))
                     screen.blit(hover_surface, rect.topleft)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    # print(mouse)
                     if quit_rect.collidepoint(mouse):
                         running = False
 
@@ -430,10 +416,10 @@ if __name__ == "__main__":
                                 if e.type == pygame.MOUSEBUTTONUP:
                                     break
                             running = game_loop(game_name, screen)
+                            pygame.display.set_caption("GAME HUB")
             if not running:
                 break
             pygame.display.update()
 
     start_menu()
-    # analysis_menu(screen)
     pygame.quit()
