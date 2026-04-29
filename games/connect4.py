@@ -315,7 +315,7 @@ def make_buttons(screen):
     pygame.draw.rect(screen, (0, 255, 0), back_rect)
     pass
 
-def run(user1, user2, screen):
+def run(user1, user2, screen, flag):
     INIT_TURN = 1
     player1 = Player(user1)
     player2 = Player(user2)
@@ -324,7 +324,8 @@ def run(user1, user2, screen):
 
     game = Connect4("Connect Four", player1, player2, game_board, INIT_TURN)
     board_matrix = game_board.matrix
-
+    if flag:
+        return game.draw_game_over(screen)
     if not pygame.get_init():
         pygame.init()
     pygame.display.set_caption("Connect Four")

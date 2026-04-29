@@ -210,12 +210,12 @@ if __name__ == "__main__":
     user1 = sys.argv[1] 
     user2 = sys.argv[2]
 
-    def play_game(game_name, screen):
+    def play_game(game_name, screen, flag=False):
         module_path = GAME_PATH[game_name]
 
         game_module = __import__(module_path, fromlist=['run'])
 
-        command = game_module.run(user1, user2, screen)
+        command = game_module.run(user1, user2, screen, flag)
 
         return command
     
@@ -295,7 +295,7 @@ if __name__ == "__main__":
 
         top_w_l_ratio = w_l_ratio[:5]
 
-        fig, axs = plt.subplots(2, 2, figsize = (12, 10))
+        fig, axs = plt.subplots(2, 2, figsize = (12, 8))
         # Top 5 wins
         bars = axs[0][0].bar([data[0] for data in top_wins], [data[1] for data in top_wins])
         axs[0][0].bar_label(bars)
@@ -318,31 +318,57 @@ if __name__ == "__main__":
         axs[1][1].set_title("Most Played Games")
         fig.savefig("plot.png")
 
+        bg_img = pygame.image.load("images/statistics.png")
         plot_img = pygame.image.load("plot.png")
-        plot_img = pygame.transform.scale(plot_img, screen_size)
+
+        plot_rect = pygame.Rect(250, 205, 1038, 670)
+        back_rect = pygame.Rect(249, 931, 243, 55)
+        quit_rect = pygame.Rect(1048, 930, 236, 57)
+        plot_img = pygame.transform.scale(plot_img, (plot_rect.width, plot_rect.height))
+
         running = True
         pygame.display.set_caption("Leaderboard")
         while(running):
-            screen.blit(plot_img, (0, 0))
+            mouse = pygame.mouse.get_pos()
+            screen.blit(bg_img, (0, 0))
+            screen.blit(plot_img, plot_rect)
+            for rect in back_rect, quit_rect:
+                if rect.collidepoint(mouse):
+                    hover_surface = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
+                    hover_surface.fill((0, 0, 0, 70))
+                    screen.blit(hover_surface, rect.topleft)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    return False
+                    return 0
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    cur_pos = event.pos
+                    # print(cur_pos)
+                    if back_rect.collidepoint(cur_pos):
+                        return 1
+                    if quit_rect.collidepoint(cur_pos):
+                        return 0
             pygame.display.flip()
+        return 1
         
-        # back to menu or quit shown on screen
-        back_to_menu = True
-        # if next run post_game_loop and return true
-        return back_to_menu
 
     def game_loop(game_name, screen):
+        flag = False
         while True:
-            command = play_game(game_name, screen)
+            command = play_game(game_name, screen, flag)
             if command == 0: # quit
                 return False
             elif command == 1: # play again
+                flag = False
                 continue
             elif command == 2: # show leaderboard
-                return analysis_menu(screen)
+                action = analysis_menu(screen)
+                if action == 0:
+                    return False
+                else:
+                    flag = True
+                    continue
+
             elif command == 3: # back to menu
                 return True
             else:
@@ -372,6 +398,7 @@ if __name__ == "__main__":
 
             screen.fill(BGCOLOR)
             screen.blit( menu_img ,(0,0))
+
             #write player names
             write_name(screen,sys.argv[1].capitalize(),player1_rect,font)
             write_name(screen,sys.argv[2].capitalize(),player2_rect,font)

@@ -37,10 +37,10 @@ sprite_wt = [193, 198, 315, 313]
 sprite_pos = [(40, 510), (1204, 510), (55,510), (1204, 510)]
 
 # BACK
-back_rect= pygame.Rect(432,985,265,70)
+back_rect= pygame.Rect(432,894,265,70)
 
 #RESET
-reset_rect = pygame.Rect(830,985,265,70)
+reset_rect = pygame.Rect(830,894,265,70)
 
 # sprites
 sprite_still_blue = pygame.image.load("images/sprite_still_blue.png")
@@ -63,8 +63,16 @@ cross_img = pygame.image.load("images/cross_ttc.png")
 cross_img = pygame.transform.scale(cross_img,(col_gap/3*2,row_gap/3*2))
 
 # zero image
-zero_img = pygame.image.load("images/circle_ttc.png")
+zero_img = pygame.image.load("images/circle_red.png")
 zero_img = pygame.transform.scale(zero_img,(col_gap/3*2,row_gap/3*2))
+
+# win cross image
+win_cross_img = pygame.image.load("images/Win_cross.png")
+win_cross_img = pygame.transform.scale(win_cross_img,(col_gap/3*2,row_gap/3*2))
+
+# win zero image
+win_zero_img = pygame.image.load("images/Win_circle.png")
+win_zero_img = pygame.transform.scale(win_zero_img,(col_gap/3*2,row_gap/3*2))
 
 def draw_line(screen, x,y,theta) :
     X_centre = LEFT_BOARD + col_gap*x + col_gap // 2 
@@ -73,7 +81,7 @@ def draw_line(screen, x,y,theta) :
     if theta == -45 :
         X_final = X_centre - 4*col_gap 
     Y_final = Y_centre if theta == 0 else Y_centre + 4*row_gap 
-    pygame.draw.line(screen,(0,0,0),(X_centre,Y_centre),(X_final,Y_final),3) 
+    pygame.draw.line(screen,(0,0,0),(X_centre,Y_centre),(X_final,Y_final),6) 
 
 
 # make a function to check win condition in new game class
@@ -131,23 +139,31 @@ class tictactoe(Game):
                 
             return [-1, None, None, None]
 
-def make_board_box(screen, x, y, value_code ):
+def make_board_box(screen, x, y, value_code):
     gap_x = col_gap
     gap_y = row_gap
     center_x = LEFT_BOARD  + (x-1) * (gap_x) + gap_x//2
     center_y = TOP_BOARD+ (y-1) * (gap_y) + gap_y//2
 
-    if(value_code == 1):
-        draw_O(screen, center_x-gap_x//3,center_y-gap_y//3,2*min(row_gap,col_gap)//3)
-    elif (value_code == 2):
-        draw_cross(screen, center_x-gap_x//3,center_y-gap_y//3,min(row_gap,col_gap)//3)
+    if value_code == 1:
+        draw_O(screen, center_x-gap_x//3,center_y-gap_y//3)
+    elif value_code == 2:
+        draw_cross(screen, center_x-gap_x//3,center_y-gap_y//3)
+    elif value_code == 3:
+        draw_win_zero(screen, center_x-gap_x//3,center_y-gap_y//3)
+    elif value_code == 4:
+        draw_win_cross(screen, center_x-gap_x//3,center_y-gap_y//3)
 
+def draw_cross(screen, x,y):
+    screen.blit(cross_img,(x, y)) 
 
-def draw_cross(screen, x,y,len):
-    screen.blit(cross_img,(x,y)) 
+def draw_win_cross(screen, x, y):
+    screen.blit(win_cross_img, (x, y))
 
+def draw_win_zero(screen, x, y):
+    screen.blit(win_zero_img, (x, y))
 
-def draw_O(screen, x,y,r):
+def draw_O(screen, x, y):
     screen.blit(zero_img,(x,y)) #
 
 def collide_box(x,y, mouse):
@@ -182,13 +198,29 @@ def update_sprites(screen, turn):
     elif turn == 2:
         make_sprite(screen, 0, 2)
         make_sprite(screen, 1, 1)
+
 def write_name(screen,text,rect,font) :
         rendered_font = font.render(text, True, "BLACK")
         text_rect = rendered_font.get_rect()
         text_rect.center = rect.center
         screen.blit(rendered_font, text_rect)
-def run(user1, user2, screen):
 
+def draw_win_col(screen, x, y, theta, win):
+    value_code = win + 2
+    if theta == 0:  # horizontal
+        for i in range(5):
+            make_board_box(screen, x + i + 1, y + 1, value_code)
+    elif theta == 45:  # main diagonal
+        for i in range(5):
+            make_board_box(screen, x + i + 1, y + i + 1, value_code)
+    elif theta == -45:  # anti diagonal
+        for i in range(5):
+            make_board_box(screen, x - i + 1, y + i + 1, value_code)
+    elif theta == 90:  # vertical
+        for i in range(5):
+            make_board_box(screen, x + 1, y + i + 1, value_code)
+
+def run(user1, user2, screen, flag):
     INIT_TURN = 1
     player1 = Player(user1)
     player2 = Player(user2)
@@ -200,6 +232,8 @@ def run(user1, user2, screen):
     game_board = Board(10,10)
 
     game = tictactoe("Tic-Tac-Toe", player1, player2, game_board, INIT_TURN)
+    if flag:
+        return game.draw_game_over(screen)
     board_matrix = game_board.matrix
 
     if not pygame.get_init():
@@ -226,22 +260,26 @@ def run(user1, user2, screen):
         make_board(screen, board_matrix, mouse)
         write_name(screen,user1.capitalize(),text_rect1,font)
         write_name(screen,user2.capitalize(),text_rect2,font)
+
+        for rect in back_rect, reset_rect:
+            if rect.collidepoint(mouse):
+                hover_surface = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
+                hover_surface.fill((0, 0, 0, 50))
+                screen.blit(hover_surface, rect.topleft)
+                
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 command = 3
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                print(pygame.mouse.get_pos())
                 if back_rect.collidepoint(event.pos) :
                     game.back_game()
-                    print("back")
                     board_matrix=game.board.matrix
-                    continue
+                    
                 if reset_rect.collidepoint(event.pos) :
                     game.reset_game()
-                    print("reset")
                     board_matrix=game.board.matrix
-                    continue
+                    
                 filled = False
                 for i in range(COLS):
                     for j in range(ROWS - 1, -1, -1):
@@ -255,6 +293,7 @@ def run(user1, user2, screen):
 
                             win_situation, x, y, theta = game.check_win((i, j))
                             if (win_situation == 1 or win_situation == 2):
+                                draw_win_col(screen, x, y, theta, win_situation)
                                 draw_line(screen, x, y, theta)
                             command = game.update_result(screen, game, win_situation)
                             game.switch_turn()

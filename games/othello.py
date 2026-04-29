@@ -420,7 +420,7 @@ def update_sprites(screen, turn):
         make_sprite(screen, 0, 2)
         make_sprite(screen, 1, 1)
 
-def run(user1,user2, screen):
+def run(user1,user2, screen, flag):
     INIT_TURN = 1
     player1 = Player(user1)
     player2 = Player(user2)
@@ -434,7 +434,8 @@ def run(user1,user2, screen):
     game_board = Board(8,8)
 
     game = othello("Othello", player1, player2, game_board, INIT_TURN)
-    title_font = pygame.font.SysFont("Calibri", 60)
+    if flag:
+        return game.draw_game_over(screen)
     Number_font = pygame.font.SysFont("Calibri", 60)
 
     game_board.matrix[3][3]=1
