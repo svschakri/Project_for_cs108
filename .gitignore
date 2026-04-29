@@ -209,7 +209,11 @@ __marimo__/
 # User details
 users.tsv
 history.csv
-games/temp_result.csv
-things_to_do.txt
-coords.txt
 plot.png
+report-blx.bib
+report.aux
+report.bbl
+report.blg
+report.out
+report.run.xml
+report.toc
