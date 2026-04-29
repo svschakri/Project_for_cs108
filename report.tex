@@ -29,15 +29,12 @@
 \lhead{Mini Game Hub}
 \title{Mini Game Hub}
 \author{Bipul Kumar and S.V.S. Chakri}
-\date{}
-% You may also add path to the images optionally
+\date{\date{April 2026}}
+
 \graphicspath{{report_images/}}
 
 \begin{document}
 \maketitle
-% preamble
-% below line auto generates the table of contents
-% thank me for your free 1 mark
 \tableofcontents
 \clearpage
 
@@ -183,9 +180,9 @@ The following image shows the condition of winning in this game:
 The code for \texttt{tictactoe.py} contains the \texttt{tictactoe} class which inherits the \texttt{Game} class. Some of the functions used are:
 
 \begin{description}
-    \item[{tictactoe.check\_win}] -  Checks win condition from the numpy array using numpy slicing, draws line at the end of the matching 5 X's or O's  using \texttt{numpy.where()}.
-    \item[{make\_board}] - Makes board GUI
-    \item[{update\_sprites}] - Updates the player sprites (represents the characters on left and right of the screen) after each move.
+    \item[\texttt{tictactoe.check\_win}] -  Checks win condition from the numpy array using numpy slicing, draws line at the end of the matching 5 X's or O's  using \texttt{numpy.where()}.
+    \item[\texttt{make\_board}] - Makes board GUI
+    \item[\texttt{update\_sprites}] - Updates the player sprites (represents the characters on left and right of the screen) after each move.
 \end{description}
 
 Some other functions were used for making the GUI of the game like \texttt{draw\_cross()}, \texttt{draw\_0()}, etc.
@@ -202,10 +199,18 @@ The following image is a still in othello game:
 \end{figure}
 
 The rules for this game are more complex than the other two as it includes valid move checking as well as score counting which adds more functions contributing to the GUI.
+\\
 Some of the notable functions used in this game are:
 \begin{description}
-    \item[{Othello.check\_win()}] - Checks win condition using \texttt{numpy.sum}\cite{numpyDocs}
+    \item[\texttt{Othello.check\_win()}] - Checks win condition using \texttt{numpy.sum}
+    \cite{numpyDocs}
+    \item[\texttt{Othello.reset\_game()}] - Overrides the function defined in the \texttt{Game} class and resets the board based on the given initial condition.
+    \item[\texttt{Othello.back\_game()}] - Ovverrides the function defined in the \texttt{Game} class, calls \texttt{update\_possible\_moves} to revert back the move.
+    \item[\texttt{update\_possible\_moves()}] - Checks for the valid moves in each position by looping through the horizontal, vertical and diagonal lines from the last played position.
+    \item[\texttt{update\_values()}] - Updates the matrix values after each move accordingly.
 \end{description}
+
+Some other functions are used to make GUI like \texttt{make\_score()} to display score of each player and \texttt{create\_glow()} to display glow over valid moves to players on each turn.
 
 \subsubsection{Connect Four}
 This game is the usual connect four \cite{connect4Rules} game played with coins falling down on a board. The theme chosen is the ancient four.
@@ -218,9 +223,9 @@ This game is the usual connect four \cite{connect4Rules} game played with coins 
 
 This also has a \texttt{Connect4} class which inherits from the \texttt{Game} class. Some of the notable functions used in this are - 
 \begin{description}
-    \item[{Connect4.check\_win()}] - Checks the win condition from the numpy array using numpy slicing, and returns the matched pieces using \texttt{numpy.where}\cite{numpyDocs} to later show using glowing coins.
-    \item[{make\_screen()}] - Makes the screen design (mainly board) of the game after each turn which includes falling animation of the coin where the coin falls to its place in constant time.
-    \item[{update\_sprites()}] - Update the player sprites based on the turn.
+    \item[\texttt{Connect4.check\_win()}] - Checks the win condition from the numpy array using numpy slicing, and returns the matched pieces using \texttt{numpy.where}\cite{numpyDocs} to later show using glowing coins.
+    \item[\texttt{make\_screen()}] - Makes the screen design (mainly board) of the game after each turn which includes falling animation of the coin where the coin falls to its place in constant time.
+    \item[\texttt{update\_sprites()}] - Update the player sprites based on the turn.
 \end{description}
 
 Some other functions were used for making GUI of the game such as \texttt{make\_coin}, \texttt{make\_placeholders}, etc.
@@ -310,9 +315,31 @@ In the directory structure used, \texttt{\_\_init\_\_.py} has been made to make 
 
 \section{Features and Additional Improvements}
 \begin{itemize}
-    \item Added back and reset features in all games
+    \item \textbf{Use of AI generated images for design:}
+    \\
+    AI generated images have been used to make the project look better. The use of these images was definitely challenging. This involves a good amount of prompting knowledge as well as some design skills.
+    \item \textbf{Added back and reset features in all games:}
+    \\
+    This feature has been added to make the project more user friendly and less frustrating for the players. It was challenging to add these features especially in Othello as it required to think of an algorithm to store and use the last flipped coins.
+    \item \textbf{Adding game sprites for characters:}
+    \\
+    This involved adding game sprites which made the game more interacting and fun to play, e.g., adding happy player sprite next to the winning player after a game. Since, this was made from AI generated images, It was challenging to locate and resize the images on the screen.
 \end{itemize}
 \section{Project Journey}
-Could have done more things if I had 10 hours more, like adding flipping animation in othello and could have added more games
+
+This project was definitely something new to us as we are inexperienced in making games using pygame, especially GUI.
+\\
+Initially, we were not focusing much on the design and aesthetics of our game hub, but later we realised that it is important to learn how to implement design ideas and it was also challenging, so we took it up enthusiastically.
+\\
+We are happy with the final result as it matched with our expectations though some things could have been better.
+\\
+We would definitely have tried to change some things if we had some more time, like:
+\begin{itemize}
+    \item Adding coin flipping animation in Othello.
+    \item Adding some more animations related to player sprites.
+    \item Some more personalisations like choosing character sprites based on personal preference.
+    \item Making some improvements in authentication system and terminal leaderboard by making it more interactive and aesthetic using special shapes.
+
+\end{itemize}
 \printbibliography
 \end{document}
