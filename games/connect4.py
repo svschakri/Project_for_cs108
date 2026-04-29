@@ -149,14 +149,18 @@ for col in range(COLS):
     col_rects.append(rect)
 
 # reset rectangle
-reset_rect = pygame.Rect(514, 931, 140, 50)
+reset_rect = pygame.Rect(500, 900, 280, 150)
 reset_img = pygame.image.load("images/reset_button.png")
-reset_img = pygame.transform(reset_img,(140, 50))
+reset_img = pygame.transform.scale(reset_img,(280, 150))
 
 # back rectangle
-back_rect = pygame.Rect(875, 931, 140, 50)
+back_rect = pygame.Rect(850, 900, 280, 150)
 back_img = pygame.image.load("images/back_button.png")
-back_img = pygame.transform(back_img,(140, 50))
+back_img = pygame.transform.scale(back_img,(280, 150))
+
+#player fin title 
+p1_fin_rect = (100,236,280,150)
+p2_fin_rect = (1150,236,280,150)
 
 class Connect4(Game):
     def check_win(self, move):
@@ -325,12 +329,20 @@ def make_images_for_buttons(screen):
     pass
 
 def draw_over(screen, win):
+    win_title_img = pygame.image.load("images/winner_title.png")
+    win_title_img = pygame.transform.scale(win_title_img,(280,150))
+    lose_title_img = pygame.image.load("images/loser_title.png")
+    lose_title_img = pygame.transform.scale(lose_title_img,(280,150))
     # if win == 1 --> draw happy_blue (sprites idx = 6) and crying_red (sprites idx = 5)
     if win == 1:
+        screen.blit(win_title_img,p1_fin_rect)
+        screen.blit(lose_title_img,p2_fin_rect)
         screen.blit(sprites[5], sprite_rects[5])
         screen.blit(sprites[6], sprite_rects[6])
     # if win == 2 --> draw crying_blue (sprites idx = 4) and happy_red (sprites idx = 7)
     else:
+        screen.blit(win_title_img,p2_fin_rect)
+        screen.blit(lose_title_img,p1_fin_rect)
         screen.blit(sprites[4], sprite_rects[4])
         screen.blit(sprites[7], sprite_rects[7])
 
@@ -372,7 +384,7 @@ def run(user1, user2, screen, flag):
                 running = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                # print(mouse)
+                print(mouse)
                 if reset_rect.collidepoint(event.pos):
                     game.reset_game()
                     board_matrix = game.board.matrix
