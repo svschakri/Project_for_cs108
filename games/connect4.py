@@ -355,6 +355,7 @@ def run(user1, user2, screen):
                 print(mouse)
                 if reset_rect.collidepoint(event.pos):
                     game.reset_game()
+                    board_matrix = game.board.matrix
                 if back_rect.collidepoint(event.pos):
                     game.back_game()
                 filled = False
