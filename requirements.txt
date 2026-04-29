@@ -1,0 +1,9 @@
+csv
+pygame
+numpy 
+matplotlib
+pathlib
+sys
+os 
+time
+subprocess

@@ -80,9 +80,11 @@ GLOW_COLOR1 = (235, 64, 52)
 GLOW_COLOR2 = (52, 92, 235)
 
 #sprite_constanst 
-sprite_ht = [375, 375, 375, 375]
-sprite_wt = [193, 198, 315, 313]
-sprite_pos = [(75, 425), (1220, 425), (30,425), (1220, 425)]
+scale1 = 2.2
+scale2 = 1.5
+sprite_ht = [375] * 4 + [375 * scale1, 375 * scale2, 375 * scale1, 375 * scale2]
+sprite_wt = [193, 198, 315, 313, 160 * scale1, 315 * scale2, 140 * scale1, 315 * scale2]
+sprite_pos = [(40, 450), (1230, 450), (40,450), (1230, 450), (0, 172), (-30, 368), (1150, 130), (1100, 365)]
 
 # sprites
 sprite_still_blue = pygame.image.load("images/sprite_still_blue.png")
@@ -91,10 +93,23 @@ sprite_active_blue = pygame.image.load("images/sprite_active_blue.png")
 sprite_active_red = pygame.image.load("images/sprite_active_red.png")
 sprites = [sprite_still_blue, sprite_still_red, sprite_active_blue, sprite_active_red]
 
+# sprites after game_over
+crying_blue = pygame.image.load("images/Lose_blue.png")
+happy_blue = pygame.image.load("images/Win_blue.png")
+
+crying_red = pygame.image.load("images/Lose_red.png")
+happy_red = pygame.image.load("images/Win_red.png")
+
+sprites = [sprite_still_blue, sprite_still_red, sprite_active_blue, sprite_active_red, crying_blue, happy_blue, crying_red, happy_red]
+
 for i in range(len(sprites)):
     sprites[i] = pygame.transform.smoothscale(sprites[i], (sprite_wt[i], sprite_ht[i]))
 
-sprite_rects = [pygame.Rect(*sprite_pos[i], sprite_wt[i], sprite_ht[i]) for i in range(4)]
+sprite_rects = [pygame.Rect(*sprite_pos[i], sprite_wt[i], sprite_ht[i]) for i in range(len(sprites))]
+
+#final images position of title like winner and loser
+p1_fin_rect = pygame.Rect(64, 213, 265, 140)
+p2_fin_rect = pygame.Rect(1265, 213, 265, 140)
 
 # make a function to check win condition in new game class
 class othello(Game):
@@ -443,7 +458,26 @@ def collide_box(x,y, mouse):
 
     col_rect = pygame.Rect(left, top, col_gap, row_gap)
     return col_rect.collidepoint(mouse)
+def draw_over(screen, win):
+    win_title_img = pygame.image.load("images/winner_title.png")
+    win_title_img = pygame.transform.scale(win_title_img,(265,140))
+    lose_title_img = pygame.image.load("images/loser_title.png")
+    lose_title_img = pygame.transform.scale(lose_title_img,(265,140))
 
+    # if win == 1 --> draw happy_blue (sprites idx = 6) and crying_red (sprites idx = 5)
+    if win == 1:
+        screen.blit(win_title_img,p1_fin_rect)
+        screen.blit(lose_title_img,p2_fin_rect)
+        screen.blit(sprites[5], sprite_rects[5])
+        screen.blit(sprites[6], sprite_rects[6])
+    # if win == 2 --> draw crying_blue (sprites idx = 4) and happy_red (sprites idx = 7)
+    else:
+        screen.blit(win_title_img,p2_fin_rect)
+        screen.blit(lose_title_img,p1_fin_rect)
+        screen.blit(sprites[4], sprite_rects[4])
+        screen.blit(sprites[7], sprite_rects[7])
+    
+    pygame.time.wait(2000)
 
 def make_board(screen,board_matrix,Number_font, mouse):
     center_y = title_ht + title_board_gap + board_ht // 2
@@ -519,14 +553,15 @@ def run(user1,user2, screen, flag):
         write_name(screen,game.player1.user_name,Player1_name_rect,font,"#E2E8F0")
         write_name(screen,game.player2.user_name,Player2_name_rect,font,"#E2E8F0")
         board_matrix = game_board.matrix
-        update_possible_moves(3 - piece_code, board_matrix)
+        update_possible_moves( 3-piece_code, board_matrix)
         make_board(screen, board_matrix, Number_font, mouse)
         update_sprites(screen, piece_code)
-        if (start and np.sum(board_matrix==piece_code +0.5)==0) :
+        
+        if (start and np.sum(board_matrix == piece_code +0.5 )==0) :
             game.switch_turn()
             make_board(screen,board_matrix,Number_font,mouse)
             pygame.display.update()
-            pygame.time.wait(2000)
+            pygame.time.wait(1000)
             continue
         command = -1
         for event in pygame.event.get():
@@ -543,7 +578,6 @@ def run(user1,user2, screen, flag):
                     game.reset_game()
                     board_matrix=game.board.matrix
                     continue
-                print(pygame.mouse.get_pos())
                 filled = False
                 for i in range(COLS):
                     for j in range(ROWS - 1, -1, -1):
@@ -557,6 +591,13 @@ def run(user1,user2, screen, flag):
                             update_sprites(screen, piece_code)
                             # update_values(i, j, board_matrix)
                             win = game.check_win()
+                            if (win == 1 or win == 2) :
+                                screen.blit(board_img,(0,0))
+                                write_name(screen,user1.capitalize(),Player1_name_rect,font,"#E2E8F0")
+                                write_name(screen,str(np.sum(board_matrix==1)),Player1_score_rect,font,"#E2E8F0")
+                                write_name(screen,user2.capitalize(),Player2_name_rect,font,"#E2E8F0")
+                                write_name(screen,str(np.sum(board_matrix==1)),Player2_score_rect,font,"#E2E8F0")
+                                draw_over(screen, win)
                             command = game.update_result(screen, game, win)
                             if command != -1:
                                 return command
