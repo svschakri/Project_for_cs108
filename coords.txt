@@ -43,3 +43,12 @@ active - (457, 546)
 
 What to add more?
 --> In connect4 after game over, matched things should glow and next option should show at bottom
+
+
+
+
+images - win_red - (458, 545) --> 315
+win_blue - (458, 545) --> 315
+lose_blue - (352, 710) --> 186
+lose_red - (306, 816) --> 140
+

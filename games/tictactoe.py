@@ -33,8 +33,8 @@ col_gap = board_wt //10
 
 #sprite_constanst 
 sprite_ht = [375] * 8
-sprite_wt = [193, 198, 315, 313, 193, 198, 315, 313]
-sprite_pos = [(40, 510), (1204, 510), (55,510), (1204, 510), (40, 510), (1204, 510), (55, 510), (1204, 510)]
+sprite_wt = [193, 198, 315, 313, 186, 198, 140, 313]
+sprite_pos = [(40, 510), (1204, 510), (55,510), (1204, 510), (40, 510), (55, 510), (1204, 510), (1204, 510)]
 
 # BACK
 back_rect= pygame.Rect(432,894,265,70)
@@ -155,13 +155,13 @@ def make_board_box(screen, x, y, value_code):
     center_y = TOP_BOARD+ (y-1) * (gap_y) + gap_y//2
 
     if value_code == 1:
-        draw_O(screen, center_x-gap_x//3,center_y-gap_y//3)
-    elif value_code == 2:
         draw_cross(screen, center_x-gap_x//3,center_y-gap_y//3)
+    elif value_code == 2:
+        draw_O(screen, center_x-gap_x//3,center_y-gap_y//3)
     elif value_code == 3:
-        draw_win_zero(screen, center_x-gap_x//3,center_y-gap_y//3)
-    elif value_code == 4:
         draw_win_cross(screen, center_x-gap_x//3,center_y-gap_y//3)
+    elif value_code == 4:
+        draw_win_zero(screen, center_x-gap_x//3,center_y-gap_y//3)
 
 def draw_cross(screen, x,y):
     screen.blit(cross_img,(x, y)) 
@@ -202,11 +202,11 @@ def make_sprite(screen, status, turn):
     
 def update_sprites(screen, turn):
     if turn == 1:
+        make_sprite(screen, 1, 1)
+        make_sprite(screen, 0, 2)
+    elif turn == 2:
         make_sprite(screen, 0, 1)
         make_sprite(screen, 1, 2)
-    elif turn == 2:
-        make_sprite(screen, 0, 2)
-        make_sprite(screen, 1, 1)
 
 def write_name(screen,text,rect,font) :
         rendered_font = font.render(text, True, "BLACK")
@@ -230,7 +230,7 @@ def draw_win_col(screen, x, y, theta, win):
             make_board_box(screen, x + 1, y + i + 1, value_code)
 
 def draw_over(screen, win):
-    # if win == 1 --> draw happy_blue (sprites idx = 5) and crying_red (sprites idx = 6)
+    # if win == 1 --> draw happy_blue (sprites idx = 6) and crying_red (sprites idx = 5)
     if win == 1:
         screen.blit(sprites[5], sprite_rects[5])
         screen.blit(sprites[6], sprite_rects[6])
@@ -269,7 +269,7 @@ def run(user1, user2, screen, flag):
 
         # clock.tick(120)
         mouse = pygame.mouse.get_pos()
-        turn = 1 + game.turn
+        turn = 2 - game.turn
 
         command = -1
 
