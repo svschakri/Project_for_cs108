@@ -75,9 +75,8 @@ col_gap = 24
 row_gap = 18
 st_gap_x = 38
 st_gap_y = 16
-sprite_scale = 1.3
-sprite_ht = [100 * sprite_scale,100 * sprite_scale, 170 * sprite_scale,170 * sprite_scale]
-sprite_wt = [(sprite_ht[0] * 706) // 354,(sprite_ht[0] * 706) // 354, (sprite_ht[1] * 546) // 457,(sprite_ht[1] * 546) // 457]
+sprite_ht = [250] * 4
+sprite_wt = [(sprite_ht[0] * 359) // 695,(sprite_ht[0] * 363) // 687, (sprite_ht[1] * 457) // 546,(sprite_ht[1] * 458) // 585]
 coin_radius = 30
 sprite_pos = [(160, 440),(160, 440), (1210, 440),(1210, 440)]
 ph_wt = 550
@@ -114,7 +113,7 @@ sprite_active_red = pygame.image.load("images/sprite_active_red.png")
 sprites = [sprite_still_blue,sprite_still_red, sprite_active_blue,sprite_active_red]
 
 for i in range(len(sprites)):
-    sprites[i] = pygame.transform.smoothscale(sprites[i], (sprite_ht[i], sprite_wt[i]))
+    sprites[i] = pygame.transform.smoothscale(sprites[i], (sprite_wt[i], sprite_ht[i]))
 
 sprite_rects = [pygame.Rect(*sprite_pos[i], sprite_wt[i], sprite_ht[i]) for i in range(4)]
 

@@ -32,9 +32,9 @@ col_gap = board_wt //10
 
 
 #sprite_constanst 
-sprite_ht = [375 ,375 ,375 ,375 ]
-sprite_wt = [300,300,250,250]
-sprite_pos = [(40,300),(55,500), (1204, 458), (1204, 458)]
+sprite_ht = [375, 375, 375, 375]
+sprite_wt = [193, 198, 315, 313]
+sprite_pos = [(40, None),(55,458), (1204, 458), (1204, 458)]
 
 
 # sprites
@@ -42,10 +42,10 @@ sprite_still_blue = pygame.image.load("images/sprite_still_blue.png")
 sprite_still_red = pygame.image.load("images/sprite_still_red.png")
 sprite_active_blue = pygame.image.load("images/sprite_active_blue.png")
 sprite_active_red = pygame.image.load("images/sprite_active_red.png")
-sprites = [sprite_still_blue,sprite_still_red, sprite_active_blue,sprite_active_red]
+sprites = [sprite_still_blue, sprite_still_red, sprite_active_blue, sprite_active_red]
 
 for i in range(len(sprites)):
-    sprites[i] = pygame.transform.smoothscale(sprites[i], (sprite_ht[i], sprite_wt[i]))
+    sprites[i] = pygame.transform.smoothscale(sprites[i], (sprite_wt[i], sprite_ht[i]))
 
 sprite_rects = [pygame.Rect(*sprite_pos[i], sprite_wt[i], sprite_ht[i]) for i in range(4)]
 
@@ -56,14 +56,6 @@ cross_img = pygame.transform.scale(cross_img,(col_gap/3*2,row_gap/3*2))
 # zero image
 zero_img = pygame.image.load("images/circle_ttc.png")
 zero_img = pygame.transform.scale(zero_img,(col_gap/3*2,row_gap/3*2))
-
-# 
-# def convert_matrix_pixels(coord):
-#     x = coord[0]
-#     y = coord[1]
-#     X = (SCREEN_WIDTH - board_wt)/2 + col_gap*x + col_gap // 2 
-#     Y = title_ht + title_board_gap + row_gap*y + row_gap // 2
-#     return X, Y
 
 def draw_line(screen, x,y,theta) :
     X_centre = LEFT_BOARD + col_gap*x + col_gap // 2 
@@ -211,7 +203,7 @@ def run(user1, user2, screen):
 
         # clock.tick(120)
         mouse = pygame.mouse.get_pos()
-        turn = game.turn+1
+        turn = 2 - game.turn
 
         command = -1
 
@@ -226,7 +218,7 @@ def run(user1, user2, screen):
                 running = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                # print(pygame.mouse.get_pos())
+                print(pygame.mouse.get_pos())
                 filled = False
                 for i in range(COLS):
                     for j in range(ROWS - 1, -1, -1):
@@ -251,8 +243,3 @@ def run(user1, user2, screen):
             return command
 
     return command
-
-
-
-
-
