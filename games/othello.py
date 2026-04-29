@@ -467,7 +467,7 @@ def run(user1,user2, screen):
                 for i in range(COLS):
                     for j in range(ROWS - 1, -1, -1):
                         if collide_box(i+1,j+1,mouse):
-                            print(mouse)
+                            # print(mouse)
                             if board_matrix[i][j] != piece_code+0.5 :
                                 break
                             make_board_circle(screen,i+1, j+1, piece_code)
