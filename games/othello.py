@@ -447,7 +447,7 @@ def run(user1,user2, screen):
             make_title(screen,title_font,"DRAW!")
             pygame.display.update()
 
-        command = game.update_result(screen, title_font, game, win_status)
+        command = game.update_result(screen, game, win_status)
         if command != -1:
             return command
         for event in pygame.event.get():

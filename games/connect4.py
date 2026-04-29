@@ -142,6 +142,13 @@ for col in range(COLS):
     rect = pygame.Rect(left, top, cell_w, cell_h * ROWS )
     col_rects.append(rect)
 
+# reset rectangle
+reset_rect = pygame.Rect(514, 931, 140, 50)
+reset_img = None
+# back rectangle
+back_rect = pygame.Rect(875, 931, 140, 50)
+back_img = None
+
 class Connect4(Game):
     def check_win(self, move):
         board_matrix = self.board.matrix
@@ -299,8 +306,14 @@ def update_screen(screen, board_matrix, game, mouse, i, j, turn):
         update_sprites(screen, turn)
         add_board(screen)
         make_placeholders(screen, game)
+        make_buttons(screen)
         pygame.display.flip()
     board_matrix[i][j] = turn
+
+def make_buttons(screen):
+    pygame.draw.rect(screen, (255, 0, 0), reset_rect)
+    pygame.draw.rect(screen, (0, 255, 0), back_rect)
+    pass
 
 def run(user1, user2, screen):
     INIT_TURN = 1
@@ -314,7 +327,6 @@ def run(user1, user2, screen):
 
     if not pygame.get_init():
         pygame.init()
-    title_font = pygame.font.SysFont("Calibri", 60)
     pygame.display.set_caption("Connect Four")
 
     pygame.event.clear()
@@ -331,6 +343,8 @@ def run(user1, user2, screen):
         add_board(screen)
         update_sprites(screen, turn)
         make_placeholders(screen, game)
+
+        make_buttons(screen)
         command = -1
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -338,13 +352,18 @@ def run(user1, user2, screen):
                 running = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                # print(mouse)
+                print(mouse)
+                if reset_rect.collidepoint(event.pos):
+                    game.reset_game()
+                if back_rect.collidepoint(event.pos):
+                    game.back_game()
                 filled = False
                 for i in range(COLS):
                     if collide_col(i, event.pos):
                         for j in range(ROWS - 1, -1, -1):
                             if int(board_matrix[i][j]) == 0:
-                                board_matrix[i][j] = 1 if turn == 1 else 2
+                                # board_matrix[i][j] = 1 if turn == 1 else 2
+                                game.make_move((i, j), turn)
                                 update_screen(screen, board_matrix, game, mouse, i, j, turn)
                                 pygame.event.clear(pygame.MOUSEBUTTONDOWN) # Clears all clicks in event queue registered in update_screen
 
@@ -352,7 +371,7 @@ def run(user1, user2, screen):
                                 if (win == 1 or win == 2):
                                     make_win_glow(screen, x, y, turn, theta)
 
-                                command = game.update_result(screen, screen_img, game, win)
+                                command = game.update_result(screen, game, win)
 
                                 game.switch_turn()
                                 filled = True

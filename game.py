@@ -98,7 +98,6 @@ class Board:
         self.width = width
         self.height = height
         self.matrix = np.zeros((width , height))
-
 class Game:
     def __init__(self, name, player1, player2, board, turn):
         self.name = name
@@ -106,6 +105,7 @@ class Game:
         self.player2 = player2
         self.board = board
         self.turn = turn
+        self.move_array = []
 
     def switch_turn(self): 
         self.turn = 1 - self.turn
@@ -165,7 +165,7 @@ class Game:
             pygame.display.flip()
         return command
 
-    def update_result(self, screen, img_object, game, win):
+    def update_result(self, screen, game, win):
         user1 = game.player1.user_name
         user2 = game.player2.user_name
 
@@ -188,6 +188,22 @@ class Game:
             return self.draw_game_over(screen)
         
         return -1
+    
+    def make_move(self, move, code):
+        i, j = move
+        self.board.matrix[i][j] = code
+        self.move_array.append(move)
+
+    def reset_game(self):
+        self.board.matrix = np.zeros((self.board.width, self.board.height))
+        self.move_array = []
+        self.turn = 1
+
+    def back_game(self):
+        if self.move_array:
+            i, j = self.move_array.pop()
+            self.board.matrix[i][j] = 0
+            self.switch_turn()
 
 if __name__ == "__main__":
     # handle users

@@ -168,8 +168,8 @@ def make_board(screen, board_matrix, mouse):
 def make_sprite(screen, status, turn):
     # status = 0 --> passive
     # status = 1 --> active
-
     screen.blit(sprites[status*2+turn-1], sprite_rects[status*2+turn-1])
+    
 def update_sprites(screen, turn):
     if turn == 1:
         make_sprite(screen, 0, 1)
@@ -228,14 +228,15 @@ def run(user1, user2, screen):
                     for j in range(ROWS - 1, -1, -1):
                         if collide_box(i+1,j+1,mouse):
                             if board_matrix[i][j] != 0 : break
-                            board_matrix[i][j] = turn
+                            # board_matrix[i][j] = turn
+                            game.make_move((i, j), turn)
                             make_board_box(screen, i+1, j+1, turn)
                             update_sprites(screen, turn)
 
                             win_situation, x, y, theta = game.check_win((i, j))
                             if (win_situation == 1 or win_situation == 2):
                                 draw_line(screen, x, y, theta)
-                            command = game.update_result(screen, title_font, game, win_situation)
+                            command = game.update_result(screen, game, win_situation)
                             game.switch_turn()
                             filled = True
                             break
