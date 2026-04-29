@@ -88,15 +88,13 @@ class othello(Game):
    def check_win(self):
     board_matrix = self.board.matrix
 
-    a = np.sum(board_matrix == 1.5)
-    b = np.sum(board_matrix == 2.5)
+    a = np.sum(board_matrix == 1)
+    b = np.sum(board_matrix == 2)
 
-    if a == 0 and b == 0:
-        p1 = np.sum(board_matrix == 1)
-        p2 = np.sum(board_matrix == 2)
-        if p1 > p2:
+    if a + b == 64 :
+        if a > b:
             return 1
-        elif p2 > p1:
+        elif b > a:
             return 2
         else:
             return 0
@@ -441,7 +439,7 @@ def run(user1,user2, screen):
     game_board.matrix[4][4]=1
     game_board.matrix[4][3]=2
     game_board.matrix[3][4]=2
-
+    start = False
     while running:
         clock = pygame.time.Clock()
         clock.tick(MAX_FPS)
@@ -456,6 +454,12 @@ def run(user1,user2, screen):
         update_possible_moves(3 - piece_code, board_matrix)
         make_board(screen, board_matrix, Number_font, mouse)
         update_sprites(screen, piece_code)
+        if (start and np.sum(board_matrix==piece_code +0.5)==0) :
+            game.switch_turn()
+            make_board(screen,board_matrix,Number_font,mouse)
+            pygame.display.update()
+            pygame.time.wait(2000)
+            continue
         command = -1
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -470,6 +474,7 @@ def run(user1,user2, screen):
                             # print(mouse)
                             if board_matrix[i][j] != piece_code+0.5 :
                                 break
+                            start = True
                             make_board_circle(screen,i+1, j+1, piece_code)
                             game.make_move((i, j), piece_code)
                             update_sprites(screen, piece_code)
@@ -484,7 +489,7 @@ def run(user1,user2, screen):
                             break
                 if (filled): # what is the use of this condition any ways
                     break
-                    
+            
         pygame.display.update()
         if command != -1:
             return command
