@@ -29,17 +29,30 @@ TITLE_FONT_COLOR = (255, 255, 255)
 bottom_wt = SCREEN_WIDTH
 bottom_ht = SCREEN_HEIGHT // 20 
 
+# player name rects 
+Player1_name_rect = pygame.Rect(66,123,211,85)
+Player2_name_rect = pygame.Rect(1269,123,211,85)
+Player1_score_rect = pygame.Rect(67,286,180,130)
+Player2_score_rect = pygame.Rect(1281,284,186,130)
+
+# reset rect
+reset_rect = pygame.Rect(1288,829,190,125)
+
+# back rect
+back_rect = pygame.Rect(66,829,190,125)
+
+
 
 # board dimensions
 ROWS = 8
 COLS = 8
-LEFT_BOARD=488
-TOP_BOARD=149
+LEFT_BOARD=475
+TOP_BOARD=176
 title_board_gap = title_ht // 4
-board_wt = 567
-board_ht  = 685
-row_gap = board_ht / 8
-col_gap = board_wt / 8
+board_wt = 600
+board_ht  = 665
+row_gap = board_ht // 8
+col_gap = board_wt // 8
 
 #score box position
 LEFT_P1 = 148
@@ -69,7 +82,7 @@ GLOW_COLOR2 = (52, 92, 235)
 #sprite_constanst 
 sprite_ht = [375, 375, 375, 375]
 sprite_wt = [193, 198, 315, 313]
-sprite_pos = [(120, 275), (1204, 275), (55,275), (1204, 275)]
+sprite_pos = [(75, 425), (1220, 425), (30,425), (1220, 425)]
 
 # sprites
 sprite_still_blue = pygame.image.load("images/sprite_still_blue.png")
@@ -85,6 +98,46 @@ sprite_rects = [pygame.Rect(*sprite_pos[i], sprite_wt[i], sprite_ht[i]) for i in
 
 # make a function to check win condition in new game class
 class othello(Game):
+   def  reset_game(self):
+        self.board.matrix = np.zeros((8,8))
+        self.board.matrix[3][3]=1
+        self.board.matrix[4][4]=1
+        self.board.matrix[3][4]=2
+        self.board.matrix[4][3]=2
+        self.move_array = []
+        self.turn = 1
+   def back_game(self):
+        if len(self.move_array) == 0:
+            return
+
+        arr = self.move_array.pop()
+
+        played_row, played_col = arr[0]
+
+        # Read code BEFORE removing the piece
+        code = self.board.matrix[played_row][played_col]
+
+        # Remove the played piece
+        self.board.matrix[played_row][played_col] = 0
+
+        # Revert flipped pieces to the opponent's color
+        opponent = 3 - code
+        for row, col in arr[1:]:
+            self.board.matrix[row][col] = opponent
+        self.board.matrix[self.board.matrix == 1.5] = 0
+        self.board.matrix[self.board.matrix == 2.5] = 0
+        update_possible_moves(opponent,self.board.matrix)
+
+        self.switch_turn()
+
+   def make_move(self, move, code ,board_matrix):
+        row, col = move
+
+        board_matrix[row][col] = code
+
+        arr = update_values(row, col, board_matrix)
+
+        self.move_array.append(arr)
    def check_win(self):
     board_matrix = self.board.matrix
 
@@ -98,7 +151,7 @@ class othello(Game):
             return 2
         else:
             return 0
-    return -1
+    return -1   
 
 def update_possible_moves(req_color,board_matrix):
 
@@ -214,6 +267,7 @@ def update_values(i,j,board_matrix):
     color_code = board_matrix[i,j]
     board_matrix[board_matrix == 1.5] = 0
     board_matrix[board_matrix == 2.5] = 0
+    arr = [(i,j)]
     #VERTICAL - DOWN 
     if j<7 :
         if board_matrix[i,j+1] == 3-color_code :
@@ -225,6 +279,7 @@ def update_values(i,j,board_matrix):
             elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
             else :
                 board_matrix[i,j:b]=color_code
+                arr += [(i,k) for k in range(j+1,b)] 
     #VERTICAL - UP 
     if j>0 :
         if board_matrix[i,j-1] == 3-color_code :
@@ -236,6 +291,8 @@ def update_values(i,j,board_matrix):
             elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
             else :
                 board_matrix[i,b:j]=color_code
+                arr += [(i,k) for k in range(b+1,j)] 
+
     #HORIZONTAL - RIGHT
     if i<7 :
         if board_matrix[i+1,j] == 3-color_code :
@@ -247,6 +304,7 @@ def update_values(i,j,board_matrix):
             elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
             else :
                 board_matrix[i:a,j] = 3 - board_matrix[i+1,j]
+                arr += [(k,j) for k in range(i+1,a)] 
                 pass
     #HORIZONTAL - LEFT
     if i >0 :
@@ -259,6 +317,7 @@ def update_values(i,j,board_matrix):
             elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
             else :
                 board_matrix[a:i,j] = 3 - board_matrix[i-1,j]
+                arr += [(k,j) for k in range(a+1,i)] 
                 pass
         
     # TOP-LEFT-DIAG
@@ -273,6 +332,7 @@ def update_values(i,j,board_matrix):
             elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
             else :
                 np.fill_diagonal(board_matrix[a:i, b:j], 3 - board_matrix[i-1, j-1])
+                arr+=[(i-k,j-k) for k in range(1,i-a)]
                 pass
     # BOTTOM-RIGHT-DIAG 
     if i < 7 and j < 7 : 
@@ -286,6 +346,7 @@ def update_values(i,j,board_matrix):
             elif board_matrix [a,b] in (0 ,1.5 ,2.5) : pass
             else :
                 np.fill_diagonal(board_matrix[i:a, j:b], 3 - board_matrix[i+1, j+1])
+                arr+=[(i+k,j+k) for k in range(1,a-i)]
                 pass
     # TOP-RIGHT-DIAG 
     if i < 7 and j>0 : 
@@ -300,6 +361,7 @@ def update_values(i,j,board_matrix):
             else :
                 for k in range (b,j) :
                     board_matrix[i+abs(j-k),k] = 3 - board_matrix[i+1,j-1]
+                arr+=[(i+k,j-k) for k in range(1,a-i)]
                 pass
     # BOTTOM-LEFT-DIAG 
     if i > 0 and j < 7 : 
@@ -314,7 +376,10 @@ def update_values(i,j,board_matrix):
             else :
                 for k in range (a,i) :
                     board_matrix[k,j+abs(i-k)] = 3 - board_matrix[i-1,j+1]
+                arr+=[(i-k,j+k) for k in range(1,i-a)]
                 pass
+    
+    return arr
 
 def make_title(screen, title_font,text_str):
     bg_rect = pygame.Rect(0, 0, SCREEN_WIDTH, title_ht)
@@ -329,14 +394,11 @@ def make_score(screen,board_matrix,Number_font):
     tot_1 = np.sum(board_matrix == 1)
     tot_2 = np.sum(board_matrix == 2)
 
-    Player_1_score_board = pygame.Rect(LEFT_P1, TOP_P1, RIGHT_P1-LEFT_P1, BOTTOM_P1-TOP_P1)
-    Player_2_score_board = pygame.Rect(LEFT_P2, TOP_P2, RIGHT_P2-LEFT_P2, BOTTOM_P2-TOP_P2)
-
     text_1 = Number_font.render(str(tot_1), True, (250, 250, 250))
     text_2 = Number_font.render(str(tot_2), True, (250, 250, 250))
 
-    screen.blit(text_1, Player_1_score_board.center)
-    screen.blit(text_2, Player_2_score_board.center)
+    screen.blit(text_1, Player1_score_rect.center)
+    screen.blit(text_2, Player2_score_rect.center)
 
 
 def make_board_circle(screen,x, y, color_code):
@@ -349,13 +411,11 @@ def make_board_circle(screen,x, y, color_code):
     if (color_code == 0):
         ball_color = GREEN
     elif (color_code == 1):
-        ball_img =pygame.image.load("images/White_othello.jpeg").convert()
-        ball_img.set_colorkey((0, 0, 0))
+        ball_img =pygame.image.load("images/White_othello.png")
         ball_img = pygame.transform.scale(ball_img,(2*r,2*r))
         rect = ball_img.get_rect(center=(center_x, center_y))
     elif (color_code == 2):
-        ball_img =pygame.image.load("images/Black_othello.jpeg").convert_alpha()
-        ball_img.set_colorkey((0, 0, 0))
+        ball_img =pygame.image.load("images/Black_othello.png")
         ball_img = pygame.transform.scale(ball_img,(2*r,2*r))
         rect = ball_img.get_rect(center=(center_x, center_y))
     elif (color_code == 1.5):
@@ -404,7 +464,6 @@ def make_board(screen,board_matrix,Number_font, mouse):
                 if board_matrix[i][j] == 0:
                     make_board_circle(screen,i+1, j+1,0)
 
-
 def make_sprite(screen, status, turn):
     # status = 0 --> passive
     # status = 1 --> active
@@ -417,7 +476,11 @@ def update_sprites(screen, turn):
     elif turn == 2:
         make_sprite(screen, 0, 2)
         make_sprite(screen, 1, 1)
-
+def write_name(screen,text,rect,font,color) :
+        rendered_font = font.render(text, True,color)
+        text_rect = rendered_font.get_rect()
+        text_rect.center = rect.center
+        screen.blit(rendered_font, text_rect)
 def run(user1,user2, screen):
     INIT_TURN = 1
     player1 = Player(user1)
@@ -426,14 +489,14 @@ def run(user1,user2, screen):
         pygame.init()
     pygame.display.set_caption("othello")
     running = True
-    board_img = pygame.image.load("images/othello_board.png")
+    board_img = pygame.image.load("images/othello_board.jpeg")
     board_img = pygame.transform.scale(board_img,(SCREEN_WIDTH,SCREEN_HEIGHT))
 
     game_board = Board(8,8)
 
     game = othello("Othello", player1, player2, game_board, INIT_TURN)
-    title_font = pygame.font.SysFont("Calibri", 60)
-    Number_font = pygame.font.SysFont("Calibri", 60)
+    font=pygame.font.Font("./fonts/Cinzel-VariableFont_wght.ttf", 36)
+    Number_font = font
 
     game_board.matrix[3][3]=1
     game_board.matrix[4][4]=1
@@ -450,6 +513,8 @@ def run(user1,user2, screen):
         piece_code = 1 + turn
         
         screen.blit(board_img)
+        write_name(screen,game.player1.user_name,Player1_name_rect,font,"#E2E8F0")
+        write_name(screen,game.player2.user_name,Player2_name_rect,font,"#E2E8F0")
         board_matrix = game_board.matrix
         update_possible_moves(3 - piece_code, board_matrix)
         make_board(screen, board_matrix, Number_font, mouse)
@@ -465,8 +530,17 @@ def run(user1,user2, screen):
             if event.type == pygame.QUIT:
                 command = 3
                 running = False
-
             if event.type == pygame.MOUSEBUTTONDOWN:
+                if back_rect.collidepoint(event.pos) :
+                    game.back_game()
+                    start=False
+                    board_matrix=game.board.matrix
+                    continue
+                if reset_rect.collidepoint(event.pos) :
+                    game.reset_game()
+                    board_matrix=game.board.matrix
+                    continue
+                print(pygame.mouse.get_pos())
                 filled = False
                 for i in range(COLS):
                     for j in range(ROWS - 1, -1, -1):
@@ -475,12 +549,11 @@ def run(user1,user2, screen):
                             if board_matrix[i][j] != piece_code+0.5 :
                                 break
                             start = True
-                            make_board_circle(screen,i+1, j+1, piece_code)
-                            game.make_move((i, j), piece_code)
+                            # make_board_circle(screen,i+1, j+1, piece_code)
+                            game.make_move((i, j), piece_code ,board_matrix)
                             update_sprites(screen, piece_code)
-                            
+                            # update_values(i, j, board_matrix)
                             win = game.check_win()
-                            update_values(i, j, board_matrix)
                             command = game.update_result(screen, game, win)
                             if command != -1:
                                 return command
