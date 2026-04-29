@@ -384,7 +384,6 @@ def run(user1, user2, screen, flag):
                 running = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                print(mouse)
                 if reset_rect.collidepoint(event.pos):
                     game.reset_game()
                     board_matrix = game.board.matrix
@@ -395,7 +394,6 @@ def run(user1, user2, screen, flag):
                     if collide_col(i, event.pos):
                         for j in range(ROWS - 1, -1, -1):
                             if int(board_matrix[i][j]) == 0:
-                                # board_matrix[i][j] = 1 if turn == 1 else 2
                                 game.make_move((i, j), turn)
                                 update_screen(screen, board_matrix, game, mouse, i, j, turn)
                                 pygame.event.clear(pygame.MOUSEBUTTONDOWN) # Clears all clicks in event queue registered in update_screen

@@ -67,21 +67,35 @@ This Project emphasizes of design of these games as well as addition of some ext
 \begin{itemize}
     \item The game requires python version 3.11 or above along with pip.
     \item Clone the project repository on your local device and move to the root directory in the terminal.
-    \item \textbf{Optional:} Setup a virtual environment for installing dependencies.
+    \item \textbf{Optional:} Setup a virtual environment for installing dependencies as follows:
+    \begin{verbatim}
+        python3 -m venv .venv
+    \end{verbatim}
+    Activate the virtual environment in the terminal by:
+    \begin{verbatim}
+        source .venv/bin/activate
+    \end{verbatim}
     \item Install dependencies from requirements.txt
     \begin{verbatim}
         pip install -r requirements.txt
     \end{verbatim}
+    \item Before starting the game run:
+    \begin{verbatim}
+        bash ./reset.sh
+    \end{verbatim}
+    This resets the game and forms the necessary files for the game to start.
+    \\
+    \textbf{**CAUTION** : Don't run reset.sh carelessly as it resets the game history.}
     \item Start the game hub by running the following command on the terminal 
     \begin{verbatim}
-        bash main.sh 
+        bash ./main.sh 
     \end{verbatim}
     \item  Follow the instructions on the screen from now on.
     \item To compile the report run:
     \begin{verbatim}
         make
     \end{verbatim}
-    \item To clean auxiliary files:
+    \item After running \texttt{make}, always run the following to clear auxiliary files generated:
     \begin{verbatim}
         make clean
     \end{verbatim}
@@ -112,13 +126,52 @@ The start menu on start of a game between Bipul and Chakri will look as follows:
     \caption{Authenticator window in terminal}
     \label{fig:start_menu}
 \end{figure}
-The users can then go on to click on the icons of the games to enter the game interface.
 
+The users can then go on to click on the icons of the games to enter the game interface.
+\\
+\texttt{game.py} essentially has the \texttt{Player}, \texttt{Board} and \texttt{Game} class which would contain the necessary functions for the games to work as this class would be inherited by the other game files.
+\\
+The \texttt{Game} class constructor includes \texttt{Player} and \texttt{Board} objects, for storing player information and board state at each move (as a numpy array).
+\\
+\\
+Some of the important functions in the \texttt{Game} class are:
+\begin{description}
+    \item[\texttt{Game.check\_win()}]
+    - Overridable function to check win condition in each game.
+
+    \item[\texttt{Game.switch\_turn()}]
+    - Switches turn of players after each move in every game.
+
+    \item[\texttt{Game.draw\_game\_over()}]
+    - Draws the game over screen after each game ends.
+
+    \item[\texttt{Game.update\_result()}]
+    - Updates result of each game based on the result of the game into \texttt{history.csv} which saves game name, winner, loser and date of playing of game.
+
+    \item[\texttt{Game.reset\_game()}]
+    - Resets game, this can be called during play to reset the board (overriden in othello.py).
+
+    \item[\texttt{Game.back\_game()}]
+    - Reverts the last move played in the game (overriden in othello.py).
+\end{description}
+
+Some of the other functions used in game.py are as follows:
+\begin{description}
+    \item[\texttt{play\_game()}] - Runs \texttt{games/*.py} files (game files) as a module using \texttt{\_\_import\_\_} inbuilt method.
+    \item[\texttt{analysis\_menu}] - Shows leaderboard after each game by calling \texttt{leaderboard.sh} using \texttt{subprocess} module. Also takes input for the user (through a GUI) for how the leaderboard data to be displayed is to be sorted.
+    \\
+    Additionally used for making analysis window using \texttt{matplotlib} module.
+    \item[\texttt{game\_loop}] - Runs the main game loop.
+    \item[\texttt{start\_menu}] - Runs GUI interface for the start menu.
+\end{description}
+
+Further in each of the game files, there is a \texttt{run()} function which is called by \texttt{game.py} in \texttt{play\_game()} function to run the games.
 \subsection{Games}
 In all of the following games, AI generated images have been used to make the design aesthetic and in accordance with the chosen theme of \textbf{Hollow Knight}.
+
 \subsubsection{Tic-Tac-Toe}
 This game is a modified version of usual tic-tac-toe \cite{tictactoeRules} with a 10 x 10 board. A player wins if they have 5 of their pieces (X or O) in a row (horizontally, vertically or diagonally)
-
+\\
 The following image shows the condition of winning in this game:
 \begin{figure}[H]
     \centering
@@ -126,6 +179,16 @@ The following image shows the condition of winning in this game:
     \caption{Ultimate Tic-Tac-Toe}
     \label{fig:tictactoe_menu}
 \end{figure}
+
+The code for \texttt{tictactoe.py} contains the \texttt{tictactoe} class which inherits the \texttt{Game} class. Some of the functions used are:
+
+\begin{description}
+    \item[{tictactoe.check\_win}] -  Checks win condition from the numpy array using numpy slicing, draws line at the end of the matching 5 X's or O's  using \texttt{numpy.where()}.
+    \item[{make\_board}] - Makes board GUI
+    \item[{update\_sprites}] - Updates the player sprites (represents the characters on left and right of the screen) after each move.
+\end{description}
+
+Some other functions were used for making the GUI of the game like \texttt{draw\_cross()}, \texttt{draw\_0()}, etc.
 
 \subsubsection{Othello (Reversi)}
 This game is the usual Othello \cite{othelloReversiRules} game played using white and black pieces. 
@@ -137,6 +200,13 @@ The following image is a still in othello game:
     \caption{Othello game}
     \label{fig:othello}
 \end{figure}
+
+The rules for this game are more complex than the other two as it includes valid move checking as well as score counting which adds more functions contributing to the GUI.
+Some of the notable functions used in this game are:
+\begin{description}
+    \item[{Othello.check\_win()}] - Checks win condition using \texttt{numpy.sum}\cite{numpyDocs}
+\end{description}
+
 \subsubsection{Connect Four}
 This game is the usual connect four \cite{connect4Rules} game played with coins falling down on a board. The theme chosen is the ancient four.
 \begin{figure}[H]
@@ -145,28 +215,78 @@ This game is the usual connect four \cite{connect4Rules} game played with coins 
     \caption{Connect four after win}
     \label{fig:connect4}
 \end{figure}
+
+This also has a \texttt{Connect4} class which inherits from the \texttt{Game} class. Some of the notable functions used in this are - 
+\begin{description}
+    \item[{Connect4.check\_win()}] - Checks the win condition from the numpy array using numpy slicing, and returns the matched pieces using \texttt{numpy.where}\cite{numpyDocs} to later show using glowing coins.
+    \item[{make\_screen()}] - Makes the screen design (mainly board) of the game after each turn which includes falling animation of the coin where the coin falls to its place in constant time.
+    \item[{update\_sprites()}] - Update the player sprites based on the turn.
+\end{description}
+
+Some other functions were used for making GUI of the game such as \texttt{make\_coin}, \texttt{make\_placeholders}, etc.
+
 \subsection{Leaderboard and Analytics}
-This is done from \texttt{leaderboard.sh} using awk\cite{awkDocs}.
+Leaderboard is created using \texttt{history.csv} which gets updated everytime when a game ends in the hub.
+\\
+\texttt{history.csv} is in the following format:
+\\
+\textbf{Game,Draw,Winner,Loser,Date}
+\\
+\\
+Here the columns denote the following:
+\begin{description}
+    \item[Game] - Contains game name
+    \item[Draw] - Is empty if no draw is made, otherwise it stores "Draw".
+    \item[Winner] - Contains the winner if there is no draw, otherwise holds the name of player 1.
+    \item[Loser] - Contains the loser if there is no draw, otherwise holds the name of player 2.
+    \item[Date] - Contains the date at which the game was played.
+\end{description}
+
+With the data contained in \texttt{history.csv}, leaderboard is created using \texttt{leaderboard.sh}. Some of the features of this script are as follows:
+\begin{itemize}
+    \item Uses awk \cite{awkDocs} to read the csv file line by line and create associative arrays having wins, losses and win-loss ratio.
+    \item Output given from awk is formatted based on "Sort by" input given by the user. The leaderboard can be sorted based on --- \textbf{wins}, \textbf{losses} or \textbf{win-loss ratio}.
+    \item Sort formatting is done using \texttt{sort} command in bash.
+\end{itemize}
+
+For each game leaderboard.sh displays leaderboards for each game in \textbf{terminal} containing username, wins, losses and win-loss ratio as follows:
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{leaderboard}
     \caption{Leaderbaord}
     \label{fig:leaderboard}
 \end{figure}
+
+Additionally, there is a window consisting of the following matplotlib charts:
+\begin{itemize}
+    \item \textbf{Top 5 Players (By Wins)} - Bar graph
+    \item \textbf{Top 5 Players (By Win-Loss Ratio)} - Bar graph
+    \item \textbf{Percentage of Wins} - Pie Chart
+    \item \textbf{Most Played Games (Percentage)} - Pie Chart
+\end{itemize}
+
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{charts}
+    \includegraphics[width=0.9\textwidth]{charts}
     \caption{Matplotlib charts}
     \label{fig:charts}
 \end{figure}
 \subsection{Directory Structure}
 The following directory structure has been used:
+\\
 \dirtree{%
 .1 PROJECT\_FOR\_CS108/.
 .2 \_\_pycache\_\_/.
 .2 .git/.
 .2 fonts/.
 .2 games/.
+.3 \_\_pycache\_\_/.
+.3 \_\_init\_\_.py.
+.3 connect4.py.
+.3 othello.py.
+.3 README.md.
+.3 tictactoe.py.
 .2 images/.
 .2 report\_images/.
 .2 venv/.
@@ -177,13 +297,17 @@ The following directory structure has been used:
 .2 leaderboard.sh.
 .2 main.sh.
 .2 makefile.
-.2 plot.png.
 .2 README.md.
 .2 references.bib.
 .2 report.pdf.
 .2 report.tex.
+.2 requirements.txt.
+.2 reset.sh.
 .2 users.tsv.
 }
+
+In the directory structure used, \texttt{\_\_init\_\_.py} has been made to make the directory \texttt{games/} into a package which can be used efficiently by the game engine to import the function \texttt{run()} and run the games.
+
 \section{Features and Additional Improvements}
 \begin{itemize}
     \item Added back and reset features in all games

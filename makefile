@@ -1,10 +1,12 @@
 MAIN = report
-
+IMAGES := $(wildcard report_images/*)
 # Compilers
 LATEX = pdflatex
 BIBTEX = bibtex
 
-all:
+all:$(MAIN).pdf
+
+$(MAIN).pdf: $(MAIN).tex references.bib $(IMAGES)
 	$(LATEX) $(MAIN).tex
 	$(BIBTEX) $(MAIN)
 	$(LATEX) $(MAIN).tex
