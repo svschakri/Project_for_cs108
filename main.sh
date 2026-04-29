@@ -69,7 +69,7 @@ for i in 1 2; do
 			fi 	
 			while true; do
 				echo -n "Password: "
-				read Pass
+				read -s Pass
 				hashPass=$(echo -n $Pass | sha256sum | cut -d " " -f1)
 				if [[ $hashPass != $(  grep -E "^${User}\b" users.tsv | cut -f 2 ) ]]; then  
 					echo -e "\e[31mPassword incorrect. Try again.\e[0m"
