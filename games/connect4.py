@@ -352,7 +352,7 @@ def run(user1, user2, screen):
                 running = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                print(mouse)
+                # print(mouse)
                 if reset_rect.collidepoint(event.pos):
                     game.reset_game()
                     board_matrix = game.board.matrix

@@ -66,6 +66,23 @@ GREEN = (0,255,0)
 GLOW_COLOR1 = (235, 64, 52)
 GLOW_COLOR2 = (52, 92, 235)
 
+#sprite_constanst 
+sprite_ht = [375, 375, 375, 375]
+sprite_wt = [193, 198, 315, 313]
+sprite_pos = [(120, 275), (1204, 275), (55,275), (1204, 275)]
+
+# sprites
+sprite_still_blue = pygame.image.load("images/sprite_still_blue.png")
+sprite_still_red = pygame.image.load("images/sprite_still_red.png")
+sprite_active_blue = pygame.image.load("images/sprite_active_blue.png")
+sprite_active_red = pygame.image.load("images/sprite_active_red.png")
+sprites = [sprite_still_blue, sprite_still_red, sprite_active_blue, sprite_active_red]
+
+for i in range(len(sprites)):
+    sprites[i] = pygame.transform.smoothscale(sprites[i], (sprite_wt[i], sprite_ht[i]))
+
+sprite_rects = [pygame.Rect(*sprite_pos[i], sprite_wt[i], sprite_ht[i]) for i in range(4)]
+
 # make a function to check win condition in new game class
 class othello(Game):
    def check_win(self):
@@ -92,7 +109,7 @@ def update_possible_moves(req_color,board_matrix):
             if board_matrix[i,j] != 0 :
                 continue
             #VERTICAL     x,y = pygame.mouse.get_pos()
-                print(x,y)- DOWN 
+                # print(x,y)- DOWN 
             if j<7 :
                 if board_matrix[i,j+1] == req_color :
                     a,b = i,j+1
@@ -389,6 +406,20 @@ def make_board(screen,board_matrix,Number_font, mouse):
                 if board_matrix[i][j] == 0:
                     make_board_circle(screen,i+1, j+1,0)
 
+
+def make_sprite(screen, status, turn):
+    # status = 0 --> passive
+    # status = 1 --> active
+    screen.blit(sprites[status*2 + turn-1], sprite_rects[status*2 + turn-1])
+
+def update_sprites(screen, turn):
+    if turn == 1:
+        make_sprite(screen, 0, 1)
+        make_sprite(screen, 1, 2)
+    elif turn == 2:
+        make_sprite(screen, 0, 2)
+        make_sprite(screen, 1, 1)
+
 def run(user1,user2, screen):
     INIT_TURN = 1
     player1 = Player(user1)
@@ -418,38 +449,14 @@ def run(user1,user2, screen):
         mouse = pygame.mouse.get_pos()
         turn = game.turn
 
-        if (turn == 1):
-            bg_col = BG_COLOR1
-            col_code = 1
-            title_text = f"{user1}'s turn"
-        else:
-            bg_col = BG_COLOR2
-            col_code = 2
-            title_text = f"{user2}'s turn"
+        piece_code = 1 + turn
         
-        screen.fill(bg_col)
         screen.blit(board_img)
         board_matrix = game_board.matrix
-        update_possible_moves(3-col_code,board_matrix)
-        make_title(screen,title_font,title_text)
-        make_board(screen, board_matrix,Number_font, mouse)
-        win_status = game.check_win()
-
-        if win_status == 1:
-            make_title(screen,title_font,f"{user1} WON!")
-            pygame.display.update()
-    
-        elif win_status == 2:
-            make_title(screen,title_font,f"{user2} WON!")
-            pygame.display.update()
-
-        elif win_status == 0:
-            make_title(screen,title_font,"DRAW!")
-            pygame.display.update()
-
-        command = game.update_result(screen, game, win_status)
-        if command != -1:
-            return command
+        update_possible_moves(3 - piece_code, board_matrix)
+        make_board(screen, board_matrix, Number_font, mouse)
+        update_sprites(screen, piece_code)
+        command = -1
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 command = 3
@@ -460,11 +467,18 @@ def run(user1,user2, screen):
                 for i in range(COLS):
                     for j in range(ROWS - 1, -1, -1):
                         if collide_box(i+1,j+1,mouse):
-                            if board_matrix[i][j] != col_code+0.5  : break
-                            make_board_circle(screen,i+1, j+1, col_code)
-                            board_matrix[i][j] = col_code
-                            update_values(i,j,board_matrix)
-                            # update_possible_moves(3-col_code)
+                            print(mouse)
+                            if board_matrix[i][j] != piece_code+0.5 :
+                                break
+                            make_board_circle(screen,i+1, j+1, piece_code)
+                            game.make_move((i, j), piece_code)
+                            update_sprites(screen, piece_code)
+                            
+                            win = game.check_win()
+                            update_values(i, j, board_matrix)
+                            command = game.update_result(screen, game, win)
+                            if command != -1:
+                                return command
                             game.switch_turn()
                             filled = True
                             break
@@ -472,5 +486,7 @@ def run(user1,user2, screen):
                     break
                     
         pygame.display.update()
+        if command != -1:
+            return command
 
     return command

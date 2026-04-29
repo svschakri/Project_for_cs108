@@ -227,7 +227,8 @@ def run(user1, user2, screen):
                 for i in range(COLS):
                     for j in range(ROWS - 1, -1, -1):
                         if collide_box(i+1,j+1,mouse):
-                            if board_matrix[i][j] != 0 : break
+                            if board_matrix[i][j] != 0 :
+                                break
                             # board_matrix[i][j] = turn
                             game.make_move((i, j), turn)
                             make_board_box(screen, i+1, j+1, turn)
