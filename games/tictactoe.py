@@ -32,9 +32,9 @@ col_gap = board_wt //10
 
 
 #sprite_constanst 
-sprite_ht = [375, 375, 375, 375]
-sprite_wt = [193, 198, 315, 313]
-sprite_pos = [(40, 510), (1204, 510), (55,510), (1204, 510)]
+sprite_ht = [375] * 8
+sprite_wt = [193, 198, 315, 313, 193, 198, 315, 313]
+sprite_pos = [(40, 510), (1204, 510), (55,510), (1204, 510), (40, 510), (1204, 510), (55, 510), (1204, 510)]
 
 # BACK
 back_rect= pygame.Rect(432,894,265,70)
@@ -47,12 +47,20 @@ sprite_still_blue = pygame.image.load("images/sprite_still_blue.png")
 sprite_still_red = pygame.image.load("images/sprite_still_red.png")
 sprite_active_blue = pygame.image.load("images/sprite_active_blue.png")
 sprite_active_red = pygame.image.load("images/sprite_active_red.png")
-sprites = [sprite_still_blue, sprite_still_red, sprite_active_blue, sprite_active_red]
+
+# sprites after game_over
+crying_blue = pygame.image.load("images/Lose_blue.png")
+happy_blue = pygame.image.load("images/Win_blue.png")
+
+crying_red = pygame.image.load("images/Lose_red.png")
+happy_red = pygame.image.load("images/Win_red.png")
+
+sprites = [sprite_still_blue, sprite_still_red, sprite_active_blue, sprite_active_red, crying_blue, happy_blue, crying_red, happy_red]
 
 for i in range(len(sprites)):
     sprites[i] = pygame.transform.smoothscale(sprites[i], (sprite_wt[i], sprite_ht[i]))
 
-sprite_rects = [pygame.Rect(*sprite_pos[i], sprite_wt[i], sprite_ht[i]) for i in range(4)]
+sprite_rects = [pygame.Rect(*sprite_pos[i], sprite_wt[i], sprite_ht[i]) for i in range(len(sprites))]
 
 # text rectangles
 text_rect1 = pygame.Rect(60, 44, 264, 107)
@@ -73,6 +81,7 @@ win_cross_img = pygame.transform.scale(win_cross_img,(col_gap/3*2,row_gap/3*2))
 # win zero image
 win_zero_img = pygame.image.load("images/Win_circle.png")
 win_zero_img = pygame.transform.scale(win_zero_img,(col_gap/3*2,row_gap/3*2))
+
 
 def draw_line(screen, x,y,theta) :
     X_centre = LEFT_BOARD + col_gap*x + col_gap // 2 
@@ -220,6 +229,16 @@ def draw_win_col(screen, x, y, theta, win):
         for i in range(5):
             make_board_box(screen, x + 1, y + i + 1, value_code)
 
+def draw_over(screen, win):
+    # if win == 1 --> draw happy_blue (sprites idx = 5) and crying_red (sprites idx = 6)
+    if win == 1:
+        screen.blit(sprites[5], sprite_rects[5])
+        screen.blit(sprites[6], sprite_rects[6])
+    # if win == 2 --> draw crying_blue (sprites idx = 4) and happy_red (sprites idx = 7)
+    else:
+        screen.blit(sprites[4], sprite_rects[4])
+        screen.blit(sprites[7], sprite_rects[7])
+
 def run(user1, user2, screen, flag):
     INIT_TURN = 1
     player1 = Player(user1)
@@ -266,7 +285,7 @@ def run(user1, user2, screen, flag):
                 hover_surface = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
                 hover_surface.fill((0, 0, 0, 50))
                 screen.blit(hover_surface, rect.topleft)
-                
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 command = 3
@@ -293,8 +312,12 @@ def run(user1, user2, screen, flag):
 
                             win_situation, x, y, theta = game.check_win((i, j))
                             if (win_situation == 1 or win_situation == 2):
+                                make_board(screen, board_matrix, mouse)
+                                write_name(screen,user1.capitalize(),text_rect1,font)
+                                write_name(screen,user2.capitalize(),text_rect2,font)
                                 draw_win_col(screen, x, y, theta, win_situation)
                                 draw_line(screen, x, y, theta)
+                                draw_over(screen, win_situation)
                             command = game.update_result(screen, game, win_situation)
                             game.switch_turn()
                             filled = True
