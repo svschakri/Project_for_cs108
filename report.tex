@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[12pt, letterpaper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{subcaption}
 \usepackage{amsmath}
@@ -29,7 +29,7 @@
 \lhead{Mini Game Hub}
 \title{Mini Game Hub}
 \author{Bipul Kumar and S.V.S. Chakri}
-\date{\date{April 2026}}
+\date{April 2026}
 
 \graphicspath{{report_images/}}
 
@@ -155,11 +155,11 @@ Some of the important functions in the \texttt{Game} class are:
 Some of the other functions used in game.py are as follows:
 \begin{description}
     \item[\texttt{play\_game()}] - Runs \texttt{games/*.py} files (game files) as a module using \texttt{\_\_import\_\_} inbuilt method.
-    \item[\texttt{analysis\_menu}] - Shows leaderboard after each game by calling \texttt{leaderboard.sh} using \texttt{subprocess} module. Also takes input for the user (through a GUI) for how the leaderboard data to be displayed is to be sorted.
+    \item[\texttt{analysis\_menu()}] - Shows leaderboard after each game by calling \texttt{leaderboard.sh} using \texttt{subprocess} module. Also takes input for the user (through a GUI) for how the leaderboard data to be displayed is to be sorted.
     \\
     Additionally used for making analysis window using \texttt{matplotlib} module.
-    \item[\texttt{game\_loop}] - Runs the main game loop.
-    \item[\texttt{start\_menu}] - Runs GUI interface for the start menu.
+    \item[\texttt{game\_loop()}] - Runs the main game loop.
+    \item[\texttt{start\_menu()}] - Runs GUI interface for the start menu.
 \end{description}
 
 Further in each of the game files, there is a \texttt{run()} function which is called by \texttt{game.py} in \texttt{play\_game()} function to run the games.
@@ -205,7 +205,7 @@ Some of the notable functions used in this game are:
     \item[\texttt{Othello.check\_win()}] - Checks win condition using \texttt{numpy.sum}
     \cite{numpyDocs}
     \item[\texttt{Othello.reset\_game()}] - Overrides the function defined in the \texttt{Game} class and resets the board based on the given initial condition.
-    \item[\texttt{Othello.back\_game()}] - Ovverrides the function defined in the \texttt{Game} class, calls \texttt{update\_possible\_moves} to revert back the move.
+    \item[\texttt{Othello.back\_game()}] - Overrides the function defined in the \texttt{Game} class, calls \texttt{update\_possible\_moves} to revert back the move.
     \item[\texttt{update\_possible\_moves()}] - Checks for the valid moves in each position by looping through the horizontal, vertical and diagonal lines from the last played position.
     \item[\texttt{update\_values()}] - Updates the matrix values after each move accordingly.
 \end{description}
