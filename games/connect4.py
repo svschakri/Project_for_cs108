@@ -150,10 +150,13 @@ for col in range(COLS):
 
 # reset rectangle
 reset_rect = pygame.Rect(514, 931, 140, 50)
-reset_img = None
+reset_img = pygame.image.load("images/reset_button.png")
+reset_img = pygame.transform(reset_img,(140, 50))
+
 # back rectangle
 back_rect = pygame.Rect(875, 931, 140, 50)
-back_img = None
+back_img = pygame.image.load("images/back_button.png")
+back_img = pygame.transform(back_img,(140, 50))
 
 class Connect4(Game):
     def check_win(self, move):
@@ -312,13 +315,13 @@ def update_screen(screen, board_matrix, game, mouse, i, j, turn):
         update_sprites(screen, turn)
         add_board(screen)
         make_placeholders(screen, game)
-        make_buttons(screen)
+        make_images_for_buttons(screen)
         pygame.display.flip()
     board_matrix[i][j] = turn
 
-def make_buttons(screen):
-    pygame.draw.rect(screen, (255, 0, 0), reset_rect)
-    pygame.draw.rect(screen, (0, 255, 0), back_rect)
+def make_images_for_buttons(screen):
+    screen.blit(back_img,back_rect)
+    screen.blit(reset_img,reset_rect)
     pass
 
 def draw_over(screen, win):
@@ -361,7 +364,7 @@ def run(user1, user2, screen, flag):
         update_sprites(screen, turn)
         make_placeholders(screen, game)
 
-        make_buttons(screen)
+        make_images_for_buttons(screen)
         command = -1
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
