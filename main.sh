@@ -35,12 +35,17 @@ for i in 1 2; do
 						fi
 					done  
 					while true; do
-						echo -n "Enter Password: "
-						read newPass
-						echo -n "Confirm Password: "
-						read  confirmedPass
+						echo "Enter Password: "
+						read -s newPass
+						if [ $newPass ==  "^$" ] ; then
+							echo -e "\e[31mEnter Non Empty Password\e[0m"
+							continue
+						fi
+						echo "Confirm Password: "
+						read -s confirmedPass
 						if [[ "${newPass}" != "${confirmedPass}" ]]; then
 							echo -e "\e[31mPasswords don't match. Try again.\e[0m"
+
 							continue
 						else 
 							hashedPass=$(echo -n "$newPass" | sha256sum | cut -d ' ' -f1)
