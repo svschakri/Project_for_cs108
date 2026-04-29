@@ -36,6 +36,11 @@ sprite_ht = [375, 375, 375, 375]
 sprite_wt = [193, 198, 315, 313]
 sprite_pos = [(40, 510), (1204, 510), (55,510), (1204, 510)]
 
+# BACK
+back_rect= pygame.Rect(432,985,265,70)
+
+#RESET
+reset_rect = pygame.Rect(830,985,265,70)
 
 # sprites
 sprite_still_blue = pygame.image.load("images/sprite_still_blue.png")
@@ -51,7 +56,7 @@ sprite_rects = [pygame.Rect(*sprite_pos[i], sprite_wt[i], sprite_ht[i]) for i in
 
 # text rectangles
 text_rect1 = pygame.Rect(60, 44, 264, 107)
-text_rect2 = pygame.Rect(1230, 156, 260, 110)
+text_rect2 = pygame.Rect(1230, 44, 260, 110)
 
 # cross image
 cross_img = pygame.image.load("images/cross_ttc.png")
@@ -155,7 +160,7 @@ def collide_box(x,y, mouse):
 
 def make_board(screen, board_matrix, mouse):
     center_y = TOP_BOARD + board_ht // 2
-   
+   #DCBE78
     for i in range(COLS):
         for j in range(ROWS):
             make_board_box(screen, i+1, j+1, board_matrix[i][j])
@@ -177,7 +182,11 @@ def update_sprites(screen, turn):
     elif turn == 2:
         make_sprite(screen, 0, 2)
         make_sprite(screen, 1, 1)
-
+def write_name(screen,text,rect,font) :
+        rendered_font = font.render(text, True, "BLACK")
+        text_rect = rendered_font.get_rect()
+        text_rect.center = rect.center
+        screen.blit(rendered_font, text_rect)
 def run(user1, user2, screen):
 
     INIT_TURN = 1
@@ -185,7 +194,7 @@ def run(user1, user2, screen):
     player2 = Player(user2)
 
     pygame.display.set_caption("Tic-Tac-Toe")
-    board_img = pygame.image.load("images/tic-tac-toe.png")
+    board_img = pygame.image.load("images/Tic-Tac-Toe_final.png")
     board_img = pygame.transform.scale(board_img,(SCREEN_WIDTH,SCREEN_HEIGHT))
 
     game_board = Board(10,10)
@@ -195,8 +204,8 @@ def run(user1, user2, screen):
 
     if not pygame.get_init():
         pygame.init()
-    title_font = pygame.font.SysFont("Calibri", 60)
     pygame.display.set_caption("Tic-Tac-Toe")
+    font = pygame.font.Font("./fonts/Cinzel,EB_Garamond/EB_Garamond/EBGaramond-VariableFont_wght.ttf", 48)
 
     pygame.event.clear()
     running = True
@@ -214,15 +223,25 @@ def run(user1, user2, screen):
         screen.blit(board_img, (0, 0))
         update_sprites(screen, turn)
         board_matrix = game_board.matrix
-
         make_board(screen, board_matrix, mouse)
+        write_name(screen,user1.capitalize(),text_rect1,font)
+        write_name(screen,user2.capitalize(),text_rect2,font)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 command = 3
                 running = False
-
             if event.type == pygame.MOUSEBUTTONDOWN:
-                # print(pygame.mouse.get_pos())
+                print(pygame.mouse.get_pos())
+                if back_rect.collidepoint(event.pos) :
+                    game.back_game()
+                    print("back")
+                    board_matrix=game.board.matrix
+                    continue
+                if reset_rect.collidepoint(event.pos) :
+                    game.reset_game()
+                    print("reset")
+                    board_matrix=game.board.matrix
+                    continue
                 filled = False
                 for i in range(COLS):
                     for j in range(ROWS - 1, -1, -1):
