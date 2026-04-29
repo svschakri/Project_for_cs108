@@ -74,10 +74,10 @@ row_gap = 18
 st_gap_x = 38
 st_gap_y = 16
 sprite_scale = 1.3
-sprite_ht = [100 * sprite_scale, 170 * sprite_scale]
-sprite_wt = [(sprite_ht[0] * 706) // 354, (sprite_ht[1] * 546) // 457]
+sprite_ht = [100 * sprite_scale,100 * sprite_scale, 170 * sprite_scale,170 * sprite_scale]
+sprite_wt = [(sprite_ht[0] * 706) // 354,(sprite_ht[0] * 706) // 354, (sprite_ht[1] * 546) // 457,(sprite_ht[1] * 546) // 457]
 coin_radius = 30
-sprite_pos = [(160, 440), (1210, 440)]
+sprite_pos = [(160, 440),(160, 440), (1210, 440),(1210, 440)]
 ph_wt = 550
 placeholder_dim = (ph_wt, (ph_wt * 379) // 676)
 placeholder_pos = [(-50, 690), (1030, 690)]
@@ -101,14 +101,16 @@ for i in range(2):
     glow_coins[i] = pygame.transform.smoothscale(glow_coins[i], (coin_radius*2, coin_radius*2))
 
 # sprites
-sprite_passive = pygame.image.load("images/sprite_passive.png")
-sprite_active = pygame.image.load("images/sprite_active.png")
-sprites = [sprite_passive, sprite_active]
+sprite_still_blue = pygame.image.load("images/sprite_still_blue.png")
+sprite_still_red = pygame.image.load("images/sprite_still_red.png")
+sprite_active_blue = pygame.image.load("images/sprite_active_blue.png")
+sprite_active_red = pygame.image.load("images/sprite_active_red.png")
+sprites = [sprite_still_blue,sprite_still_red, sprite_active_blue,sprite_active_red]
 
 for i in range(len(sprites)):
     sprites[i] = pygame.transform.smoothscale(sprites[i], (sprite_ht[i], sprite_wt[i]))
 
-sprite_rects = [pygame.Rect(*sprite_pos[i], sprite_wt[i], sprite_ht[i]) for i in range(2)]
+sprite_rects = [pygame.Rect(*sprite_pos[i], sprite_wt[i], sprite_ht[i]) for i in range(4)]
 
 # board
 board_img = pygame.image.load("images/connect4_board.png")
@@ -224,15 +226,15 @@ def add_board(screen):
 def make_sprite(screen, status, turn):
     # status = 0 --> passive
     # status = 1 --> active
-    screen.blit(sprites[status], sprite_rects[turn-1])
+    screen.blit(sprites[status*2+turn-1], sprite_rects[turn])
 
 def update_sprites(screen, turn):
     if turn == 1:
-        make_sprite(screen, 0, 1)
-        make_sprite(screen, 1, 2)
+        make_sprite(screen, 0, 1) # blue active
+        make_sprite(screen, 1, 2) # red still
     elif turn == 2:
-        make_sprite(screen, 0, 2)
-        make_sprite(screen, 1, 1)
+        make_sprite(screen, 0, 2) # red active
+        make_sprite(screen, 1, 1) # blue still
 
 def update_screen(screen, board_matrix, game, mouse, i, j, turn):
     board_matrix[i][j] = 0

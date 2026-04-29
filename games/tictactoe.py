@@ -26,63 +26,48 @@ SCREEN_HEIGHT = 1023
 screen_size = (SCREEN_WIDTH, SCREEN_HEIGHT)
 
 
-# title dimensions
-title_ht, title_wt = SCREEN_HEIGHT // 7, SCREEN_WIDTH
-TITLE_COLOR = (85, 250, 148)
-TITLE_FONT_COLOR = (255, 255, 255)
-
-
-# bottom clearence 
-bottom_wt = SCREEN_WIDTH
-bottom_ht = SCREEN_HEIGHT // 20 
-
 # board dimensions
 ROWS = 10
 COLS = 10
-title_board_gap = title_ht // 4
-board_wt = (2 * SCREEN_WIDTH) // 3
-board_ht  = SCREEN_HEIGHT - title_ht-bottom_ht
+LEFT_BOARD = 453
+TOP_BOARD = 236
+board_wt = 630
+board_ht  = 577
 row_gap = board_ht // 10
 col_gap = board_wt //10
 
 
-# colors used
-BG_COLOR1= (245, 88, 49)
-BG_COLOR2 = (85, 85, 250)
-BOARD_COLOR = (104, 118, 143)
-BALL_COLOR1 = (255, 0, 0)
-BALL_COLOR2 = (0, 0, 255)
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-GREY = (152, 163, 181) 
+#sprite_constanst 
+sprite_ht = [375 ,375 ,375 ,375 ]
+sprite_wt = [300,300,250,250]
+sprite_pos = [(40,),(55,500), (1204, 458), (1204, 458)]
+
+
+# sprites
+sprite_still_blue = pygame.image.load("images/sprite_still_blue.png")
+sprite_still_red = pygame.image.load("images/sprite_still_red.png")
+sprite_active_blue = pygame.image.load("images/sprite_active_blue.png")
+sprite_active_red = pygame.image.load("images/sprite_active_red.png")
+sprites = [sprite_still_blue,sprite_still_red, sprite_active_blue,sprite_active_red]
+
+for i in range(len(sprites)):
+    sprites[i] = pygame.transform.smoothscale(sprites[i], (sprite_ht[i], sprite_wt[i]))
+
+sprite_rects = [pygame.Rect(*sprite_pos[i], sprite_wt[i], sprite_ht[i]) for i in range(4)]
+
 
 def draw_line(screen, x,y,theta) :
-    X_centre = (SCREEN_WIDTH - board_wt)/2 + col_gap*x + col_gap // 2 
-    Y_centre =  title_ht + title_board_gap + row_gap*y + row_gap // 2
+    X_centre = LEFT_BOARD + col_gap*x + col_gap // 2 
+    Y_centre =  TOP_BOARD+ row_gap*y + row_gap // 2
     X_final = X_centre if theta == 90 else X_centre + 4*col_gap 
     if theta == -45 :
         X_final =X_centre - 4*col_gap 
     Y_final = Y_centre if theta == 0 else Y_centre + 4*row_gap 
-    pygame.draw.line(screen,BLACK,(X_centre,Y_centre),(X_final,Y_final),3) 
+    pygame.draw.line(screen,(0,0,0),(X_centre,Y_centre),(X_final,Y_final),3) 
 
 
 # make a function to check win condition in new game class
 class tictactoe(Game):
-    def for_each_box(self,arr):
-        hori_2 = np.any(np.all(arr)==2,axis=1)
-        col_2 = np.any(np.all(arr)==2,axis=0)
-        hori_1 = np.any(np.all(arr)==1,axis=1)
-        col_1 = np.any(np.all(arr)==1,axis=0)
-        if (hori_2 or col_2 ) :
-            return 2
-        if (hori_1 or col_1 ) :
-            return 1
-        if(len(set(np.diag(arr)))==1) : 
-            return arr[2,2]
-        if(len(set(np.diag(np.fliplr(arr))))==1) : 
-            return arr[2,2]
-        return 0
-
     def check_win(self, screen):
         board_matrix = self.board.matrix
         board_t = np.transpose(board_matrix)
@@ -161,63 +146,40 @@ class tictactoe(Game):
         else:
             return -1
 
-def make_title(screen, title_font, text_str):
-    bg_rect = pygame.Rect(0, 0, SCREEN_WIDTH, title_ht)
-    bg_rect.center = (SCREEN_WIDTH // 2, title_ht // 2)
-
-    pygame.draw.rect(screen, TITLE_COLOR, bg_rect)
-    text = title_font.render(text_str, True, TITLE_FONT_COLOR)
-    text_rect = text.get_rect(center = bg_rect.center)
-    screen.blit(text, text_rect)
-
 def make_board_box(screen, x, y, value_code ):
     gap_x = col_gap
     gap_y = row_gap
-    center_x = (SCREEN_WIDTH - board_wt) // 2  + (x-1) * (gap_x) + gap_x//2
-    center_y = title_ht + title_board_gap + (y-1) * (gap_y) + gap_y//2
+    center_x = LEFT_BOARD  + (x-1) * (gap_x) + gap_x//2
+    center_y = TOP_BOARD+ (y-1) * (gap_y) + gap_y//2
 
-    if (value_code == 0):
-        draw_rect(screen, center_x-gap_x//2,center_y-gap_y//2)
-    elif (value_code == 1):
-        draw_cross(screen, center_x-gap_x//2,center_y-gap_y//2,2*min(row_gap,col_gap)//3)
+    if(value_code == 1):
+        draw_cross(screen, center_x-gap_x//3,center_y-gap_y//3,2*min(row_gap,col_gap)//3)
     elif (value_code == 2):
-        draw_O(screen, center_x-gap_x//2,center_y-gap_y//2,min(row_gap,col_gap)//3)
-    else:
-        ball_color = GREY
+        draw_O(screen, center_x-gap_x//3,center_y-gap_y//3,min(row_gap,col_gap)//3)
 
-def draw_rect(screen, x,y):
-    pygame.draw.rect(screen,BLACK,(x,y,col_gap,row_gap),3)
 
 def draw_cross(screen, x,y,len):
-
-    dia_len = pow(pow(col_gap,2)+pow(row_gap,2),0.5) 
-
-    pygame.draw.rect(screen,BLACK,(x,y,col_gap,row_gap),3)
-    pygame.draw.line(screen,WHITE,(x+ (dia_len-len)/2*(col_gap/dia_len) , y+ (dia_len-len)/2*(row_gap/dia_len)  ),(x+ col_gap - (dia_len-len)/2*(col_gap/dia_len) , y+row_gap- (dia_len-len)/2*(row_gap/dia_len)  ),3)
-    pygame.draw.line(screen,WHITE,(x+ (dia_len-len)/2*(col_gap/dia_len) , y+row_gap- (dia_len-len)/2*(row_gap/dia_len)  ),(x+ col_gap - (dia_len-len)/2*(col_gap/dia_len) , y+ (dia_len-len)/2*(row_gap/dia_len)  ),3)
-
+    img = pygame.image.load("images/cross_ttc.png")
+    img = pygame.transform.scale(img,(col_gap/3*2,row_gap/3*2))
+    screen.blit(img,(x,y)) # check whether this works or not
 
 
 def draw_O(screen, x,y,r):
-    pygame.draw.rect(screen,BLACK,(x,y,col_gap,row_gap),3)
-    pygame.draw.circle(screen,WHITE,(x+col_gap//2,y+row_gap//2),r,3)
-
+    img = pygame.image.load("images/circle_ttc.png")
+    img = pygame.transform.scale(img,(col_gap/3*2,row_gap/3*2))
+    screen.blit(img,(x,y)) # check whether this works or not
 
 def collide_box(x,y, mouse):
-    top = title_ht + title_board_gap + (y-1)*row_gap 
-    left = (SCREEN_WIDTH - board_wt) // 2 + (x-1) * (col_gap)
+    top = TOP_BOARD + (y-1)*row_gap 
+    left = LEFT_BOARD + (x-1) * (col_gap)
 
     col_rect = pygame.Rect(left, top, col_gap, row_gap)
     return col_rect.collidepoint(mouse)
 
 
 def make_board(screen, board_matrix, mouse):
-    center_y = title_ht + title_board_gap + board_ht // 2
-    board_rect = pygame.Rect(0, 0, board_wt, board_ht)
-    board_rect.center = (SCREEN_WIDTH // 2, center_y)
-
+    center_y = TOP_BOARD + board_ht // 2
    
-    pygame.draw.rect(screen, BOARD_COLOR, board_rect, 0, 10)
     for i in range(COLS):
         for j in range(ROWS):
             make_board_box(screen, i+1, j+1, board_matrix[i][j])
@@ -227,6 +189,18 @@ def make_board(screen, board_matrix, mouse):
             if collide_box(i,j,mouse):
                 if board_matrix[i][j] == 0:
                     make_board_box(screen, i+1, j+1,0) 
+def make_sprite(screen, status, turn):
+    # status = 0 --> passive
+    # status = 1 --> active
+
+    screen.blit(sprites[status*2+turn-1], sprite_rects[turn])
+def update_sprites(screen, turn):
+    if turn == 1:
+        make_sprite(screen, 0, 1)
+        make_sprite(screen, 1, 2)
+    elif turn == 2:
+        make_sprite(screen, 0, 2)
+        make_sprite(screen, 1, 1)
 
 def run(user1, user2, screen):
 
@@ -235,7 +209,7 @@ def run(user1, user2, screen):
     player2 = Player(user2)
 
     pygame.display.set_caption("Tic-Tac-Toe")
-    board_img = pygame.image.load("images/othello_board.png")
+    board_img = pygame.image.load("images/tic-tac-toe.png")
     board_img = pygame.transform.scale(board_img,(SCREEN_WIDTH,SCREEN_HEIGHT))
 
     game_board = Board(10,10)
@@ -252,41 +226,33 @@ def run(user1, user2, screen):
     running = True
 
     while running:
+        clock = pygame.time.Clock()
+        clock.tick(120)
         mouse = pygame.mouse.get_pos()
-        turn = game.turn
+        turn = game.turn+1
 
+        screen.blit(board_img, (0, 0))
         win_situation = game.check_win(screen)
 
         if win_situation == 1:
-            make_title(screen, title_font, f"{user1} WON!")
+            # make_title(screen, title_font, f"{user1} WON!")
             pygame.display.update()
 
         elif win_situation == 2:
-            make_title(screen, title_font, f"{user2} WON!")
+            # make_title(screen, title_font, f"{user2} WON!")
             pygame.display.update()
 
         elif win_situation == 0:
-            make_title(screen, title_font, "DRAW!")
+            # make_title(screen, title_font, "DRAW!") 
             pygame.display.update()
         
         command = game.update_result(screen, title_font, game, win_situation)
         if command != -1:
             return command
-        
-        if (turn == 1):
-            bg_col = BG_COLOR1
-            val_code = 1
-            title_text = f"{user1}'s turn"
-        else:
-            bg_col = BG_COLOR2
-            val_code = 2
-            title_text = f"{user2}'s turn"
-        
-        screen.fill(bg_col)
         screen.blit(board_img)
+        update_sprites(screen, turn)
         board_matrix = game_board.matrix
 
-        make_title(screen, title_font, title_text)
         make_board(screen, board_matrix, mouse)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -294,13 +260,15 @@ def run(user1, user2, screen):
                 running = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
+                print(pygame.mouse.get_pos())
                 filled = False
                 for i in range(COLS):
                     for j in range(ROWS - 1, -1, -1):
                         if collide_box(i+1,j+1,mouse):
                             if board_matrix[i][j] != 0 : break
-                            make_board_box(screen, i+1, j+1, val_code)
-                            board_matrix[i][j] = val_code
+                            make_board_box(screen, i+1, j+1, turn)
+                            update_sprites(screen,turn)
+                            board_matrix[i][j] = turn
                             game.switch_turn()
                             filled = True
                             break
