@@ -75,10 +75,10 @@ col_gap = 24
 row_gap = 18
 st_gap_x = 38
 st_gap_y = 16
-sprite_ht = [250] * 4
-sprite_wt = [(sprite_ht[0] * 359) // 695,(sprite_ht[0] * 363) // 687, (sprite_ht[1] * 457) // 546,(sprite_ht[1] * 458) // 585]
+sprite_ht = [250] * 4 + [500, 400, 500, 400]
+sprite_wt = [(sprite_ht[0] * 359) // 695,(sprite_ht[0] * 363) // 687, (sprite_ht[1] * 457) // 546,(sprite_ht[1] * 458) // 585, (sprite_ht[4] * 352) // 710, (sprite_ht[5] * 458) // 585, (sprite_ht[6] * 306) // 816, (sprite_ht[7] * 458) // 545]
 coin_radius = 30
-sprite_pos = [(160, 440),(160, 440), (1210, 440),(1210, 440)]
+sprite_pos = [(160, 440),(160, 440), (1210, 440),(1210, 440), (160, 270), (100, 370), (1170, 270), (1140, 370)]
 ph_wt = 550
 placeholder_dim = (ph_wt, (ph_wt * 379) // 676)
 placeholder_pos = [(-50, 690), (1030, 690)]
@@ -88,14 +88,13 @@ FALLING_TIME = 15
 screen_img = pygame.image.load("images/connect4_screen.png")
 screen_img = pygame.transform.scale(screen_img, (SCREEN_WIDTH, SCREEN_HEIGHT))
 # coins
+coin1 = pygame.image.load("images/silver_connect4-removebg.png")
+glow_coin1 = pygame.image.load("images/silver_connect4_glow.png")
+win_glow_coin1 = pygame.image.load("images/spider_glowing.png")
 
-coin1 = pygame.image.load("images/bronze_connect4-removebg.png")
-glow_coin1 = pygame.image.load("images/bronze_connect4_glowing.png")
-win_glow_coin1 = pygame.image.load("images/skull_glowing.png")
-
-coin2 = pygame.image.load("images/silver_connect4-removebg.png")
-glow_coin2 = pygame.image.load("images/silver_connect4_glow.png")
-win_glow_coin2 = pygame.image.load("images/spider_glowing.png")
+coin2 = pygame.image.load("images/bronze_connect4-removebg.png")
+glow_coin2 = pygame.image.load("images/bronze_connect4_glowing.png")
+win_glow_coin2 = pygame.image.load("images/skull_glowing.png")
 
 coins = [coin1, coin2]
 glow_coins = [glow_coin1, glow_coin2] 
@@ -106,17 +105,24 @@ for i in range(2):
     glow_coins[i] = pygame.transform.smoothscale(glow_coins[i], (coin_radius*2, coin_radius*2))
     win_glow_coins[i] = pygame.transform.smoothscale(win_glow_coins[i], (coin_radius*2, coin_radius*2))
 
+# sprites after game_over
+crying_blue = pygame.image.load("images/Lose_blue.png")
+happy_blue = pygame.image.load("images/Win_blue.png")
+
+crying_red = pygame.image.load("images/Lose_red.png")
+happy_red = pygame.image.load("images/Win_red.png")
+
 # sprites
 sprite_still_blue = pygame.image.load("images/sprite_still_blue.png")
 sprite_still_red = pygame.image.load("images/sprite_still_red.png")
 sprite_active_blue = pygame.image.load("images/sprite_active_blue.png")
 sprite_active_red = pygame.image.load("images/sprite_active_red.png")
-sprites = [sprite_still_blue,sprite_still_red, sprite_active_blue,sprite_active_red]
+sprites = [sprite_still_blue, sprite_still_red, sprite_active_blue, sprite_active_red, crying_blue, happy_blue, crying_red, happy_red]
 
 for i in range(len(sprites)):
     sprites[i] = pygame.transform.smoothscale(sprites[i], (sprite_wt[i], sprite_ht[i]))
 
-sprite_rects = [pygame.Rect(*sprite_pos[i], sprite_wt[i], sprite_ht[i]) for i in range(4)]
+sprite_rects = [pygame.Rect(*sprite_pos[i], sprite_wt[i], sprite_ht[i]) for i in range(len(sprites))]
 
 # board
 board_img = pygame.image.load("images/connect4_board.png")
@@ -226,7 +232,7 @@ def make_win_glow(screen, x, y, turn, theta):
         for i in range(4):
             x_i = x + i
             y_i = y
-            make_board_coin(screen, x_i, y, turn, glow=2)
+            make_board_coin(screen, x_i, y_i, turn, glow=2)
     elif theta == -45 :
         for i in range(4):
             x_i = x - i
@@ -287,11 +293,11 @@ def make_sprite(screen, status, turn):
 
 def update_sprites(screen, turn):
     if turn == 1:
-        make_sprite(screen, 0, 1) # blue active
-        make_sprite(screen, 1, 2) # red still
+        make_sprite(screen, 1, 1) # blue active
+        make_sprite(screen, 0, 2) # red still
     elif turn == 2:
-        make_sprite(screen, 0, 2) # red active
-        make_sprite(screen, 1, 1) # blue still
+        make_sprite(screen, 0, 1) # red active
+        make_sprite(screen, 1, 2) # blue still
 
 def update_screen(screen, board_matrix, game, mouse, i, j, turn):
     board_matrix[i][j] = 0
@@ -315,6 +321,16 @@ def make_buttons(screen):
     pygame.draw.rect(screen, (0, 255, 0), back_rect)
     pass
 
+def draw_over(screen, win):
+    # if win == 1 --> draw happy_blue (sprites idx = 6) and crying_red (sprites idx = 5)
+    if win == 1:
+        screen.blit(sprites[5], sprite_rects[5])
+        screen.blit(sprites[6], sprite_rects[6])
+    # if win == 2 --> draw crying_blue (sprites idx = 4) and happy_red (sprites idx = 7)
+    else:
+        screen.blit(sprites[4], sprite_rects[4])
+        screen.blit(sprites[7], sprite_rects[7])
+
 def run(user1, user2, screen, flag):
     INIT_TURN = 1
     player1 = Player(user1)
@@ -337,7 +353,7 @@ def run(user1, user2, screen, flag):
         clock = pygame.time.Clock()
         clock.tick(MAX_FPS)
         mouse = pygame.mouse.get_pos()
-        turn = game.turn + 1
+        turn = 2 - game.turn
 
         screen.blit(screen_img, (0, 0))
         make_screen(screen, board_matrix, mouse)
@@ -371,7 +387,13 @@ def run(user1, user2, screen, flag):
 
                                 win, x, y, theta = game.check_win((i, j))
                                 if (win == 1 or win == 2):
+                                    screen.blit(screen_img, (0, 0))
+                                    make_screen(screen, board_matrix, mouse)
+                                    add_board(screen)
                                     make_win_glow(screen, x, y, turn, theta)
+                                    draw_over(screen, win)
+                                    make_placeholders(screen, game)
+
 
                                 command = game.update_result(screen, game, win)
 

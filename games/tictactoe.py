@@ -32,9 +32,11 @@ col_gap = board_wt //10
 
 
 #sprite_constanst 
-sprite_ht = [375] * 8
-sprite_wt = [193, 198, 315, 313, 186, 198, 140, 313]
-sprite_pos = [(40, 510), (1204, 510), (55,510), (1204, 510), (40, 510), (55, 510), (1204, 510), (1204, 510)]
+scale1 = 2.2
+scale2 = 1.5
+sprite_ht = [375] * 4 + [375 * scale1, 375 * scale2, 375 * scale1, 375 * scale2]
+sprite_wt = [193, 198, 315, 313, 160 * scale1, 315 * scale2, 140 * scale1, 315 * scale2]
+sprite_pos = [(40, 510), (1204, 510), (55,510), (1204, 510), (0, 250), (-30, 450), (1150, 205), (1100, 450)]
 
 # BACK
 back_rect= pygame.Rect(432,894,265,70)
@@ -312,6 +314,7 @@ def run(user1, user2, screen, flag):
 
                             win_situation, x, y, theta = game.check_win((i, j))
                             if (win_situation == 1 or win_situation == 2):
+                                screen.blit(board_img, (0, 0))
                                 make_board(screen, board_matrix, mouse)
                                 write_name(screen,user1.capitalize(),text_rect1,font)
                                 write_name(screen,user2.capitalize(),text_rect2,font)
