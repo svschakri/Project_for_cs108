@@ -68,6 +68,11 @@ sprite_rects = [pygame.Rect(*sprite_pos[i], sprite_wt[i], sprite_ht[i]) for i in
 text_rect1 = pygame.Rect(60, 44, 264, 107)
 text_rect2 = pygame.Rect(1230, 44, 260, 110)
 
+#final images position of title like winner and loser
+p1_fin_rect = pygame.Rect(60, 244, 265, 140)
+p2_fin_rect = pygame.Rect(1230, 244, 265, 140)
+
+
 # cross image
 cross_img = pygame.image.load("images/cross_ttc.png")
 cross_img = pygame.transform.scale(cross_img,(col_gap/3*2,row_gap/3*2))
@@ -232,12 +237,21 @@ def draw_win_col(screen, x, y, theta, win):
             make_board_box(screen, x + 1, y + i + 1, value_code)
 
 def draw_over(screen, win):
+    win_title_img = pygame.image.load("images/winner_title.png")
+    win_title_img = pygame.transform.scale(win_title_img,(265,140))
+    lose_title_img = pygame.image.load("images/loser_title.png")
+    lose_title_img = pygame.transform.scale(lose_title_img,(265,140))
+
     # if win == 1 --> draw happy_blue (sprites idx = 6) and crying_red (sprites idx = 5)
     if win == 1:
+        screen.blit(win_title_img,p1_fin_rect)
+        screen.blit(lose_title_img,p2_fin_rect)
         screen.blit(sprites[5], sprite_rects[5])
         screen.blit(sprites[6], sprite_rects[6])
     # if win == 2 --> draw crying_blue (sprites idx = 4) and happy_red (sprites idx = 7)
     else:
+        screen.blit(win_title_img,p2_fin_rect)
+        screen.blit(lose_title_img,p1_fin_rect)
         screen.blit(sprites[4], sprite_rects[4])
         screen.blit(sprites[7], sprite_rects[7])
 
