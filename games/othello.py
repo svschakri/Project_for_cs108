@@ -132,7 +132,7 @@ class othello(Game):
             return 2 # player 2 wins
         else:
             return 0 # draw 
-    if (no_of_possible(board_matrix,1) == 0 and np.sum(board_matrix,2) == 0) : 
+    if (no_of_possible(board_matrix,1) == 0 and no_of_possible(board_matrix,2) == 0) : 
         if a > b:
             return 1 #player 1 wins
         elif b > a:
@@ -559,9 +559,8 @@ def run(user1,user2, screen, flag):
                             if (win == 1 or win == 2) :
                                 screen.blit(board_img,(0,0))
                                 write_text(screen,user1.capitalize(),Player1_name_rect,font,"#E2E8F0")
-                                write_text(screen,str(np.sum(board_matrix==2)),Player1_score_rect,font,"#E2E8F0")
                                 write_text(screen,user2.capitalize(),Player2_name_rect,font,"#E2E8F0")
-                                write_text(screen,str(np.sum(board_matrix==1)),Player2_score_rect,font,"#E2E8F0")
+                                make_board(screen,board_matrix,font,mouse)
                                 draw_over(screen, win)
                             command = game.update_result(screen, game, win)
                             if command != -1:
