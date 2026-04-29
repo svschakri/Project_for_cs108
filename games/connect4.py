@@ -88,13 +88,14 @@ FALLING_TIME = 15
 screen_img = pygame.image.load("images/connect4_screen.png")
 screen_img = pygame.transform.scale(screen_img, (SCREEN_WIDTH, SCREEN_HEIGHT))
 # coins
-coin1 = pygame.image.load("images/silver_connect4-removebg.png")
-glow_coin1 = pygame.image.load("images/silver_connect4_glow.png")
-win_glow_coin1 = pygame.image.load("images/spider_glowing.png")
 
-coin2 = pygame.image.load("images/bronze_connect4-removebg.png")
-glow_coin2 = pygame.image.load("images/bronze_connect4_glowing.png")
-win_glow_coin2 = pygame.image.load("images/skull_glowing.png")
+coin1 = pygame.image.load("images/bronze_connect4-removebg.png")
+glow_coin1 = pygame.image.load("images/bronze_connect4_glowing.png")
+win_glow_coin1 = pygame.image.load("images/skull_glowing.png")
+
+coin2 = pygame.image.load("images/silver_connect4-removebg.png")
+glow_coin2 = pygame.image.load("images/silver_connect4_glow.png")
+win_glow_coin2 = pygame.image.load("images/spider_glowing.png")
 
 coins = [coin1, coin2]
 glow_coins = [glow_coin1, glow_coin2] 

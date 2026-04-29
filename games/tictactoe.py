@@ -27,14 +27,14 @@ LEFT_BOARD = 453
 TOP_BOARD = 236
 board_wt = 630
 board_ht  = 577
-row_gap = board_ht // 10
+row_gap = board_ht // 10 + 1
 col_gap = board_wt //10
 
 
 #sprite_constanst 
 sprite_ht = [375, 375, 375, 375]
 sprite_wt = [193, 198, 315, 313]
-sprite_pos = [(40, None),(55,458), (1204, 458), (1204, 458)]
+sprite_pos = [(40, 510), (1204, 510), (55,510), (1204, 510)]
 
 
 # sprites
@@ -48,6 +48,10 @@ for i in range(len(sprites)):
     sprites[i] = pygame.transform.smoothscale(sprites[i], (sprite_wt[i], sprite_ht[i]))
 
 sprite_rects = [pygame.Rect(*sprite_pos[i], sprite_wt[i], sprite_ht[i]) for i in range(4)]
+
+# text rectangles
+text_rect1 = pygame.Rect(60, 44, 264, 107)
+text_rect2 = pygame.Rect(1230, 156, 260, 110)
 
 # cross image
 cross_img = pygame.image.load("images/cross_ttc.png")
@@ -129,9 +133,9 @@ def make_board_box(screen, x, y, value_code ):
     center_y = TOP_BOARD+ (y-1) * (gap_y) + gap_y//2
 
     if(value_code == 1):
-        draw_cross(screen, center_x-gap_x//3,center_y-gap_y//3,2*min(row_gap,col_gap)//3)
+        draw_O(screen, center_x-gap_x//3,center_y-gap_y//3,2*min(row_gap,col_gap)//3)
     elif (value_code == 2):
-        draw_O(screen, center_x-gap_x//3,center_y-gap_y//3,min(row_gap,col_gap)//3)
+        draw_cross(screen, center_x-gap_x//3,center_y-gap_y//3,min(row_gap,col_gap)//3)
 
 
 def draw_cross(screen, x,y,len):
@@ -165,7 +169,7 @@ def make_sprite(screen, status, turn):
     # status = 0 --> passive
     # status = 1 --> active
 
-    screen.blit(sprites[status*2+turn-1], sprite_rects[turn])
+    screen.blit(sprites[status*2+turn-1], sprite_rects[status*2+turn-1])
 def update_sprites(screen, turn):
     if turn == 1:
         make_sprite(screen, 0, 1)
@@ -203,7 +207,7 @@ def run(user1, user2, screen):
 
         # clock.tick(120)
         mouse = pygame.mouse.get_pos()
-        turn = 2 - game.turn
+        turn = 1 + game.turn
 
         command = -1
 
@@ -218,7 +222,7 @@ def run(user1, user2, screen):
                 running = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                print(pygame.mouse.get_pos())
+                # print(pygame.mouse.get_pos())
                 filled = False
                 for i in range(COLS):
                     for j in range(ROWS - 1, -1, -1):
