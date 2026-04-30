@@ -418,6 +418,7 @@ if __name__ == "__main__":
                             running = game_loop(game_name, screen)
                             pygame.display.set_caption("GAME HUB")
             if not running:
+                # Breaks when game_loop() returns False to quit
                 break
             pygame.display.update()
 

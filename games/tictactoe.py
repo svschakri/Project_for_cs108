@@ -1,13 +1,10 @@
 import numpy as np 
-import matplotlib
-import pathlib
 import sys
 import os 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1" # what is it doing
 import pygame
-import time
-import subprocess
 
+# Add the parent directory of the current file to Python's module search path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 from game import Game, Player, Board
 
@@ -31,17 +28,17 @@ row_gap = board_ht // 10 + 1
 col_gap = board_wt //10
 
 
-#sprite_constanst 
+# sprite constants
 scale1 = 2.2
 scale2 = 1.5
 sprite_ht = [375] * 4 + [375 * scale1, 375 * scale2, 375 * scale1, 375 * scale2]
 sprite_wt = [193, 198, 315, 313, 160 * scale1, 315 * scale2, 140 * scale1, 315 * scale2]
 sprite_pos = [(40, 510), (1204, 510), (55,510), (1204, 510), (0, 250), (-30, 450), (1150, 205), (1100, 450)]
 
-# BACK
+# Back button rectangle
 back_rect= pygame.Rect(432,894,265,70)
 
-#RESET
+# Reset button rectangle
 reset_rect = pygame.Rect(830,894,265,70)
 
 # sprites
@@ -50,7 +47,7 @@ sprite_still_red = pygame.image.load("images/sprite_still_red.png")
 sprite_active_blue = pygame.image.load("images/sprite_active_blue.png")
 sprite_active_red = pygame.image.load("images/sprite_active_red.png")
 
-# sprites after game_over
+# sprites after game over
 crying_blue = pygame.image.load("images/Lose_blue.png")
 happy_blue = pygame.image.load("images/Win_blue.png")
 
@@ -89,7 +86,7 @@ win_cross_img = pygame.transform.scale(win_cross_img,(col_gap/3*2,row_gap/3*2))
 win_zero_img = pygame.image.load("images/Win_circle.png")
 win_zero_img = pygame.transform.scale(win_zero_img,(col_gap/3*2,row_gap/3*2))
 
-
+# Draw line based on coordinates returned from check_win at some angle
 def draw_line(screen, x,y,theta) :
     X_centre = LEFT_BOARD + col_gap*x + col_gap // 2 
     Y_centre =  TOP_BOARD + row_gap*y + row_gap // 2
@@ -100,8 +97,13 @@ def draw_line(screen, x,y,theta) :
     pygame.draw.line(screen,(0,0,0),(X_centre,Y_centre),(X_final,Y_final),6) 
 
 
-# make a function to check win condition in new game class
+# Make a function to check win condition in new game class
 class tictactoe(Game):
+    # Returns [win_status, x, y, angle]
+    # Horizontal match --> (x, y) is the leftmost
+    # Vertical match --> (x, y) is the topmost (less y)
+    # Main diagonal match --> (x, y) is the leftmost and the topmost (less y)
+    # Anti diagonal match --> (x, y) is the rightmost and the topmost (more y)
     def check_win(self, move):
             board_matrix = self.board.matrix
             x, y = move
@@ -155,6 +157,7 @@ class tictactoe(Game):
                 
             return [-1, None, None, None]
 
+# ADd piece to a particular coordinate
 def make_board_box(screen, x, y, value_code):
     gap_x = col_gap
     gap_y = row_gap
@@ -182,6 +185,7 @@ def draw_win_zero(screen, x, y):
 def draw_O(screen, x, y):
     screen.blit(zero_img,(x,y)) #
 
+# Check whether mouse is in the interior of the box at coordinates (x, y)
 def collide_box(x,y, mouse):
     top = TOP_BOARD + (y-1)*row_gap 
     left = LEFT_BOARD + (x-1) * (col_gap)
@@ -202,11 +206,13 @@ def make_board(screen, board_matrix, mouse):
             if collide_box(i,j,mouse):
                 if board_matrix[i][j] == 0:
                     make_board_box(screen, i+1, j+1,0) 
+
 def make_sprite(screen, status, turn):
     # status = 0 --> passive
     # status = 1 --> active
     screen.blit(sprites[status*2+turn-1], sprite_rects[status*2+turn-1])
-    
+
+# Update sprites from active to passive or passive to active based on turns
 def update_sprites(screen, turn):
     if turn == 1:
         make_sprite(screen, 1, 1)
@@ -215,6 +221,7 @@ def update_sprites(screen, turn):
         make_sprite(screen, 0, 1)
         make_sprite(screen, 1, 2)
 
+# Write player names on placeholders
 def write_name(screen,text,rect,font) :
         rendered_font = font.render(text, True, "BLACK")
         text_rect = rendered_font.get_rect()
@@ -236,6 +243,7 @@ def draw_win_col(screen, x, y, theta, win):
         for i in range(5):
             make_board_box(screen, x + 1, y + i + 1, value_code)
 
+# Draw screen after someone wins
 def draw_over(screen, win):
     win_title_img = pygame.image.load("images/winner_title.png")
     win_title_img = pygame.transform.scale(win_title_img,(265,140))
@@ -255,6 +263,7 @@ def draw_over(screen, win):
         screen.blit(sprites[4], sprite_rects[4])
         screen.blit(sprites[7], sprite_rects[7])
 
+# When run with flag = True, directly move to game over screen
 def run(user1, user2, screen, flag):
     INIT_TURN = 1
     player1 = Player(user1)
@@ -268,7 +277,9 @@ def run(user1, user2, screen, flag):
 
     game = tictactoe("Tic-Tac-Toe", player1, player2, game_board, INIT_TURN)
     if flag:
+        # Return to game over screen when flag is true
         return game.draw_game_over(screen)
+    
     board_matrix = game_board.matrix
 
     if not pygame.get_init():
@@ -283,7 +294,6 @@ def run(user1, user2, screen, flag):
         clock = pygame.time.Clock()
         clock.tick(MAX_FPS)
 
-        # clock.tick(120)
         mouse = pygame.mouse.get_pos()
         turn = 2 - game.turn
 
@@ -298,6 +308,7 @@ def run(user1, user2, screen, flag):
 
         for rect in back_rect, reset_rect:
             if rect.collidepoint(mouse):
+                # Add hover by adding an overlay
                 hover_surface = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
                 hover_surface.fill((0, 0, 0, 50))
                 screen.blit(hover_surface, rect.topleft)
@@ -321,13 +332,13 @@ def run(user1, user2, screen, flag):
                         if collide_box(i+1,j+1,mouse):
                             if board_matrix[i][j] != 0 :
                                 break
-                            # board_matrix[i][j] = turn
                             game.make_move((i, j), turn)
                             make_board_box(screen, i+1, j+1, turn)
                             update_sprites(screen, turn)
 
                             win_situation, x, y, theta = game.check_win((i, j))
                             if (win_situation == 1 or win_situation == 2):
+                                # Redraw the board after winning
                                 screen.blit(board_img, (0, 0))
                                 make_board(screen, board_matrix, mouse)
                                 write_name(screen,user1.capitalize(),text_rect1,font)

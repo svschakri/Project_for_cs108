@@ -4,6 +4,7 @@ import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 import pygame
 
+# Add the parent directory of the current file to Python's module search path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 from game import Game, Player, Board
 
@@ -14,55 +15,12 @@ SCREEN_WIDTH = 1537
 SCREEN_HEIGHT = 1023
 screen_size = SCREEN_WIDTH, SCREEN_HEIGHT
 
-# title dimensions
-title_ht, title_wt = SCREEN_HEIGHT // 8, SCREEN_WIDTH
-TITLE_COLOR = (85, 250, 148)
-TITLE_FONT_COLOR = (255, 255, 255)
-
 # board dimensions
 ROWS = 7
 COLS = 7
-title_board_gap = 4*title_ht // 5
-board_wt = (2 * SCREEN_WIDTH) // 3
-board_ht  = SCREEN_HEIGHT - title_ht - title_board_gap
-circle_radius = (3 * board_ht) // (7 * ROWS + 2)
-border_width = circle_radius // 6
-row_gap = circle_radius // 3
-start_circle_gap = 2*row_gap
-col_gap = (board_wt - 2 * circle_radius * COLS) // (1 + COLS)
-hover_circle_offset = 2*(circle_radius // 3)
-
-# colors used
-BG_COLOR1 = (224, 123, 72)
-BG_COLOR2 = (72, 110, 224)
-BOARD_COLOR = (104, 118, 143)
-BALL_COLOR1 = (255, 0, 0)
-BALL_COLOR2 = (0, 0, 255)
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-GREY = (152, 163, 181)
 
 # Animation related
 FALLING_TIME = 100
-TRANSITION_TIME = 100
-
-# Game over screen constants
-over_title_wt = 2* (SCREEN_WIDTH // 3)
-over_title_ht = title_ht
-over_title_y = SCREEN_HEIGHT // 4
-title_button_gap = over_title_ht
-button_wt = SCREEN_WIDTH // 3    
-button_ht = SCREEN_HEIGHT // 12
-button_gap = SCREEN_HEIGHT // 24
-BOARD_BORDER_RADIUS = 30
-
-BGCOLOR = (245, 182, 66)
-BUTTON_BG = (245, 66, 233)
-LIGHT_BUTTON_BG = (237, 147, 227)
-BUTTON_FONT_COLOR = WHITE
-
-QUIT_BG = (242, 90, 63)
-LIGHT_QUIT_BG = (242, 121, 99)
 
 board_scale = 1.4
 board_img_ht = ((SCREEN_HEIGHT * 681) // 1023) * board_scale
@@ -83,6 +41,7 @@ ph_wt = 550
 placeholder_dim = (ph_wt, (ph_wt * 379) // 676)
 placeholder_pos = [(-50, 690), (1030, 690)]
 FALLING_TIME = 15
+WHITE = (0, 0, 0)
 # Images
 #screen
 screen_img = pygame.image.load("images/connect4_screen.png")
@@ -148,12 +107,12 @@ for col in range(COLS):
     rect = pygame.Rect(left, top, cell_w, cell_h * ROWS )
     col_rects.append(rect)
 
-# reset rectangle
+# reset button rectangle
 reset_rect = pygame.Rect(500, 900, 280, 150)
 reset_img = pygame.image.load("images/reset_button.png")
 reset_img = pygame.transform.scale(reset_img,(280, 150))
 
-# back rectangle
+# back button rectangle
 back_rect = pygame.Rect(850, 900, 280, 150)
 back_img = pygame.image.load("images/back_button.png")
 back_img = pygame.transform.scale(back_img,(280, 150))
@@ -234,6 +193,7 @@ def make_board_coin(screen, i, j, turn, glow=0):
     y = coord_map[i][j][1]
     make_coin(screen, x, y, turn, glow)
 
+# Make aligned pieces glow after win
 def make_win_glow(screen, x, y, turn, theta):
     if theta == 0:
         for i in range(4):
@@ -259,6 +219,7 @@ def make_win_glow(screen, x, y, turn, theta):
 def collide_col(i, mouse):
     return col_rects[i].collidepoint(mouse)
 
+# Make placeholders for storing names of users
 def make_placeholders(screen, game):
     player_names = [game.player1.user_name, game.player2.user_name]
     rects = []
@@ -298,6 +259,7 @@ def make_sprite(screen, status, turn):
     # status = 1 --> active
     screen.blit(sprites[status*2+turn-1], sprite_rects[turn])
 
+# Update player sprites from active to passive or passive to active based on the turn
 def update_sprites(screen, turn):
     if turn == 1:
         make_sprite(screen, 1, 1) # blue active
@@ -306,6 +268,7 @@ def update_sprites(screen, turn):
         make_sprite(screen, 0, 1) # red active
         make_sprite(screen, 1, 2) # blue still
 
+# Updates screen with animation
 def update_screen(screen, board_matrix, game, mouse, i, j, turn):
     board_matrix[i][j] = 0
     init_y = coord_map[i][0][1]
@@ -323,11 +286,13 @@ def update_screen(screen, board_matrix, game, mouse, i, j, turn):
         pygame.display.flip()
     board_matrix[i][j] = turn
 
+# Reset and back buttons
 def make_images_for_buttons(screen):
     screen.blit(back_img,back_rect)
     screen.blit(reset_img,reset_rect)
     pass
 
+# Draw win or lose screen after game ends 
 def draw_over(screen, win):
     win_title_img = pygame.image.load("images/winner_title.png")
     win_title_img = pygame.transform.scale(win_title_img,(280,150))

@@ -371,6 +371,7 @@ def update_values(i,j,board_matrix):
     
     return arr
 
+# Write score of players in placeholder
 def make_score(screen,board_matrix,Number_font):
     tot_1 = np.sum(board_matrix == 2) # for player 1
     tot_2 = np.sum(board_matrix == 1) # for player 2
@@ -381,7 +382,7 @@ def make_score(screen,board_matrix,Number_font):
     screen.blit(text_1, Player1_score_rect.center)
     screen.blit(text_2, Player2_score_rect.center)
 
-
+# Make player pieces on board
 def make_board_circle(screen,x, y, color_code):
     r = min(col_gap,row_gap)*2/5 
     gap_x = col_gap
@@ -407,18 +408,22 @@ def make_board_circle(screen,x, y, color_code):
     elif color_code != 0 :
         screen.blit(ball_img,rect)
 
+# Create glow to show valid moves
 def create_glow(screen, radius, x, y, glow_color = (255, 255, 0), alpha = 80): # creates a new surface to show the transplant glow
     glow = pygame.Surface((radius*2, radius*2), pygame.SRCALPHA) 
     pygame.draw.circle(glow, (*glow_color, alpha), (radius, radius), radius)
     screen.blit(glow, (x-radius, y-radius))
 
-def collide_box(x,y, mouse): # checks whether mouse click that or not
+# Check whether mouse clicks a box at coordinates (x, y) (Relative to rows and cols)
+def collide_box(x,y, mouse):
     top = TOP_BOARD + (y-1)*row_gap 
     left = LEFT_BOARD + (x-1) * (col_gap)
 
     col_rect = pygame.Rect(left, top, col_gap, row_gap)
     return col_rect.collidepoint(mouse)
-def draw_over(screen, win): # final winning screen
+
+# Draw final winning screen
+def draw_over(screen, win):
     win_title_img = pygame.image.load("images/winner_title.png")
     win_title_img = pygame.transform.scale(win_title_img,(265,140))
     lose_title_img = pygame.image.load("images/loser_title.png")
@@ -439,6 +444,7 @@ def draw_over(screen, win): # final winning screen
     
     pygame.time.wait(2000)
 
+# Make board GUI
 def make_board(screen,board_matrix,Number_font, mouse):
     center_y = TOP_BOARD + board_ht // 2
     board_rect = pygame.Rect(0, 0, board_wt, board_ht)
@@ -462,7 +468,7 @@ def make_sprite(screen, status, turn):
     # status*2 + turn-1 acts like a bijection function 
     screen.blit(sprites[status*2 + turn-1], sprite_rects[status*2 + turn-1])
 
-# it is used for updating sprites from making passice to active and active to passive respectively based on turn
+# it is used for updating sprites from making passive to active and active to passive respectively based on turn
 def update_sprites(screen, turn):
     if turn == 1:
         make_sprite(screen, 0, 1)
@@ -471,7 +477,7 @@ def update_sprites(screen, turn):
         make_sprite(screen, 0, 2)
         make_sprite(screen, 1, 1)
 
-# text writting function with req font and color at the req position on the require screen
+# Text writting function with required font and color at the req position on the require screen
 def write_text(screen,text,rect,font,color) :
         rendered_font = font.render(text, True,color)
         text_rect = rendered_font.get_rect()

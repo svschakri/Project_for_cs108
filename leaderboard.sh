@@ -38,7 +38,7 @@ for game in "${games_arr[@]}" ; do
             if (mx < z) mx = z
             return mx
         }
-
+        # Format the string based on max length possible and fill the rest with appropriate number of spaces
         function format(str, mx_len) {
             spaces = mx_len - length(str)
             res = str ""
@@ -48,6 +48,7 @@ for game in "${games_arr[@]}" ; do
             return res
         }
 
+        # Formats the header string with pad_char as padding on both sides
         function format_header(str, mx_len, pad_char) {
             head_len = 36 + mx_len
             padding = int((head_len - length(str) - 2)/2)
@@ -69,6 +70,7 @@ for game in "${games_arr[@]}" ; do
                 max_name_len = 0
                 printf "%s\n\n", format_header(game, max_len, "=")
                 found = 0
+                # ST and ND used for underlining
                 ST = "\033[4m"
                 ND = "\033[0m"   
             }
@@ -107,7 +109,7 @@ for game in "${games_arr[@]}" ; do
             printf "\n%s", format_header("END", max_len, "=")
         }
         ' "history.csv")
-        echo "$output" | head -n 3
+        echo "$output" | head -n 3 # Format the output from awk to sorted one based on arguments
         echo "$output" | tail -n +4 | head -n -2 | sort -t "|" -k"$col","$col" -nr -k"$sec_col","$sec_col" -nr
         echo "$output" | tail -n 2
         echo -e "\n"
